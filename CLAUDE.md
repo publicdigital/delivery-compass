@@ -21,6 +21,14 @@ npm install && npm run compass -- ingest
 npm run web
 ```
 
+Deploying it for other people: **[DEPLOY.md](DEPLOY.md)**. One hosted instance behind
+a shared passcode, corpus baked into the image at build time, feedback on a volume.
+
+```bash
+npm run verify   # corpus health; the deploy build gates on this
+npm run feedback # what users said, and what they asked that returned nothing
+```
+
 `npm run compass -- <ingest|ask|watch|map|list|conflicts|expand>`
 
 Tests: `node --experimental-strip-types test/golden.test.ts`
@@ -38,6 +46,22 @@ even on fresh pages, rather than letting an absent badge read as "checked, fine"
 **No GOV.UK branding.** This does not run on a GOV.UK domain, so no crown, no
 logotype, no GDS Transport, no GOV.UK brand palette. It was built that way once and
 had to be de-branded. The UI carries an explicit "Unofficial" disclaimer — keep it.
+
+**Feedback is the one irreplaceable thing here.** It lives in its own database
+(`pipeline/feedback.ts`, `FEEDBACK_DB`), never in `corpus.db` — the corpus is a build
+artefact thrown away on every deploy. Every write is also mirrored to stdout as a JSON
+line so a lost volume is not a lost study. Do not merge the two databases.
+
+**A deployed instance must fail loudly, not quietly.** `compass verify` asserts corpus
+floors and that the FTS index is populated; the Docker build runs it and fails the
+deploy, and `/healthz` returns 503 on the same condition. The failure this exists to
+catch is a GOV.UK fetch that has silently started returning less — which otherwise
+looks like a healthy service that just answers fewer questions.
+
+**No inline `style=` attributes in `web/index.html`.** The server sends a nonce-based
+CSP, and a nonce cannot whitelist a style attribute. Inline styles are silently
+dropped in the browser; use a class. This was a real bug, caught only by reading the
+console.
 
 **HTML-first ingestion.** Never parse the seed PDFs into the corpus. Several are
 CID-encoded and extract as garbage; two are print-outs of web pages. A source with no

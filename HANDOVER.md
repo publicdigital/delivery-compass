@@ -1,7 +1,11 @@
 # Delivery Compass — handover
 
 Written 2026-08-21, across three sessions the same day, so a fresh session can pick
-this up cold. Read this first, then [README.md](README.md) for how to run it.
+this up cold; kept current since. Read this first, then [README.md](README.md) for how
+to run it, or [DEPLOY.md](DEPLOY.md) for how it is hosted for testers.
+
+The open decision that dominated §7 for five sessions is **answered** as of
+2026-08-24: one hosted instance, shared passcode, invited testers. See §6.5 and §7.
 
 ---
 
@@ -302,44 +306,110 @@ own title. Correct per the attachment model (its state *is* the parent's), but i
 reads as duplication in the feed. Whether an attachment should show its parent's notes
 is a judgement call, not a bug — left for whoever decides §7.
 
-## 7. Open decision: making this useful for others
+### 6.5 Deployable instance, feedback capture, git (session 6, 2026-08-24)
 
-Still open as of session 4 (2026-08-21). One thing did settle (§6.3): "a handful of
-colleagues who'd run it locally from the repo" was a misreading — colleagues would
-only ever test on the builder's machine, not run their own copy against their own
-files. So that's not really a distinct audience option below; it collapses into
-either "not published at all yet" or one of the two real options. What's confirmed
-regardless of which is chosen: the tool's aim is to serve others from live, current
-guidance — nothing it shows them should depend on a personal local file, which is why
-"Your folder" came out rather than staying as a nice-to-have.
+The §7 fork was answered by the brief for this session: **one hosted instance, behind
+a shared passcode, for invited testers.** Not public, not open-source — those stay
+open, and nothing here forecloses them. This is the cheapest way to do §7 step 1
+(get it in front of 3-5 real delivery people), which everything else in §7 was
+waiting on.
 
-**The fork that determines almost everything else: who is "others"?**
+**Now under version control** (§7 step 3, previously a listed gap). `git init`, one
+commit covering the whole prototype plus this session's work.
 
-- A team or department using one shared instance → needs hosting, a refresh
-  schedule, maybe light access control.
-- Public / open to the wider delivery community → needs a licence for the *code*
-  (OGL already covers the ingested *content*), and a maintenance plan for who keeps
-  the registry current once it's not just one person.
+**Deployment.** `Dockerfile` + `fly.toml` (primary) + `render.yaml` (alternative),
+procedure in [DEPLOY.md](DEPLOY.md). Two decisions worth not re-litigating:
 
-**The recommended order, once that's picked, and why:**
+- **The corpus is baked into the image at build time, not fetched on boot.** A cold
+  start would otherwise make the first visitor wait a minute, and every new machine
+  would re-crawl GOV.UK. The consequence is that refreshing the corpus means
+  redeploying — `fly deploy --build-arg CORPUS_REFRESH=$(date -u +%FT%H%M)`, where
+  the build arg exists solely to stop Docker serving a cached corpus layer.
+- **The build gates on `compass verify`** (new: `pipeline/verify.ts`), which asserts
+  corpus floors and that the FTS index is populated. `/healthz` returns 503 on the
+  same condition. This is §7 step 4's "notice a GOV.UK fetch silently starting to
+  fail", done as cheaply as it can be done: the failure mode it catches is a deploy
+  that looks completely healthy and just answers fewer questions.
 
-1. **Put it in front of 3-5 real delivery people before anything else.** This was
-   the runner-up in §6.1 and still hasn't happened. Their unanswered questions will
-   say whether Ask/Map/Watch are even the right three surfaces — cheaper to learn
-   that now than after hardening infrastructure nobody asked for.
-2. **Finish the trust work from §6.1**: triage the conflict-sweep's candidates into
-   `relations.yaml` (`compass conflicts 20`, read the evidence, confirm the real ones).
-   Matters more once people other than the builder are relying on the tool's silence
-   meaning something.
-3. **`git init` it.** Cheap, currently missing (§8), and a hard blocker for any kind
-   of collaboration or safe iteration once other people are touching the registry.
-4. **Only then, harden for the audience chosen above** — automated re-ingest on a
-   schedule instead of manual `compass ingest`, a way to notice a GOV.UK fetch
-   silently starting to fail, and, if going beyond "share the repo," actual hosting.
+**Feedback** (`pipeline/feedback.ts`). Two routes in, because the majority who will
+never fill in a form still tell you something with one click: a **yes/partly/no strip
+on every answer**, and a **form at the foot of the page** for the minority whose
+comment is worth ten ratings. Plus **every question is logged with its hit count** —
+no user action required, and the most useful thing recorded. Read it at
+`/admin?token=…`, via `compass feedback`, or as CSV.
 
-The reasoning against jumping straight to hosting/productionising: the registry is
-hand-curated and that curation is the real asset. Scaling distribution before
-validating the content and closing the trust gap just scales whatever's wrong faster.
+The feedback database is deliberately **separate from `corpus.db`**: the corpus is a
+build artefact replaced on every deploy, and feedback is the only thing in this system
+that cannot be regenerated. It sits on a mounted volume, and every write is mirrored
+to stdout as a JSON line so a misconfigured volume is not a lost study.
+
+**Server hardening**, since it is now on the open internet: shared-passcode gate with
+an HMAC-signed cookie and a rate limit on the attempt (brute-forcing one shared
+passcode is the only real attack here), nonce-based CSP, `noindex` plus
+`robots.txt` (an unofficial tool quoting government guidance should not turn up in
+search results looking like an authority), body-size caps, per-client rate limits,
+gzip, graceful SIGTERM. `/admin` returns **404** for a bad token, not 401, so its
+existence is not advertised — and it sits outside the passcode gate, because a tester
+holding the passcode is not an administrator.
+
+**UI changes for an audience of strangers.** The limitations are now stated up front
+in an open `<details>` block rather than only in the footer small print, including
+explicitly that *the absence of a conflict warning does not mean two documents agree*
+— the inference CLAUDE.md warns about, which matters much more now that people who
+did not build it are reading it. The privacy line says plainly that typed questions
+are recorded.
+
+**One real bug caught in the browser:** a nonce-based CSP cannot whitelist inline
+`style=` attributes (nonces do not apply to them), so every generated answer card
+silently lost its paragraph spacing. All inline styles are now classes, and CLAUDE.md
+carries the rule. Only the console showed it; the page looked plausible.
+
+**Verified end to end** before writing this: gate blocks and admits, wrong passcode
+rejected, `/api/*` 401 unauthenticated, admin 404 without the token and 200 with it,
+CSV export correct, a rating and a form submission made in a real browser and read
+back out through the CLI, `/healthz` green, zero-hit queries recorded as such.
+Typecheck and the golden suite pass. Resident memory with the corpus loaded and the
+conflict sweep computed: ~60MB, which is what sized the 512MB machine.
+
+**Not done, deliberately:** the conflict-sweep triage (§7 step 2) is still untriaged.
+It was second in the recommended order and remains so — but it is a curation job
+needing a human reading evidence, and it does not block getting the thing in front of
+people. It does get more urgent the moment somebody relies on the tool's silence.
+
+## 7. Answered: hosted instance for invited testers
+
+**Decided 2026-08-24 (session 6).** "Others" means **a handful of invited delivery
+people using one hosted instance behind a shared passcode.** Not a department-wide
+service, and not public or open-source. Both of those remain live options and nothing
+built for this closes them off — but neither is worth paying for before anyone has
+told us whether Ask/Map/Watch are the right three surfaces.
+
+What that ruled in, and what it cost, is in §6.5. What it ruled out for now:
+
+- **Public / open-source.** Would need a licence for the code (OGL already covers the
+  ingested content) and a maintenance plan for who keeps the registry current once it
+  is not one person. Revisit if the invited round says the thing is worth widening.
+- **Department-scale hosting.** Light access control turned out to mean one shared
+  passcode; anything beyond that (SSO, per-user accounts, multiple machines) is
+  unjustified for five testers and would have forced the feedback store off SQLite.
+
+**Where the recommended order now stands:**
+
+1. ~~Put it in front of 3-5 real delivery people.~~ **Unblocked, not done.** The
+   instance is deployable and collects feedback; nobody has been invited yet. This is
+   the next action, and it is the builder's, not a coding task.
+2. **Triage the conflict sweep into `relations.yaml`** (`compass conflicts 20`).
+   Still outstanding, still second. More urgent once people who did not build this are
+   relying on the absence of a warning meaning something.
+3. ~~`git init`.~~ **Done** (§6.5).
+4. **Harden further only if the invited round justifies it** — scheduled re-ingest
+   instead of a manual redeploy, alerting off `/healthz` rather than reading it by
+   hand, a real access model. All cheap to add later; all pointless if the surfaces
+   turn out to be wrong.
+
+The reasoning that produced this order has not changed: the hand-curated registry is
+the real asset, and scaling distribution before validating the content just scales
+whatever is wrong faster.
 
 ## 8. Known gaps and cautions
 
@@ -367,8 +437,11 @@ validating the content and closing the trust gap just scales whatever's wrong fa
   ingested under a parent — see `explicitlyClaimedPaths` in `pipeline/ingest.ts`.
   Getting this wrong makes attribution non-deterministic, which silently breaks the
   supersession warnings.
-- Not under version control. `git init` would be sensible before the next round —
-  more so now that §7 is on the table.
+- **Deployment-specific cautions** are in [DEPLOY.md](DEPLOY.md), not here. The two
+  worth knowing from this file: the deployed corpus is only as current as the last
+  build (refresh means redeploy), and an FTS match is weak evidence of a *good* match
+  — a nonsense question can still return six sections, so "the search found
+  something" is not a success metric when reading feedback.
 
 ## 9. Re-running from cold
 

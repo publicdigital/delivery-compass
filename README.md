@@ -27,6 +27,10 @@ npm run web
 
 Then open http://localhost:3000.
 
+To put it somewhere other people can reach it, see **[DEPLOY.md](DEPLOY.md)** — one
+hosted instance behind a shared passcode, with feedback capture, deployable with
+`fly deploy` and no local Docker.
+
 ## Commands
 
 | Command | What it does |
@@ -38,6 +42,8 @@ Then open http://localhost:3000.
 | `compass list` | The source registry |
 | `compass conflicts [n]` | Ranked candidate conflicts for human review |
 | `compass expand <slug>` | Expand a GOV.UK collection into member documents |
+| `compass verify` | Assert the corpus is healthy enough to serve (exit 1 if not) |
+| `compass feedback [csv\|queries]` | What users of a deployed instance said, and what they asked that missed |
 
 Run as `npm run compass -- <command>`, or directly with
 `node --experimental-strip-types pipeline/cli.ts <command>`.

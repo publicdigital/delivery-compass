@@ -25,7 +25,11 @@ ARG CORPUS_REFRESH=unset
 RUN echo "corpus refresh token: $CORPUS_REFRESH" \
  && node --experimental-strip-types pipeline/cli.ts ingest \
  && node --experimental-strip-types pipeline/cli.ts watch \
- && node --experimental-strip-types pipeline/cli.ts verify
+ && node --experimental-strip-types pipeline/cli.ts verify \
+ # Fold the write-ahead log back into the main file, so copying corpus.db alone into
+ # the runtime stage cannot leave committed rows behind in a -wal file that is not
+ # copied with it.
+ && node -e "const{DatabaseSync}=require('node:sqlite');const d=new DatabaseSync('data/corpus.db');d.exec('PRAGMA wal_checkpoint(TRUNCATE)');d.close()"
 
 # ---------------------------------------------------------------------------
 FROM node:24-slim AS runtime
