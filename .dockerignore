@@ -1,0 +1,19 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+# The corpus is re-ingested in the build, never copied from a laptop - the deployed
+# corpus should be what GOV.UK says today, not what it said when someone last ran
+# ingest locally.
+data
+docs
+test
+HANDOVER.md
+DEPLOY.md
+README.md
+CLAUDE.md
+Dockerfile
+.dockerignore
+fly.toml
+render.yaml
+tsconfig.json

@@ -1,0 +1,129 @@
+# Assurance and project delivery spine.
+# NOTE: the Infrastructure and Projects Authority was replaced by NISTA (National
+# Infrastructure and Service Transformation Authority) on 2025-04-01. The IPA
+# organisation page has not been updated since. Registry uses NISTA as the owning body.
+- id: govs-002
+  title: "Government Functional Standard GovS 002: Project Delivery"
+  body: NISTA
+  spine: assurance
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/project-delivery-functional-standard
+  prefer: html
+  licence: OGL-v3
+  # Same shall/should/may convention as the Orange Book. Currently metadata-only on
+  # GOV.UK, so this has no effect until the standard is ingestible.
+  declares_convention: true
+  # Canonical file has moved off GOV.UK to projectdelivery.gov.uk.
+  external_attachment: https://projectdelivery.gov.uk/library-product/government-functional-standard-govs-002-project-delivery/
+
+- id: nista-assurance-toolkit
+  title: NISTA assurance review toolkit
+  body: NISTA
+  spine: assurance
+  authority: mandatory
+  fetcher: govuk_collection
+  slug: /government/collections/nista-assurance-review-toolkit
+  expand: true
+  licence: OGL-v3
+
+- id: gate-review-0
+  title: "Gate Review 0: Strategic Assessment"
+  body: NISTA
+  spine: assurance
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/gate-review-0-strategic-assessment
+  prefer: html
+  licence: OGL-v3
+
+- id: gate-review-1
+  title: "Gate Review 1: Business Justification"
+  body: NISTA
+  spine: assurance
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/gate-review-1-business-justification
+  prefer: html
+  licence: OGL-v3
+
+- id: gate-review-2
+  title: "Gate Review 2: Delivery Strategy"
+  body: NISTA
+  spine: assurance
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/gate-review-2-delivery-strategy
+  prefer: html
+  licence: OGL-v3
+
+- id: gate-review-3
+  title: "Gate Review 3: Investment Decision"
+  body: NISTA
+  spine: assurance
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/gate-review-3-investment-decision
+  prefer: html
+  licence: OGL-v3
+
+- id: gate-review-4
+  title: "Gate Review 4: Readiness for Service"
+  body: NISTA
+  spine: assurance
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/gate-review-4-readiness-for-service
+  prefer: html
+  licence: OGL-v3
+
+- id: gate-review-5
+  title: "Gate Review 5: Operations Review and Benefit Realisation"
+  body: NISTA
+  spine: assurance
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/gate-review-5-operations-review-and-benefit-realisation
+  prefer: html
+  licence: OGL-v3
+
+- id: agile-assurance
+  title: Assurance for agile delivery of digital services
+  body: NISTA
+  spine: assurance
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/assurance-for-agile-delivery-of-digital-services
+  prefer: html
+  licence: OGL-v3
+  # Bridges the funding/assurance spine and the digital spine.
+
+- id: integrated-assurance
+  title: Implementing integrated assurance for major projects
+  body: NISTA
+  spine: assurance
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/implementing-integrated-assurance-for-major-projects
+  prefer: html
+  licence: OGL-v3
+
+- id: benefits-assurance
+  title: Assurance of benefits realisation in major projects
+  body: NISTA
+  spine: assurance
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/assurance-of-benefits-realisation-in-major-projects
+  prefer: html
+  licence: OGL-v3
+
+- id: project-routemap
+  title: Project Routemap - Setting up projects for success
+  body: NISTA
+  spine: assurance
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/improving-infrastructure-delivery-project-initiation-routemap
+  prefer: html
+  licence: OGL-v3

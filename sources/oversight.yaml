@@ -1,0 +1,40 @@
+# Oversight and scrutiny tier. What the centre and Parliament will ask you about.
+# Thinner than the other spines at prototype stage, by design.
+- id: nista-annual-report
+  title: NISTA Major Projects Annual Report 2025-26
+  body: NISTA
+  spine: oversight
+  authority: informative
+  fetcher: govuk_publication
+  slug: /government/publications/nista-major-projects-annual-report-2025-26
+  prefer: html
+  licence: OGL-v3
+
+- id: gmpp
+  title: Government Major Projects Portfolio
+  body: NISTA
+  spine: oversight
+  authority: informative
+  fetcher: govuk_publication
+  slug: /government/publications/government-major-projects-portfolio
+  licence: OGL-v3
+
+- id: nao-reports
+  title: National Audit Office reports
+  body: National Audit Office
+  spine: oversight
+  authority: informative
+  fetcher: nao_wp
+  endpoint: https://www.nao.org.uk/wp-json/wp/v2/report
+  # NOT OGL. Link only; do not redistribute extracted text.
+  licence: NAO-copyright
+  redistribute: false
+
+- id: uc-lessons-learned
+  title: Universal Credit Programme - Final Lessons Learned
+  body: Department for Work and Pensions
+  spine: oversight
+  authority: informative
+  fetcher: local_only
+  licence: unknown
+  # Programme board paper, not published guidance. No canonical GOV.UK source.

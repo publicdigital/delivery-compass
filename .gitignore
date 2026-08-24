@@ -1,0 +1,7 @@
+node_modules/
+data/*.db
+data/cache/
+.env
+
+# Feedback captured by a deployed instance. Lives on the host's volume, never in git.
+feedback.db

@@ -1,0 +1,22 @@
+{
+  "name": "delivery-compass",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A navigator for UK government delivery guidance",
+  "scripts": {
+    "compass": "node --experimental-strip-types pipeline/cli.ts",
+    "web": "node --experimental-strip-types web/server.ts",
+    "typecheck": "tsc --noEmit",
+    "verify": "node --experimental-strip-types pipeline/cli.ts verify",
+    "feedback": "node --experimental-strip-types pipeline/cli.ts feedback",
+    "test": "node --experimental-strip-types test/golden.test.ts"
+  },
+  "dependencies": {
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.7.2"
+  }
+}

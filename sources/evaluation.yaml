@@ -1,0 +1,21 @@
+# Evaluation spine. Owner: HM Treasury / Evaluation Task Force.
+- id: magenta-book
+  title: "The Magenta Book: central government guidance on evaluation"
+  body: HM Treasury
+  spine: evaluation
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/the-magenta-book
+  prefer: html
+  licence: OGL-v3
+  # Publication carries 13 attachments including supplementary guides. Expand them.
+  expand_attachments: true
+
+- id: ai-evaluation
+  title: Guidance on the Impact Evaluation of AI Interventions
+  body: Evaluation Task Force
+  spine: evaluation
+  authority: advisory
+  fetcher: govuk_attachment
+  parent: magenta-book
+  licence: OGL-v3

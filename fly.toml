@@ -1,0 +1,54 @@
+# Fly.io. Chosen because `fly deploy` builds remotely (no local Docker), volumes are
+# cheap and simple, London is a region, and a machine can scale to zero between the
+# occasional visits a prototype under test actually gets.
+#
+# Change `app` to your own name before first deploy - app names are global.
+app = "delivery-compass"
+primary_region = "lhr"
+
+[build]
+  # Passed through so the corpus layer cannot be served from a stale build cache.
+  # Set it on the command line for a real re-ingest:
+  #   fly deploy --build-arg CORPUS_REFRESH=$(date -u +%FT%H%M)
+  [build.args]
+    CORPUS_REFRESH = "unset"
+
+[env]
+  PORT = "8080"
+  HOST = "0.0.0.0"
+  # Feedback lives on the mounted volume, not in the image, so a redeploy replaces
+  # the corpus without touching the only data here that cannot be regenerated.
+  FEEDBACK_DB = "/data/feedback.db"
+
+# ACCESS_CODE, ADMIN_TOKEN and SESSION_SECRET are secrets, never listed here:
+#   fly secrets set ACCESS_CODE=... ADMIN_TOKEN=... SESSION_SECRET=...
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  # Zero, so an idle prototype costs nothing. A cold start is a few seconds because
+  # the corpus is already in the image - nothing is fetched on boot.
+  min_machines_running = 0
+  # One machine only: the feedback volume attaches to a single machine, and two
+  # machines would each hold a different half of the feedback.
+  max_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "15s"
+    method = "GET"
+    path = "/healthz"
+
+[[vm]]
+  # Measured: ~60MB resident with the corpus loaded and the conflict sweep computed
+  # at boot. 512MB is comfortable; raise it if /healthz starts timing out.
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[[mounts]]
+  source = "compass_data"
+  destination = "/data"

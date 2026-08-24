@@ -1,0 +1,103 @@
+# Digital delivery spine. Owners: GDS, DSIT, Cabinet Office.
+# Absent entirely from the seed folder, but the guidance digital delivery teams hit most.
+- id: service-standard
+  title: Service Standard
+  body: Government Digital Service
+  spine: digital
+  authority: mandatory
+  fetcher: service_manual
+  slug: /service-manual/service-standard
+  expand: true   # 14 points, each a child guide with full HTML in details.body
+  licence: OGL-v3
+
+- id: service-manual
+  title: Service Manual
+  body: Government Digital Service
+  spine: digital
+  authority: advisory
+  fetcher: service_manual
+  slug: /service-manual
+  expand: true
+  licence: OGL-v3
+
+- id: spend-controls
+  title: Getting approval to spend money on a service
+  body: Government Digital Service
+  spine: digital
+  authority: mandatory
+  fetcher: service_manual
+  slug: /service-manual/agile-delivery/getting-approval-to-spend-money-on-a-service
+  prefer: html
+  licence: OGL-v3
+  # Reached via a redirect from the old spend-controls URL. Digital and technology
+  # spend controls were REPLACED on 2026-04-01; departments now make most of their
+  # own digital and technology spending decisions.
+  supersedes_url: /service-manual/agile-delivery/spend-controls-check-if-you-need-approval-to-spend-money-on-a-service
+
+- id: tcop
+  title: The Technology Code of Practice
+  body: Central Digital and Data Office
+  spine: digital
+  authority: mandatory
+  fetcher: govuk_content
+  slug: /guidance/the-technology-code-of-practice
+  prefer: html
+  licence: OGL-v3
+
+- id: secure-by-design
+  title: Secure by design
+  body: Central Digital and Data Office
+  spine: digital
+  authority: mandatory
+  # NOT /government/collections/secure-by-design - that GOV.UK collection is DSIT's
+  # unrelated consumer-IoT product security regime (PSTI Act, smart devices). Verified
+  # 2026-08-21 by checking what the AI Playbook's own "Secure by Design" link actually
+  # points to: https://www.security.gov.uk/guidance/secure-by-design/, off GOV.UK
+  # entirely, and CloudFront returns 403 to non-browser requests, so it cannot be
+  # fetched. Kept registered, off_platform, so the gap is visible rather than a
+  # plausible-looking wrong answer sitting silently in the corpus.
+  fetcher: off_platform
+  external_attachment: https://www.security.gov.uk/guidance/secure-by-design/
+  licence: OGL-v3
+
+- id: ai-playbook
+  title: AI Playbook for the UK Government
+  body: Department for Science, Innovation and Technology
+  spine: digital
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/ai-playbook-for-the-uk-government
+  prefer: html
+  licence: OGL-v3
+
+- id: data-ethics
+  title: Data and AI Ethics Framework
+  body: Central Digital and Data Office
+  spine: digital
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/data-ethics-framework
+  prefer: html
+  licence: OGL-v3
+
+- id: accessibility-regs
+  title: Understanding accessibility requirements for public sector bodies
+  body: Government Digital Service
+  spine: digital
+  authority: mandatory
+  fetcher: govuk_content
+  slug: /guidance/accessibility-requirements-for-public-sector-websites-and-apps
+  prefer: html
+  licence: OGL-v3
+  # Statutory: Public Sector Bodies (Websites and Mobile Applications) Accessibility
+  # Regulations 2018. Mandatory in law, not merely by functional standard.
+
+- id: digital-data-benefits
+  title: Digital and Data Benefits framework
+  body: Government Digital Service
+  spine: digital
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/digital-and-data-benefits-framework
+  prefer: html
+  licence: OGL-v3

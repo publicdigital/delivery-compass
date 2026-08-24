@@ -1,0 +1,115 @@
+# Funding, appraisal and business case spine. Owner: HM Treasury.
+# All slugs verified against the GOV.UK Content API on 2026-08-21.
+- id: green-book
+  title: The Green Book
+  body: HM Treasury
+  spine: funding
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/the-green-book-appraisal-and-evaluation-in-central-government
+  prefer: html
+  licence: OGL-v3
+
+- id: green-book-collection
+  title: The Green Book and accompanying guidance
+  body: HM Treasury
+  spine: funding
+  authority: informative
+  fetcher: govuk_collection
+  slug: /government/collections/the-green-book-and-accompanying-guidance-and-documents
+  # Expands to ~28 member documents, including all supplementary guidance.
+  expand: true
+  licence: OGL-v3
+
+- id: business-cases
+  title: Guidance on developing business cases (Better Business Cases)
+  body: HM Treasury
+  spine: funding
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/guidance-on-developing-business-cases
+  prefer: html
+  licence: OGL-v3
+
+- id: tap
+  title: Treasury Approvals Process for projects and programmes
+  body: HM Treasury
+  spine: funding
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/treasury-approvals-process-for-programmes-and-projects
+  prefer: html
+  licence: OGL-v3
+
+- id: managing-public-money
+  title: Managing public money
+  body: HM Treasury
+  spine: funding
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/managing-public-money
+  prefer: html
+  licence: OGL-v3
+
+- id: agile-business-case
+  title: "Agile digital and IT projects: clarification of business case guidance"
+  body: HM Treasury
+  spine: funding
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/agile-digital-and-it-projects-clarification-of-business-case-guidance
+  prefer: html
+  licence: OGL-v3
+
+- id: green-book-health
+  title: "Green Book supplementary guidance: health"
+  body: Department of Health and Social Care
+  spine: funding
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/green-book-supplementary-guidance-health
+  prefer: html
+  licence: OGL-v3
+
+# Found via `compass expand` on the Green Book collection (27 members) while filling
+# ingestion gaps. Most of the collection's supplementary guides are PDF-only, same as
+# green-book-health above - these two are the only others with an HTML edition.
+- id: green-book-environment
+  title: "Green Book supplementary guidance: climate change and environmental valuation"
+  body: Department for Environment, Food & Rural Affairs
+  spine: funding
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/green-book-supplementary-guidance-environment
+  prefer: html
+  licence: OGL-v3
+
+- id: green-book-mcda
+  title: "Green Book supplementary guidance: multi-criteria decision analysis"
+  body: HM Treasury
+  spine: funding
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/green-book-supplementary-guidance-multi-criteria-decision-analysis
+  prefer: html
+  licence: OGL-v3
+
+- id: publishing-business-cases
+  title: "Publishing business cases: guidance"
+  body: HM Treasury
+  spine: funding
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/publishing-business-cases-guidance
+  prefer: html
+  licence: OGL-v3
+
+- id: better-regulation
+  title: Better Regulation Framework
+  body: Department for Business and Trade
+  spine: funding
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/better-regulation-framework
+  prefer: html
+  licence: OGL-v3

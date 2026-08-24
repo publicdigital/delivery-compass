@@ -1,0 +1,31 @@
+# Render, as an alternative to fly.toml. Two things to know before choosing it:
+#   - A persistent disk needs a paid instance type. On the free tier the feedback
+#     database is wiped on every deploy and the service sleeps after inactivity.
+#     Feedback is still mirrored into the service logs, but logs expire too.
+#   - Free instances sleep, and the first request after that waits for a cold start.
+# Set ACCESS_CODE, ADMIN_TOKEN and SESSION_SECRET in the dashboard, not here.
+services:
+  - type: web
+    name: delivery-compass
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: frankfurt
+    plan: starter
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: HOST
+        value: 0.0.0.0
+      - key: FEEDBACK_DB
+        value: /data/feedback.db
+      - key: ACCESS_CODE
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+    disk:
+      name: compass-data
+      mountPath: /data
+      sizeGB: 1

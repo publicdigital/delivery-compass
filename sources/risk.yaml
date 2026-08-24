@@ -1,0 +1,46 @@
+# Risk spine. Owner: HM Treasury / Government Finance Function Risk Centre of Excellence.
+- id: orange-book
+  title: "Orange Book: Management of Risk - Principles and Concepts"
+  body: HM Treasury
+  spine: risk
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/orange-book
+  prefer: html
+  licence: OGL-v3
+  # Declares the RFC-2119-style convention ("shall denotes a requirement: a mandatory
+  # element") in its PDF front matter. Curated, not detected: the HTML edition drops
+  # the convention table, and we do not parse the PDF.
+  declares_convention: true
+
+# The following two sources were DELETED from GOV.UK on 2026-07-29. They are retained
+# in the registry as withdrawn so the tool can actively warn anyone still holding a copy.
+# Publisher's stated reason: "out of date, contained links to superseded guidance and no
+# longer fully reflect the current Risk Centre of Excellence thinking and practice."
+- id: portfolio-risk-annex
+  title: Portfolio Risk Management Guidance (Orange Book Annex)
+  body: HM Treasury
+  spine: risk
+  authority: withdrawn
+  fetcher: withdrawn
+  withdrawn_on: 2026-07-29
+  withdrawn_from: /government/publications/orange-book
+  withdrawn_reason: >-
+    Deleted as out of date, containing links to superseded guidance and no longer
+    fully reflecting current Risk Centre of Excellence thinking and practice.
+  replacement: Government Finance Function intranet (OneFinance) - not publicly available
+  licence: OGL-v3
+
+- id: risk-reporting-guide
+  title: "Good Practice Guide: Risk Reporting"
+  body: HM Treasury
+  spine: risk
+  authority: withdrawn
+  fetcher: withdrawn
+  withdrawn_on: 2026-07-29
+  withdrawn_from: /government/publications/orange-book
+  withdrawn_reason: >-
+    Deleted as out of date, containing links to superseded guidance and no longer
+    fully reflecting current Risk Centre of Excellence thinking and practice.
+  replacement: Government Finance Function intranet (OneFinance) - not publicly available
+  licence: OGL-v3

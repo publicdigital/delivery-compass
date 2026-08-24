@@ -1,0 +1,390 @@
+# Delivery Compass — handover
+
+Written 2026-08-21, across three sessions the same day, so a fresh session can pick
+this up cold. Read this first, then [README.md](README.md) for how to run it.
+
+---
+
+## 1. The original brief
+
+Verbatim, as given at the start of the first session:
+
+> Uk Government delivery rules and regulations are complex and interdependent. They
+> are maintained by several bodies and shared openly. But not centrally co-ordinated.
+> I have included offline versions of these in the folder as examples.
+>
+> I want to build a tool that helps delivery people in government navigate the up to
+> date guidance, and to stay on top of the changes. My vision is something like an
+> expert helper. That they can use to access advice. But I am also interested in
+> things like simplifyiing guiandce to show people how it all fits together
+
+Three things are asked for: **navigate current guidance**, **stay on top of changes**,
+and **simplify / show how it fits together**. The build addresses all three.
+
+The "offline versions" are the 15 PDFs in the parent folder. They are a seed and a
+provenance record — deliberately *not* the thing the tool is built on. See §4.
+
+## 2. Decisions taken
+
+Asked and answered at the planning stage. Revisit these before changing direction.
+
+| Question | Chosen |
+| --- | --- |
+| Which surface first? | **Thin versions of all three** (Ask, Map, Watch), on one shared pipeline |
+| How wide should the corpus go? | **Both spines plus oversight** — HMT/NISTA funding-and-assurance *and* the GDS digital spine, plus NAO/PAC/annual-report scrutiny |
+| What is this meant to become? | **Working prototype** — runs locally, no infra, no auth, no hosting |
+
+A fourth surface, **Your folder**, was added unprompted because it is the most direct
+demonstration of the problem. Removed 2026-08-21 once §7 was resolved — see the
+progress log entry below.
+
+## 3. Where it got to
+
+Working end to end. 41 registered sources, 29 ingested, 3,286 sections, 4,461
+obligations, 26 curated relationships. One runtime dependency (`yaml`), Node 24
+built-ins for everything else, 7MB SQLite file, no build step, no API key.
+
+```
+sources/*.yaml        the curated registry — the real intellectual asset
+sources/relations.yaml hand-curated edges between sources
+pipeline/             fetch, normalise, classify, index, search, watch, graph, conflicts
+web/                  server + single-page UI (Ask / Map / Watch)
+test/golden.test.ts   21 hand-marked questions; 21/21 retrieval, 5/5 caveats
+```
+
+Verification status: typecheck clean, golden set passing, redirect-following tested
+against a known-dead URL, classifier precision spot-checked by hand.
+
+## 4. What we learned about the domain
+
+These are the findings that shaped the design. They are not derivable from the code,
+and re-deriving them costs a lot of tokens.
+
+**Do not build on the PDFs.** Several are CID-encoded and extract as garbage (Magenta
+Book, Portfolio Risk annex, policy_appraisal_and_health). Two are browser print-outs
+of web pages and extract as ligature soup. Meanwhile GOV.UK publishes clean HTML for
+nearly everything, with stable heading anchors. Ingestion is HTML-first; PDF-only
+sources are skipped and reported rather than guessed at.
+
+**The GOV.UK Content API is the whole substrate.** `GET /api/content/<path>` returns
+`public_updated_at`, `first_published_at`, `details.change_history` (human-authored
+notes!), `details.attachments`, and `links`. Change detection is a cheap timestamp
+poll. `document_type: "redirect"` is returned explicitly, so link rot is detectable.
+Collections expand via `links.documents` — one registry entry for the Green Book
+collection yields 27 documents. Service manual topics expose guides via
+`links.linked_items`, not `children`. But expansion is a *discovery* tool for a human
+curating the registry (`compass expand <slug>`), not something the ingest pipeline
+does automatically — a collection source only ever ingests its own thin landing-page
+blurb. Most collection members turn out to be PDF/DOCX forms and templates anyway;
+see §6.2.
+
+**Free-text search on the API is unusable for retrieval.** A query for "orange book
+management of risk" returned "Book your driving test". It degrades to popularity
+ranking on long queries. Use `filter_organisations` for *discovery*; curate the
+registry by hand. `pipeline/find-slug.ts` and `pipeline/list-org.ts` exist for this.
+
+**The IPA no longer exists.** NISTA (National Infrastructure and Service
+Transformation Authority) replaced it on 2025-04-01. The IPA organisation page has
+not been updated since. The registry uses NISTA.
+
+**Digital and technology spend controls were abolished on 2026-04-01.** Departments
+now make most of their own digital and technology spending decisions. The Service
+Manual reflects this. **The Technology Code of Practice does not** — it still tells
+readers to follow the Cabinet Office spend control process and email the GDS
+Assurance team. Two current government sources contradict each other. This is the
+worked example the whole tool is built around.
+
+**Two of the seed PDFs were deleted from GOV.UK on 2026-07-29** — the Portfolio Risk
+Management Annex and the Good Practice Guide: Risk Reporting. HMT's own words: "out
+of date, contained links to superseded guidance and no longer fully reflect the
+current Risk Centre of Excellence thinking and practice." No public replacement; the
+material moved to the OneFinance intranet. Guidance going behind the firewall is
+itself a finding.
+
+**Business case guidance was rewritten on 2026-06-30** following the 2025 Green Book
+Review, splitting into separate project and programme guides. The 2018 PDFs in the
+folder are superseded.
+
+**Page-update dates mislead; filename matching does not.** GOV.UK asset URLs embed
+the original filename, so an exact match against a live attachment is a *definitive*
+currency verdict. A page can update while its attached PDF stays the same — this
+happened with the Better Regulation Framework, where an early read of the page date
+wrongly suggested the local copy was stale. Verdicts carry a confidence flag for
+exactly this reason.
+
+**A source's own hyperlinks are more reliable than its registry slug.** Found by
+tracing where the AI Playbook's citation for "Secure by Design principles" actually
+pointed (§6.2) — the answer was a completely different, correct URL from the one
+already registered under that name. When a registry entry looks thin or wrong,
+checking what other sources link to it is a cheap, decisive way to verify.
+
+## 5. Corrections to the original plan
+
+The approved plan is preserved at [docs/original-plan.md](docs/original-plan.md).
+Two of its claims did not survive contact with the corpus.
+
+**The RFC-2119 convention is not the differentiator.** The plan leaned heavily on
+"shall denotes a requirement" being a documented, machine-detectable convention. It
+is documented — but the Orange Book is the *only* ingested source that uses `shall`
+at all, 15 times. Every other source expresses requirements with `must`, in ordinary
+English. Worse, the convention table lives only in PDF front matter; the HTML
+editions drop it, so it cannot be auto-detected. `declares_convention` is now a
+curated registry field (true for `orange-book` and `govs-002`), and "must" is flagged
+as informal phrasing *only inside* documents that declare the convention. Outside
+them, flagging it would be noise. Distinguishing mandatory from advisory is still the
+most valuable feature; it just rests on ordinary modal verbs.
+
+**The most valuable feature was not in the plan at all.** Cross-source supersession
+detection — warning that one source has been overtaken by another — emerged from
+testing. It is now the thing that most justifies the tool existing.
+
+Also worth recording: **the prototype was initially styled to look like GOV.UK** and
+had to be de-branded. It does not run on a GOV.UK domain, so it must not use the
+crown, the logotype, GDS Transport, or the GOV.UK brand palette. It now carries an
+explicit "Unofficial" disclaimer. Do not reintroduce the branding.
+
+## 6. Progress log
+
+### 6.1 Staleness badge and conflict discovery sweep (session 2)
+
+Motivation: the tool warned on two conflicts, both found by hand. Once a UI shows
+SUPERSEDED banners, readers infer that no banner means no conflict — an inference
+that hadn't been earned. Exposure at the time: 73% of indexed pages (159 of 219) were
+last updated before 2025, and the Service Manual alone carried 218 mandatory
+obligations across pages dating back to 2016 — 40% of every mandatory obligation in
+the corpus.
+
+**Staleness badge — shipped.** Every obligation and section card in the Ask panel
+carries an explicit age tag (fresh / 1-3y / 3y+ "verify currency" / date unknown),
+computed client-side in [web/index.html](web/index.html) from `updatedAt`. That field
+didn't exist on obligations before — `ObligationHit` in
+[pipeline/search.ts](pipeline/search.ts) only carried section and source dates, not a
+per-obligation one — so it had to be added to the SQL and threaded through `/api/ask`
+in [web/server.ts](web/server.ts). No obligation card can now imply currency by
+default the way it did before.
+
+**Conflict discovery sweep — shipped.** [pipeline/conflicts.ts](pipeline/conflicts.ts)
+buckets mandatory/recommended obligations by normalised actor, pairs obligations
+across sources within a bucket that share ≥2 non-boilerplate content words and are
+≥1 year apart in page date, and scores each source pair by
+`age gap (days) × shared-word count × mandatory weight`. Pairs already present in
+`relations.yaml` are excluded, since a human has already judged those. Run it with
+`compass conflicts [n]`. **This proposes, it does not judge** — the actor extraction
+it depends on is best-effort (§8), and roughly a third of what it surfaces is
+boilerplate-phrase overlap ("your team should…") rather than a real divergence.
+**It has not yet been used to add a new curated conflict** — nobody has read the
+top candidates and decided whether they're real. That's still open; see §7.
+
+Runner-up considered and deferred at the time: tuning the conflict sweep's thresholds
+further before triaging its output. Rejected as guessing twice — triage first, let
+false positives found by hand drive the next tuning pass.
+
+### 6.2 Coverage-gap fill (session 3, same day)
+
+Asked to make the corpus "fully populated" before deciding what's next. Went through
+every registered source that wasn't `full` and checked *why* against the live GOV.UK
+Content API, rather than assuming the existing `metadata_only`/skip label was still
+correct. Found two real bugs, not just missing coverage:
+
+**`ai-evaluation` was a real pipeline gap, not a design constraint.** Its
+`fetcher: govuk_attachment` was never actually implemented in `pipeline/ingest.ts` —
+only `pipeline/fetchers/govuk.ts`'s currency-checker knew how to resolve it. The
+result: its content (the AI evaluation guide, a real HTML attachment on the Magenta
+Book) was silently absorbed into `magenta-book`'s own sections, misattributed to HM
+Treasury/mandatory instead of the Evaluation Task Force/advisory. Fixed by
+implementing `resolveAttachmentDoc` in `ingest.ts` and excluding matched attachments
+from the parent's own ingestion. The golden test's expected sources for "how should
+we evaluate an AI intervention" had to be updated to include `ai-evaluation` — the old
+expectation (`magenta-book`) was correct only because of the bug.
+
+**`secure-by-design` was registered against the wrong document entirely.** The
+registry pointed at `/government/collections/secure-by-design`, and it dutifully
+ingested as `metadata_only` — but that GOV.UK collection is DSIT's *consumer IoT
+product security* regime (PSTI Act, smart devices), unrelated to CDDO's software
+"Secure by Design" framework that the AI Playbook and other sources actually cite.
+Checked what the AI Playbook's own hyperlink for "Secure by Design principles" points
+to: `https://www.security.gov.uk/guidance/secure-by-design/`, entirely off GOV.UK, and
+it 403s non-browser requests (CloudFront). A plausible-looking wrong source is worse
+than a visible gap, so this needed a new category: added `off_platform` to
+`FetcherName` — a real canonical source exists, it's just not fetchable — distinct
+from `local_only` (no public canonical at all). The curated relation
+`tcop -> secure-by-design` was already conceptually correct; only the underlying
+registry entry was wrong.
+
+**Three new sources added**, found via `compass expand` on the Green Book collection
+(27 members) and the NISTA assurance toolkit collection (16 members): most members of
+both are PDF/DOCX-only forms and templates (checked individually, left unregistered —
+registering pure admin templates would be noise, not guidance). Three had real HTML
+editions and clear delivery-governance relevance: `green-book-environment` (climate
+change and environmental valuation), `green-book-mcda` (multi-criteria decision
+analysis in options appraisal), and `publishing-business-cases` (HMT transparency
+guidance). Two more with HTML editions — `economic-and-social-cost-of-fire` and
+`...-costs-of-crime` — were deliberately left out: narrow valuation reference data,
+not guidance a delivery person would ask about. That's a curation judgement, not a
+technical gap; noted here so it isn't re-litigated by accident.
+
+Net effect: 25/38 registered sources indexed → 29/41. Every remaining gap is now a
+checked, explained absence rather than an assumption (§8).
+
+### 6.3 "Your folder" removed, personal-file dependency retired (session 4, 2026-08-21)
+
+Asked whether "Your folder" would still serve a purpose once the tool is published for
+others. First answer floated "colleagues running it locally" as one audience where the
+feature still made sense — each person bringing their own folder of saved guidance.
+That was a misreading: colleagues would only ever test on the builder's own machine,
+not run their own copy with their own files. There is no audience for which "compare
+the PDFs sitting in *this* folder" generalises.
+
+That settled a narrower but real question left open in §7: whatever "useful for
+others" ends up meaning, every surface the tool presents must be grounded in live
+guidance, not one person's local downloads. So the feature came out entirely, not just
+hidden:
+
+- **Web:** the "Your folder" tab, its panel, and the `/api/currency` endpoint
+  ([server.ts](web/server.ts), [index.html](web/index.html)).
+- **CLI:** `compass check`, which did the identical comparison from the terminal for
+  the maintainer rather than an end user — asked separately, and also removed rather
+  than kept as a maintainer-only tool, since it depends on exactly the same personal
+  seed folder.
+- **Pipeline:** `pipeline/currency.ts` in full (`assessSeed`, `findDuplicates`), plus
+  `seedIndex` and the `localSeed` field in `pipeline/registry.ts`/`types.ts`.
+- **Registry data:** the `local_seed:` key removed from all 13 entries that carried
+  one, across six `sources/*.yaml` files. Comments explaining *why* a source is
+  registered stayed untouched — only the seed-filename pointers went.
+
+`checkSource` in `pipeline/fetchers/govuk.ts` and the `SourceState` type were **not**
+touched — Watch depends on them for live change-detection, which is unrelated to
+comparing against local files. Typecheck and the golden suite (21/21, 5/5) both pass
+after the removal.
+
+The seed PDFs themselves stay in the parent folder as the original provenance record
+per §1 — only the code path that read and compared them at runtime is gone. The
+domain findings that comparison surfaced (two withdrawals, the Magenta Book
+supersession, the rewritten business-case guidance) are not lost; they were already
+written up in §4 as things learned about the domain, independent of the feature that
+found them.
+
+### 6.4 Watch baseline recorded, two false-signal bugs in `watch` fixed (session 5, 2026-08-24)
+
+The corpus was re-ingested against live GOV.UK and `compass watch` was run to give the
+Watch surface a baseline it did not have. The `snapshots` table had **zero rows** —
+the surface was wired up and working, but had nothing to compare against, so it would
+have shown a demo reader nothing at all. 41 sources now have snapshots.
+
+Re-ingest produced identical totals to 2026-08-21 (29 full, 3,286 sections, 4,461
+obligations, golden suite 21/21 and 5/5), so nothing upstream moved in the three days
+between. Running `watch` surfaced two bugs, both of which put *wrong* things in front
+of a reader rather than merely missing right ones:
+
+**`govuk_attachment` sources could never be checked.** `poll()` in
+[pipeline/watch.ts](pipeline/watch.ts) called `checkSource(source)` with no second
+argument, but `checkSource` needs the parent's slug for an attachment source — an
+attachment has no slug of its own (§6.2). So `ai-evaluation` errored on every poll
+with "govuk_attachment source has no resolvable parent". The registry already carried
+`parent: magenta-book`; `poll()` just never resolved it. Fixed by building a
+`slugById` map from the sources being polled and passing the parent's slug through.
+
+**Any dateless source reported a phantom update on every poll.** The date comparison
+was `prior.public_updated_at !== state.publicUpdatedAt` — SQLite returns `null`, the
+checker returns `undefined`, so the two never matched for a source with no date. The
+`off_platform` source `secure-by-design` duly emitted `date-moved: "Updated unknown to
+unknown with no published note"` every single run. Fixed by normalising both sides
+with `?? null`. This one matters more than it looks: a Watch feed that cries change
+where there is none trains a reader to ignore it, which is the same failure mode as
+§6.1's silence-implies-checked, pointed the other way.
+
+After both fixes the feed is clean — the only standing entries are the two genuine
+HMT withdrawals from 2026-07-29. Typecheck and both test files pass.
+
+**Noted, not fixed:** an attachment source now inherits its parent's entire change
+history, so `ai-evaluation` re-reports the Magenta Book's published notes under its
+own title. Correct per the attachment model (its state *is* the parent's), but it
+reads as duplication in the feed. Whether an attachment should show its parent's notes
+is a judgement call, not a bug — left for whoever decides §7.
+
+## 7. Open decision: making this useful for others
+
+Still open as of session 4 (2026-08-21). One thing did settle (§6.3): "a handful of
+colleagues who'd run it locally from the repo" was a misreading — colleagues would
+only ever test on the builder's machine, not run their own copy against their own
+files. So that's not really a distinct audience option below; it collapses into
+either "not published at all yet" or one of the two real options. What's confirmed
+regardless of which is chosen: the tool's aim is to serve others from live, current
+guidance — nothing it shows them should depend on a personal local file, which is why
+"Your folder" came out rather than staying as a nice-to-have.
+
+**The fork that determines almost everything else: who is "others"?**
+
+- A team or department using one shared instance → needs hosting, a refresh
+  schedule, maybe light access control.
+- Public / open to the wider delivery community → needs a licence for the *code*
+  (OGL already covers the ingested *content*), and a maintenance plan for who keeps
+  the registry current once it's not just one person.
+
+**The recommended order, once that's picked, and why:**
+
+1. **Put it in front of 3-5 real delivery people before anything else.** This was
+   the runner-up in §6.1 and still hasn't happened. Their unanswered questions will
+   say whether Ask/Map/Watch are even the right three surfaces — cheaper to learn
+   that now than after hardening infrastructure nobody asked for.
+2. **Finish the trust work from §6.1**: triage the conflict-sweep's candidates into
+   `relations.yaml` (`compass conflicts 20`, read the evidence, confirm the real ones).
+   Matters more once people other than the builder are relying on the tool's silence
+   meaning something.
+3. **`git init` it.** Cheap, currently missing (§8), and a hard blocker for any kind
+   of collaboration or safe iteration once other people are touching the registry.
+4. **Only then, harden for the audience chosen above** — automated re-ingest on a
+   schedule instead of manual `compass ingest`, a way to notice a GOV.UK fetch
+   silently starting to fail, and, if going beyond "share the repo," actual hosting.
+
+The reasoning against jumping straight to hosting/productionising: the registry is
+hand-curated and that curation is the real asset. Scaling distribution before
+validating the content and closing the trust gap just scales whatever's wrong faster.
+
+## 8. Known gaps and cautions
+
+- Seven sources are metadata-only — GOV.UK exposes only a landing-page summary, PDF
+  attachments only, no HTML edition. They are excluded from retrieval so a blurb can
+  never surface as guidance. Checked source-by-source against the live GOV.UK
+  Content API on 2026-08-21 (§6.2) — all seven are genuine PDF-only dead ends under
+  the HTML-first rule, not pipeline bugs.
+- Five sources are registered but never ingested, each for a distinct, correct
+  reason: `nao-reports` (not OGL, link only), `uc-lessons-learned` (no public
+  canonical), `portfolio-risk-annex` and `risk-reporting-guide` (withdrawn by HMT),
+  `secure-by-design` (`off_platform` — §6.2, real content exists but isn't
+  fetchable). Every one of the 12 non-full sources now has a checked, honest reason;
+  none are silent guesses.
+- Obligation extraction is regex, tuned for precision over recall. A false "mandatory"
+  is worse than a missed one.
+- Actor extraction is best-effort and returns null rather than guessing. This is the
+  ceiling on the conflict discovery sweep's precision (§6.1).
+- The oversight tier is thin, as the plan predicted.
+- NAO content is **not** OGL. It is linked, never redistributed (`redistribute: false`).
+- Answers are extractive, not synthesised. No LLM is used or required. Given the rule
+  "quote mandatory requirements verbatim", extraction satisfies it by construction.
+- Registry entries legitimately overlap (the Service Manual crawl reaches the
+  spend-controls guide). A page explicitly registered as its own source is never also
+  ingested under a parent — see `explicitlyClaimedPaths` in `pipeline/ingest.ts`.
+  Getting this wrong makes attribution non-deterministic, which silently breaks the
+  supersession warnings.
+- Not under version control. `git init` would be sensible before the next round —
+  more so now that §7 is on the table.
+
+## 9. Re-running from cold
+
+```bash
+cd delivery-compass && npm install
+```
+
+```bash
+npm run compass -- ingest && npm run compass -- watch
+```
+
+Ingest takes about a minute and is polite to GOV.UK (150ms between calls). `watch`
+records the snapshot baseline that the Watch surface reads from.
+
+If serving through this repo's dev-preview tooling rather than a plain terminal:
+`.claude/launch.json` (one level up, in the parent folder) points at an absolute path
+deliberately — a relative path made Node call `process.cwd()` during module
+resolution, which some sandboxes deny. `pipeline/cli.ts` and `web/server.ts` compute
+their seed-folder default the same cwd-free way, via `import.meta.url`.
