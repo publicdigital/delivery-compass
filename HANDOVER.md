@@ -597,3 +597,53 @@ The headline measurement: harvesting outbound GOV.UK links from 9 sampled source
 found 177 linked pages, **146 of them not in the registry** — including the DDaT
 Playbook, business case guidance, the Algorithmic Transparency Recording Standard and
 the Public Sector Equality Duty. The corpus reports its own gaps if asked.
+
+### First tester feedback, and what it changed — 2026-10-07
+
+Oli tested it and reported three things. All three turned out to be more interesting
+than they first looked.
+
+**"Make the map a visual graph."** Done. `assets/map.js`: force-directed, clustered
+and coloured by spine, sized by how much of each document is indexed, conflicts in
+red, hovering a node dims everything it does not touch. No library — the CSP forbids
+third-party scripts and the deploy has no build step. The grouped lists remain
+underneath as the accessible rendering. The caption carries the argument: 11 of 26
+relationships cross between spines and 13 documents have no curated relationship at
+all.
+
+**"I'm not getting anything remotely useful — probably I'm not the target audience."**
+That self-diagnosis was wrong and worth disproving. The corpus held HMT's Test and
+Learn guide, 38 sections including one titled "Adapting governance for Test and
+Learn", plus GDS's "Governance principles for agile service delivery". He asked for
+governance for test and learn and reached neither. Three causes, all now fixed:
+
+- *Rare-term hijacking.* "accelerators" stems to "acceler", matching "Accelerated
+  projects and programmes" in the Treasury Approvals Process and almost nothing else.
+  BM25 rewards rarity, so one off-target word outranked four on-target ones. Capped
+  per-term IDF and added a coordination factor.
+- *Document titles were never indexed.* Sections carried their registry source's
+  title, so all 144 Service Manual pages were called "Service Manual". GOV.UK slugs
+  are the title hyphenated, so the last path segment recovers it for free.
+- *Vocabulary mismatch.* "new ways of funding and delivering work" shares no content
+  word with "Test and Learn". Unfixable by ranking. `sources/concepts.yaml` is a
+  curated bridge: phrases people type, words the corpus uses, documents that are the
+  canonical answer. Expansions weigh 40% of a typed term, never count towards
+  coverage, and are always declared in the interface.
+
+Every result set now shows what was searched for, flagging words that are rare or
+absent. The tester would have diagnosed his own session in a glance.
+
+**"Governance for test and learn accelerators doesn't exist, so let's write it."**
+Half right, and the half that is right is stark. Test, Learn and Grow is a £100m
+Cabinet Office programme running three named Accelerators, and **everything GOV.UK
+publishes about it is privacy notices** — the data protection documents exist because
+the law required them, and nothing else was required. But *test and learn* governance
+as a method does exist: HMT published a chapter on it in May 2026, which a
+well-informed practitioner had not seen. The discoverability failure is arguably the
+bigger finding.
+
+Draft scoping at `docs/accelerator-governance-draft.md`. Deliberately outside
+`sources/`: the tool quotes guidance and never writes it, and authored material must
+never sit where a reader could mistake it for something HMT published. Note that
+Public Digital is in the consortium delivering the programme, which needs declaring
+in anything published.
