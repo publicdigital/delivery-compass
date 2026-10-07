@@ -585,3 +585,15 @@ Verified on the live site: 401 without the password and 200 with it, all app ass
 and corpus files served, source paths and working notes 404, Brotli bringing the 5MB
 corpus down to ~895KB, and a search returning the supersession warning, the conflict
 warning, ten obligation cards and six section cards.
+
+### Plan for keeping sources complete and current
+
+`docs/sources-engine.md`, written 2026-10-07. Covers the freshness engine (scheduled
+Action, graduated response so a hollowed-out corpus stops rather than ships), why
+"complete" is the wrong target, three measured discovery routes, the architectural
+ceiling at roughly 10,000 sections, and the ownership question. Nothing built.
+
+The headline measurement: harvesting outbound GOV.UK links from 9 sampled sources
+found 177 linked pages, **146 of them not in the registry** — including the DDaT
+Playbook, business case guidance, the Algorithmic Transparency Recording Standard and
+the Public Sector Equality Duty. The corpus reports its own gaps if asked.
