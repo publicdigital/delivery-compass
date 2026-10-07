@@ -64,3 +64,22 @@
   to = "/index.html"
   status = 404
   force = true
+
+# Netlify injects its own HUD widget script into every page. It is same-origin so the
+# CSP lets it load, but it then applies inline styles and scripts that the CSP blocks,
+# leaving four red errors in the console of a prototype whose whole point is that
+# people report what looks broken. Blocking the script itself is quieter than letting
+# it load and fail, and nothing in the app depends on it. Scoped to /scripts/ so the
+# rest of /.netlify/ (forms, functions) is untouched.
+[[redirects]]
+  from = "/.netlify/scripts/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+# Working notes, not part of the prototype.
+[[redirects]]
+  from = "/*.md"
+  to = "/index.html"
+  status = 404
+  force = true
