@@ -1,5 +1,8 @@
 # Deploying Delivery Compass
 
+**Live at https://publicdigital-delivery-compass.netlify.app** (HTTP Basic Auth;
+credentials in `netlify/edge-functions/basic-auth.ts`). First deployed 2026-10-07.
+
 One hosted instance, behind a password, for a handful of invited delivery people to
 use and leave feedback on. It is a research instance, not a service.
 
@@ -51,6 +54,31 @@ crawl of GOV.UK; there is no value in hammering it for a prototype nobody depend
 If `npm run export` refuses to write, that is the floors check doing its job — read
 the ingest output above it for a source that has started returning something other
 than HTML. Do not lower the floors in `pipeline/verify.ts` to get a clean export.
+
+## Form detection must be switched on, once, by hand
+
+**Netlify disables form detection by default on new sites.** Until it is enabled,
+every submission returns 404 and the instance silently collects nothing — which is
+exactly the failure you would not notice until you went looking for results.
+
+In the Netlify dashboard for this project: **Forms → Enable form detection**, then
+redeploy (Actions → Deploy → Run workflow). Verify with a real POST rather than
+trusting the setting:
+
+```bash
+curl -su 'USER:PASS' -X POST https://publicdigital-delivery-compass.netlify.app/ \
+  --data-urlencode 'form-name=compass-feedback' --data-urlencode 'comment=smoke test' \
+  -o /dev/null -w '%{http_code}\n'
+```
+
+`200` means forms are live. `404` means detection is still off. Delete the smoke-test
+submission afterwards.
+
+This needs whoever owns the Netlify account, which on the Public Digital team is not
+necessarily whoever built the prototype — the deploy pathway works without sharing
+Netlify credentials, but the Forms dashboard does not. Ask them to set **email
+notifications** on both forms at the same time, so submissions reach you without a
+Netlify login.
 
 ## Reading the feedback
 

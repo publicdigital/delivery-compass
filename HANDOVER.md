@@ -554,3 +554,34 @@ should carry prose returns none. Since `npm run refresh` chains with `&&`, that 
 stops a hollowed-out corpus reaching the exporter. The registry slugs were updated.
 
 The corpus was also refreshed in passing — it had been six weeks stale.
+
+### Deployed 2026-10-07
+
+Live at **https://publicdigital-delivery-compass.netlify.app**, behind HTTP Basic
+Auth. James Stewart provisioned the `NETLIFY_AUTH_TOKEN` secret; the deploy pathway
+uses his Netlify account without sharing credentials, which also means the Forms
+dashboard is not reachable by the prototype's author.
+
+Four things were wrong on the first deploys and were caught by checking the live site
+rather than by any test:
+
+- **Form detection is off by default on new Netlify sites.** Every submission returned
+  404, including a control POST to a form name that does not exist. Had this not been
+  tested, the user study would have collected nothing while appearing to work. Needs
+  one dashboard toggle plus a redeploy; still outstanding at time of writing.
+- **The hidden Netlify form declarations rendered as stray empty input boxes** below
+  the footer, because the stylesheet's bare `form{display:flex}` overrode the `hidden`
+  attribute. Fixed with an explicit `[hidden]` rule placed before it.
+- **Two redirect rules failed silently.** Netlify serves an existing static file in
+  preference to a redirect unless `force = true`, so the rules meant to hide
+  `/pipeline/*` and friends returned 200. Separately, `/.netlify/*` is reserved and
+  cannot be redirected, and Netlify only supports a trailing splat so `/*.md` matched
+  nothing.
+- **Netlify injects a HUD script** whose inline styles and scripts the CSP blocks,
+  leaving four console errors that belong to Netlify rather than the app. Not fixable
+  from the repo; recorded in DEPLOY.md so it is not chased again.
+
+Verified on the live site: 401 without the password and 200 with it, all app assets
+and corpus files served, source paths and working notes 404, Brotli bringing the 5MB
+corpus down to ~895KB, and a search returning the supersession warning, the conflict
+warning, ten obligation cards and six section cards.
