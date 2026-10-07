@@ -36,23 +36,31 @@
 # registry YAML and the handover docs would otherwise be fetchable by anyone holding
 # the password. Nothing secret lives there, but testers should meet the prototype, not
 # its source tree. These only block HTTP access; the files are still uploaded.
+#
+# force = true is required: without it Netlify serves an existing static file in
+# preference to a redirect rule, so these returned 200 on the first deploy.
 [[redirects]]
   from = "/pipeline/*"
   to = "/index.html"
   status = 404
+  force = true
 [[redirects]]
   from = "/sources/*"
   to = "/index.html"
   status = 404
+  force = true
 [[redirects]]
   from = "/test/*"
   to = "/index.html"
   status = 404
+  force = true
 [[redirects]]
   from = "/scripts/*"
   to = "/index.html"
   status = 404
+  force = true
 [[redirects]]
   from = "/docs/*"
   to = "/index.html"
   status = 404
+  force = true
