@@ -28,6 +28,14 @@ interface Case {
   q: string;
   /** At least one of these source ids must appear in the top 5. */
   expect: string[];
+  /**
+   * A substring of a doc_path that must appear in the top 5.
+   *
+   * Source ids are too coarse for some checks: HMT's Test and Learn guide is an
+   * attachment of the Magenta Book, so asserting "magenta-book" would pass on any
+   * evaluation page at all. These assert the actual document.
+   */
+  expectPath?: string;
   /** These source ids must be flagged as superseded/conflicting when returned. */
   expectCaveatOn?: string[];
   why?: string;
@@ -80,6 +88,26 @@ const CASES: Case[] = [
   // --- evaluation -----------------------------------------------------------
   { q: "how do I design a process evaluation", expect: ["magenta-book"] },
   { q: "what is a theory of change", expect: ["magenta-book"] },
+
+  // --- from real tester sessions, 2026-10-07 --------------------------------
+  // The first of these is the question that prompted the ranking fix. "accelerators"
+  // stems to "acceler" and matched "Accelerated projects and programmes" in the
+  // Treasury Approvals Process - a near-unique term, so BM25 floated an unrelated
+  // page above four on-target ones and the tester concluded the corpus had nothing.
+  {
+    q: "what governance is recommended for test and learn accelerators",
+    expect: ["magenta-book"],
+    expectPath: "test-and-learn",
+    why: "A single rare off-target term must not outrank several on-target ones.",
+  },
+  { q: "governance for test and learn", expect: ["magenta-book"], expectPath: "test-and-learn" },
+  { q: "test and learn", expect: ["magenta-book"], expectPath: "test-and-learn" },
+  {
+    q: "how should governance change for agile delivery",
+    expect: ["service-manual"],
+    expectPath: "governance-principles-for-agile",
+    why: "GDS published exactly this; a tester looking for it did not reach it.",
+  },
 ];
 
 const relations = loadRelations();
@@ -87,7 +115,11 @@ const SECTIONS_JSON = fileURLToPath(new URL("../assets/data/sections.json", impo
 const CORPUS_DB = fileURLToPath(new URL("../data/corpus.db", import.meta.url));
 
 /** Run every case against one retrieval function and report. */
-function evaluate(label: string, lookup: (q: string) => string[]): { failures: string[]; sourcesByQ: Map<string, string[]> } {
+function evaluate(
+  label: string,
+  lookup: (q: string) => string[],
+  paths?: (q: string) => string[],
+): { failures: string[]; sourcesByQ: Map<string, string[]> } {
   let passed = 0;
   let caveatChecks = 0;
   let caveatPassed = 0;
@@ -102,6 +134,13 @@ function evaluate(label: string, lookup: (q: string) => string[]): { failures: s
       passed++;
     } else {
       failures.push(`  MISS  "${c.q}"\n        expected one of [${c.expect.join(", ")}]\n        got [${sources.join(", ") || "nothing"}]`);
+    }
+
+    if (c.expectPath && paths) {
+      const got = paths(c.q);
+      if (!got.some((p) => p.includes(c.expectPath!))) {
+        failures.push(`  WRONG DOC  "${c.q}"\n        expected a path containing "${c.expectPath}"\n        got [${got.map((p) => p.split("/").pop()).join(", ") || "nothing"}]`);
+      }
     }
 
     if (c.expectCaveatOn) {
@@ -133,8 +172,10 @@ if (!existsSync(SECTIONS_JSON)) {
 const sections = JSON.parse(readFileSync(SECTIONS_JSON, "utf8")) as { id: number; sourceId: string }[];
 const index = buildIndex(sections);
 const byId = new Map(sections.map((s) => [s.id, s]));
-const staticRun = evaluate("static (assets/search.js over exported JSON — what ships)", (q) =>
-  [...new Set((staticSearch(index, byId, q, 5) as { sourceId: string }[]).map((h) => h.sourceId))],
+const staticRun = evaluate(
+  "static (assets/search.js over exported JSON — what ships)",
+  (q) => [...new Set((staticSearch(index, byId, q, 5) as { sourceId: string }[]).map((h) => h.sourceId))],
+  (q) => (staticSearch(index, byId, q, 5) as { docPath: string }[]).map((h) => h.docPath),
 );
 
 // --- sqlite engine: reference, only when the database is present -------------
@@ -143,8 +184,10 @@ if (existsSync(CORPUS_DB)) {
   const { openDb } = await import("../pipeline/db.ts");
   const { searchSections: sqliteSearch } = await import("../pipeline/search.ts");
   const db = openDb();
-  sqliteRun = evaluate("sqlite (pipeline/search.ts over corpus.db — reference)", (q) =>
-    [...new Set(sqliteSearch(db, q, 5).map((h) => h.sourceId))],
+  sqliteRun = evaluate(
+    "sqlite (pipeline/search.ts over corpus.db — reference)",
+    (q) => [...new Set(sqliteSearch(db, q, 5).map((h) => h.sourceId))],
+    (q) => sqliteSearch(db, q, 5).map((h) => h.docPath),
   );
   db.close();
 

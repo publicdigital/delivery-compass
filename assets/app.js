@@ -10,7 +10,8 @@
  * Netlify Forms. That is deliberate: feedback is the one thing here that cannot be
  * regenerated, so it must not live only in the tab that produced it.
  */
-import { buildIndex, searchSections, citationUrl } from "./search.js";
+import { buildIndex, searchSections, citationUrl, explainQuery } from "./search.js";
+import { renderGraph } from "./map.js";
 
 const $ = (s) => document.querySelector(s);
 
@@ -29,6 +30,9 @@ const date = (s) => (s ? String(s).slice(0, 10) : "unknown");
  * from five people asking one, which is the distinction that decides whether an
  * unanswered question is a real gap. Nothing about it identifies anybody.
  */
+/** Fallback destination when a feedback POST fails. */
+const FEEDBACK_EMAIL = "oli.lovell@public.digital";
+
 const SESSION = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 let surface = "ask";
@@ -150,9 +154,10 @@ async function runAsk(q) {
   out.innerHTML = '<p class="loading">Searching&hellip;</p>';
 
   const hits = searchSections(index, sectionById, lastQuestion, 6);
+  const explain = queryExplainer(lastQuestion);
 
   if (hits.length === 0) {
-    out.innerHTML = `<div class="empty"><strong>No match in the corpus.</strong>
+    out.innerHTML = explain + `<div class="empty"><strong>No match in the corpus.</strong>
       <p>The corpus covers only the registered sources, so this is a gap rather than an answer. It has been logged as one &mdash; and it is worth saying more about
       <a href="#feedback">in the feedback form</a>, because an unanswered question is the most useful thing this prototype can be told.</p></div>` + rateStrip();
     wireRate();
@@ -170,7 +175,7 @@ async function runAsk(q) {
 
   const caveats = await caveatsFor([...new Set(hits.map((h) => h.sourceId))]);
 
-  let html = rateStrip();
+  let html = explain + rateStrip();
 
   for (const c of caveats) {
     html += `<div class="card warn">
@@ -252,6 +257,37 @@ async function runAsk(q) {
   out.innerHTML = html;
   wireRate();
   logQuery(lastQuestion, hits.length, obligations.length);
+}
+
+/**
+ * Show what the search actually looked for.
+ *
+ * Search is keyword matching over stemmed words, and when it goes wrong it usually
+ * goes wrong for a legible reason: one unusual word dominated, or a word nobody in
+ * the corpus uses matched nothing at all. A tester asking about "test and learn
+ * accelerators" got the Treasury's accelerated-approvals process at the top and
+ * reasonably concluded the tool had nothing useful. Seeing that "accelerators"
+ * matched 7 sections, while "test" and "learn" matched hundreds, explains it in a
+ * glance and suggests the fix - drop the word.
+ */
+function queryExplainer(question) {
+  const terms = explainQuery(index, question);
+  if (terms.length === 0) return "";
+
+  const RARE = Math.max(5, Math.round(sections.length * 0.004)); // ~0.4% of the corpus
+
+  const chips = terms.map((t) => {
+    if (!t.matched) return `<span class="term none" title="No section in the corpus contains this word">${esc(t.raw)} &mdash; no matches</span>`;
+    if (t.docs <= RARE) return `<span class="term rare" title="Rare words carry a lot of weight and can pull results off-topic">${esc(t.raw)} &mdash; ${t.docs} section${t.docs === 1 ? "" : "s"}</span>`;
+    return `<span class="term">${esc(t.raw)}</span>`;
+  }).join(" ");
+
+  const odd = terms.filter((t) => !t.matched || t.docs <= RARE);
+  const note = odd.length
+    ? `<p class="meta">Highlighted words are rare or absent in this corpus. They carry a lot of weight in the ranking, so if the results look off-topic, try the question without them.</p>`
+    : "";
+
+  return `<div class="explain"><strong>Searched for</strong> ${chips}${note}</div>`;
 }
 
 // --- feedback ----------------------------------------------------------------
@@ -368,6 +404,50 @@ $("#fb-form").addEventListener("submit", async (e) => {
   if (ok) $("#fb-comment").value = "";
 });
 
+/**
+ * Hovering or focusing a node fades everything it is not connected to.
+ *
+ * With 26 edges over 41 nodes the middle of the diagram is busy, and the question a
+ * reader actually has is "what does THIS one touch" — which is unanswerable by eye
+ * and trivial to answer by dimming.
+ */
+function wireGraph() {
+  const svg = document.querySelector(".graph svg");
+  if (!svg) return;
+  const nodes = [...svg.querySelectorAll(".g-node")];
+  const edges = [...svg.querySelectorAll(".g-edge")];
+
+  const focus = (id) => {
+    if (!id) {
+      svg.classList.remove("focused");
+      nodes.forEach((n) => n.classList.remove("on", "off"));
+      edges.forEach((e) => e.classList.remove("on", "off"));
+      return;
+    }
+    const near = new Set([id]);
+    edges.forEach((e) => {
+      const hit = e.dataset.from === id || e.dataset.to === id;
+      e.classList.toggle("on", hit);
+      e.classList.toggle("off", !hit);
+      if (hit) { near.add(e.dataset.from); near.add(e.dataset.to); }
+    });
+    svg.classList.add("focused");
+    nodes.forEach((n) => {
+      const hit = near.has(n.dataset.id);
+      n.classList.toggle("on", hit);
+      n.classList.toggle("off", !hit);
+    });
+  };
+
+  for (const n of nodes) {
+    n.addEventListener("mouseenter", () => focus(n.dataset.id));
+    n.addEventListener("focus", () => focus(n.dataset.id));
+    n.addEventListener("mouseleave", () => focus(null));
+    n.addEventListener("blur", () => focus(null));
+  }
+  svg.addEventListener("mouseleave", () => focus(null));
+}
+
 // --- map and watch -----------------------------------------------------------
 const LOADERS = {
   async map() {
@@ -375,7 +455,10 @@ const LOADERS = {
     const byBody = new Map();
     for (const n of nodes) byBody.set(n.body, [...(byBody.get(n.body) ?? []), n]);
 
-    let html = `<h2>Who owns what</h2><p class="lede">${byBody.size} different bodies publish the guidance a delivery team is expected to follow.</p>`;
+    // The drawing first, because the fragmentation is the thing worth seeing; the
+    // lists below remain the accessible, complete rendering of the same data.
+    let html = renderGraph(nodes, edges);
+    html += `<h2>Who owns what</h2><p class="lede">${byBody.size} different bodies publish the guidance a delivery team is expected to follow.</p>`;
     for (const [body, ns] of [...byBody].sort((a, b) => b[1].length - a[1].length)) {
       html += `<div class="body-group"><h3>${esc(body)} <span class="meta">(${ns.length})</span></h3><ul>`;
       for (const n of ns.sort((a, b) => a.title.localeCompare(b.title))) {
@@ -402,6 +485,7 @@ const LOADERS = {
       html += `</div>`;
     }
     render("#map-results", html);
+    wireGraph();
   },
 
   async watch() {

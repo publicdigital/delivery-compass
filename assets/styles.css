@@ -125,3 +125,42 @@ details.limits li{margin:6px 0}
 .para-tight{margin:8px 0 0}
 .inline{display:inline}
 .alert{color:var(--red)}
+
+/* What the search actually looked for. Shown above every result set, because a
+   ranking nobody can explain reads as a ranking that found nothing. */
+.explain{background:var(--grey3);border-left:5px solid var(--grey1);padding:10px 16px;margin:0 0 16px;font-size:.9rem}
+.explain .term{display:inline-block;padding:2px 8px;margin:2px 2px 2px 0;background:#fff;border:1px solid var(--border);font-family:ui-monospace,monospace;font-size:.85rem}
+.explain .term.rare{border-color:var(--amber);background:#fff9f4;font-weight:700}
+.explain .term.none{border-color:var(--grey1);background:#fff;color:var(--grey1);text-decoration:line-through}
+.explain .meta{margin-top:8px}
+
+/* --- the guidance landscape, drawn ----------------------------------------- */
+.graph{margin:0 0 28px;padding:0}
+.graph svg{width:100%;height:auto;display:block;background:#fcfcfc;border:1px solid var(--border)}
+.g-edge{fill:none;stroke:var(--border);stroke-width:1.4}
+.g-edge.cross{stroke:var(--grey1);stroke-width:1.6}
+.g-edge.conflict{stroke:var(--red);stroke-width:2.4}
+.g-spine{font-size:15px;font-weight:700;text-anchor:middle;text-transform:uppercase;letter-spacing:.08em;opacity:.45}
+.g-label{font-size:10px;text-anchor:middle;fill:var(--black);pointer-events:none}
+/* Unindexed documents are small and numerous; labelling them all turns the busiest
+   clusters to mush. They name themselves on hover, and appear in full in the list. */
+.g-label.small{opacity:0}
+.g-node:hover .g-label.small,.g-node:focus .g-label.small{opacity:1}
+.graph svg.focused .g-node.on .g-label.small{opacity:1}
+.g-node{cursor:pointer}
+.g-node:focus{outline:none}
+.g-node:focus circle{stroke:var(--focus);stroke-width:4}
+/* Dim everything the focused node does not touch. Transitions are opt-out for
+   anyone who has asked for reduced motion. */
+.graph svg.focused .g-node.off{opacity:.16}
+.graph svg.focused .g-edge.off{opacity:.07}
+.graph svg.focused .g-node.on circle{stroke:var(--black);stroke-width:3}
+.g-node circle,.g-edge,.g-node{transition:opacity .12s ease,stroke-width .12s ease}
+@media (prefers-reduced-motion:reduce){.g-node circle,.g-edge,.g-node{transition:none}}
+.graph figcaption{padding:10px 0 0}
+.g-legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--grey1)}
+.g-key{display:inline-flex;align-items:center;gap:6px}
+.g-key i{width:13px;height:13px;border-radius:50%;background:var(--c,var(--grey1));display:inline-block}
+.g-key i.ring{background:#fff;border:2.5px solid var(--black)}
+.g-key i.faded{background:var(--grey1);opacity:.25}
+.g-key i.line{width:18px;height:0;border-radius:0;border-top:2.5px solid var(--red)}

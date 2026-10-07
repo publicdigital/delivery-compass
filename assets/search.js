@@ -147,11 +147,31 @@ export function queryTerms(question) {
 }
 
 /**
- * Fraction of query terms appearing in a source's title.
+ * The words of a document's own title, recovered from its URL slug.
+ *
+ * Sections carry the title of their registry SOURCE, which for a 144-page manual is
+ * just "Service Manual" for every one of them — useless as a ranking signal and
+ * actively misleading for affinity. GOV.UK slugs are the page title hyphenated, so
+ * the last path segment gives the document title back for free, with no re-ingest
+ * and no schema change. "how should governance change for agile delivery" failed to
+ * reach /service-manual/.../governance-principles-for-agile-service-delivery until
+ * this was added.
+ */
+export function docTitleWords(docPath) {
+  const last = String(docPath ?? "").split("/").filter(Boolean).pop() ?? "";
+  return last.replace(/-/g, " ");
+}
+
+/**
+ * Fraction of query terms appearing in a document's title.
  *
  * A question naming a document ("what does the technology code of practice require")
  * should return that document, but BM25 over section text alone ranks whichever
  * source mentions the phrase most often — usually a different one citing it.
+ *
+ * Matched against the source title and the document's own slug-derived title
+ * together, so both "the Service Manual" and "governance principles for agile
+ * service delivery" are things a reader can successfully name.
  */
 export function titleAffinity(title, terms) {
   if (terms.length === 0) return 0;
@@ -166,6 +186,29 @@ const W_HEADING = 3.0;
 const W_TEXT = 1.0;
 /** Weight on title affinity when blended with the BM25 score. */
 const TITLE_BOOST = 8;
+
+/**
+ * Ceiling on a single term's inverse document frequency.
+ *
+ * BM25 rewards rare terms, which is usually right and occasionally catastrophic. Asked
+ * "what governance is recommended for test and learn accelerators", the corpus put the
+ * Treasury Approvals Process top: "accelerators" stems to "acceler", which appears in
+ * "Accelerated projects and programmes" and almost nowhere else, so one off-target word
+ * outscored four on-target ones. Over 3,300 sections an unstemmed hapax scores about
+ * 7.7; this caps the advantage without flattening genuinely distinctive terms.
+ */
+const IDF_CAP = 4.5;
+
+/**
+ * How much matching more of the query is worth.
+ *
+ * A document matching one rare term should not beat one matching four of five. The
+ * final score is multiplied by COVERAGE_FLOOR + (1 - COVERAGE_FLOOR) * matched/asked,
+ * so a single-term match keeps roughly half its score and a full match keeps all of it.
+ * Lucene calls this a coordination factor. A hard matched/asked multiplier was too
+ * brutal: it buried good single-paragraph answers to long, chatty questions.
+ */
+const COVERAGE_FLOOR = 0.45;
 
 /**
  * Build an inverted index over sections.
@@ -232,22 +275,65 @@ export function scoreDocs(index, question) {
   const terms = tokenize(question);
   if (terms.length === 0) return [];
 
+  const asked = new Set(terms.slice(0, 12));
   /** @type {Map<number, number>} */
   const scores = new Map();
-  for (const term of new Set(terms.slice(0, 12))) {
+  /** @type {Map<number, number>} how many distinct query terms each document matched */
+  const matched = new Map();
+
+  for (const term of asked) {
     const byDoc = index.postings.get(term);
     if (!byDoc) continue;
-    // Probabilistic IDF, floored so a term in almost every document cannot score negative.
+    // Probabilistic IDF, floored so a term in almost every document cannot score
+    // negative, and capped so one rare term cannot carry a document on its own.
     const df = byDoc.size;
-    const idf = Math.max(0.01, Math.log(1 + (index.docCount - df + 0.5) / (df + 0.5)));
+    const idf = Math.min(IDF_CAP, Math.max(0.01, Math.log(1 + (index.docCount - df + 0.5) / (df + 0.5))));
     for (const [docId, [hTf, tTf]] of byDoc) {
       const s =
         W_HEADING * bm25Field(hTf, index.headingLen.get(docId) ?? 0, index.avgHeading, idf) +
         W_TEXT * bm25Field(tTf, index.textLen.get(docId) ?? 0, index.avgText, idf);
       scores.set(docId, (scores.get(docId) ?? 0) + s);
+      matched.set(docId, (matched.get(docId) ?? 0) + 1);
     }
   }
-  return [...scores].map(([id, score]) => ({ id, score })).sort((a, b) => b.score - a.score);
+
+  return [...scores]
+    .map(([id, score]) => {
+      const coverage = COVERAGE_FLOOR + (1 - COVERAGE_FLOOR) * ((matched.get(id) ?? 0) / asked.size);
+      return { id, score: score * coverage, matched: matched.get(id) ?? 0, asked: asked.size };
+    })
+    .sort((a, b) => b.score - a.score);
+}
+
+/**
+ * What the search actually looked for, so the interface can show it.
+ *
+ * A reader who can see that "accelerators" was searched as "acceler", and matched
+ * three sections about accelerated Treasury approvals, can diagnose their own odd
+ * result in a second. Without it the ranking is unexplainable and people conclude the
+ * tool has nothing, when what happened is that one word pulled it sideways.
+ *
+ * @returns {{raw: string, stem: string, docs: number, matched: boolean}[]}
+ */
+export function explainQuery(index, question) {
+  const seen = new Set();
+  const out = [];
+  const raws = String(question)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+
+  for (const raw of raws) {
+    if (raw.length < 2 || STOP.has(raw)) continue;
+    const stem_ = stem(raw);
+    if (seen.has(stem_)) continue;
+    seen.add(stem_);
+    if (out.length >= 12) break;
+    const docs = index.postings.get(stem_)?.size ?? 0;
+    out.push({ raw, stem: stem_, docs, matched: docs > 0 });
+  }
+  return out;
 }
 
 /**
@@ -272,7 +358,9 @@ export function searchSections(index, byId, question, limit = 6) {
   const ranked = pool
     .map(({ id, score }) => {
       const section = byId.get(id);
-      return section ? { section, rank: score + titleAffinity(section.sourceTitle, terms) * TITLE_BOOST } : null;
+      if (!section) return null;
+      const titleText = `${section.sourceTitle} ${docTitleWords(section.docPath)}`;
+      return { section, rank: score + titleAffinity(titleText, terms) * TITLE_BOOST };
     })
     .filter(Boolean)
     .sort((a, b) => b.rank - a.rank);
