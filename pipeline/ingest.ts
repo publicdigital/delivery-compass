@@ -12,6 +12,8 @@ export interface IngestResult {
   obligations: number;
   skipped?: string;
   metadataOnly?: boolean;
+  /** Set when the registry slug now redirects; the registry should be updated. */
+  movedTo?: string;
 }
 
 /** A single ingestible document: one page of HTML with a canonical path. */
@@ -46,18 +48,35 @@ function attachmentTitleMatches(attachmentTitle: string, sourceTitle: string): b
  * govuk_attachment child (see resolveAttachmentDoc) - otherwise the child's guidance
  * would be absorbed into this parent's own sections under the wrong source id.
  */
-async function resolveDocs(source: Source, excludeAttachmentTitles: string[] = []): Promise<{ docs: Doc[]; skipped?: string }> {
+async function resolveDocs(
+  source: Source,
+  excludeAttachmentTitles: string[] = [],
+): Promise<{ docs: Doc[]; skipped?: string; movedTo?: string }> {
   if (!source.slug) return { docs: [], skipped: "no slug" };
 
-  const item = await getContent(source.slug);
+  let item = await getContent(source.slug);
   if ("httpError" in item) return { docs: [], skipped: `HTTP ${item.httpError}` };
+
+  // GOV.UK moves pages and leaves a redirect behind. checkSource already followed
+  // these; this did not, so a renamed slug came back as "no body content" while the
+  // previous ingest's rows stayed in the database and the corpus looked healthy.
+  // That is how the Green Book quietly emptied itself in October 2026.
+  let movedTo: string | undefined;
+  if (item.document_type === "redirect" || item.schema_name === "redirect") {
+    const target = item.details?.redirects?.[0]?.destination ?? item.redirects?.[0]?.destination;
+    if (!target) return { docs: [], skipped: "redirect with no destination" };
+    const followed = await getContent(target);
+    if ("httpError" in followed) return { docs: [], skipped: `HTTP ${followed.httpError} after redirect to ${target}` };
+    movedTo = target;
+    item = followed;
+  }
 
   const docs: Doc[] = [];
 
   // Guides and detailed guides carry their prose inline.
   const inline = item.details?.body;
   if (inline && inline.trim().length > 0) {
-    docs.push({ path: source.slug, html: inline, updatedAt: item.public_updated_at ?? null });
+    docs.push({ path: movedTo ?? source.slug, html: inline, updatedAt: item.public_updated_at ?? null });
   }
 
   // Publications hold their prose in HTML attachments, one page each.
@@ -79,10 +98,11 @@ async function resolveDocs(source: Source, excludeAttachmentTitles: string[] = [
     const hasExternal = (item.details?.attachments ?? []).some((a) => a.attachment_type === "external");
     return {
       docs: [],
+      movedTo,
       skipped: hasExternal ? "content hosted off GOV.UK" : hasPdf ? "PDF only, no HTML edition" : "no body content",
     };
   }
-  return { docs };
+  return { docs, movedTo };
 }
 
 /**
@@ -182,6 +202,7 @@ export async function ingestSource(
 
   let docs: Doc[];
   let skipped: string | undefined;
+  let movedTo: string | undefined;
 
   if (source.fetcher === "govuk_attachment") {
     if (!source.parent) return { ...result, skipped: "no parent" };
@@ -194,7 +215,7 @@ export async function ingestSource(
     const attachmentChildren = [...byId.values()]
       .filter((s) => s.fetcher === "govuk_attachment" && s.parent === source.id)
       .map((s) => s.title);
-    ({ docs, skipped } = await resolveDocs(source, attachmentChildren));
+    ({ docs, skipped, movedTo } = await resolveDocs(source, attachmentChildren));
   }
 
   // Service manual index pages have no prose of their own; their children do.
@@ -212,7 +233,7 @@ export async function ingestSource(
     }
   }
 
-  if (docs.length === 0) return { ...result, skipped: skipped ?? "no content" };
+  if (docs.length === 0) return { ...result, skipped: skipped ?? "no content", movedTo };
 
   const liveUrl = source.slug ? `https://www.gov.uk${source.slug}` : `https://www.gov.uk${docs[0]!.path}`;
   let publicUpdatedAt: string | null;
@@ -282,6 +303,7 @@ export async function ingestSource(
     result.metadataOnly = true;
   }
 
+  result.movedTo = movedTo;
   return result;
 }
 

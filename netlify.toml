@@ -31,3 +31,28 @@
   for = "/assets/data/*"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# `netlify deploy --dir=.` publishes the whole repo, so the pipeline source, the
+# registry YAML and the handover docs would otherwise be fetchable by anyone holding
+# the password. Nothing secret lives there, but testers should meet the prototype, not
+# its source tree. These only block HTTP access; the files are still uploaded.
+[[redirects]]
+  from = "/pipeline/*"
+  to = "/index.html"
+  status = 404
+[[redirects]]
+  from = "/sources/*"
+  to = "/index.html"
+  status = 404
+[[redirects]]
+  from = "/test/*"
+  to = "/index.html"
+  status = 404
+[[redirects]]
+  from = "/scripts/*"
+  to = "/index.html"
+  status = 404
+[[redirects]]
+  from = "/docs/*"
+  to = "/index.html"
+  status = 404

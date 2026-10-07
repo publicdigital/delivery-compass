@@ -528,3 +528,29 @@ admin token. That is a wider blast radius for free-text written by government st
 and it is the price of this hosting rather than an improvement. It is fine at the scale
 agreed — a handful of invited testers — and is flagged in DEPLOY.md as the thing to
 revisit if this widens.
+
+### Two bugs found while verifying the move, both fixed
+
+**A "should" was being labelled MANDATORY.** `is/are required to` was in the mandatory
+modal list, and English overloads "required": "departments are required to register
+their evaluations" is an obligation, but "ongoing dialogue is required to ensure
+quality" means *needed*. Roughly seven in ten of the 23 obligations it produced were
+the second kind — and because the modal list is ordered strongest-first, it also
+promoted whole sentences whose real modal was "should" to a red MANDATORY label. One
+was on the default "risk appetite" example, so it would have been among the first
+things a tester saw. The modal has been removed: precision over recall is the rule,
+and the genuine cases are nearly all restatements of a "must" caught elsewhere.
+
+**The Green Book had silently emptied itself.** GOV.UK moved it on 2026-10-06 —
+`/government/publications/the-green-book-appraisal-and-evaluation-in-central-government`
+now redirects to `/government/publications/the-green-book--2`, and the collection moved
+too. `checkSource` followed redirects; `resolveDocs` did not, so ingest reported "no
+body content", the previous run's rows stayed in the database, and `compass verify`
+still passed its floors. A central source was gone and nothing said so.
+
+Both halves are fixed: the ingester now follows one redirect and reports the move so
+the registry can be updated, and `compass ingest` exits non-zero when a source that
+should carry prose returns none. Since `npm run refresh` chains with `&&`, that now
+stops a hollowed-out corpus reaching the exporter. The registry slugs were updated.
+
+The corpus was also refreshed in passing — it had been six weeks stale.

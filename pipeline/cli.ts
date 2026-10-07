@@ -21,6 +21,8 @@ async function cmdIngest(only?: string): Promise<void> {
 
   console.log(`${BOLD}Ingesting ${registry.length} sources${RESET} ${DIM}(HTML-first; PDF-only sources are skipped, not guessed at)${RESET}\n`);
   let totalSections = 0, totalObligations = 0, ingested = 0;
+  const moved: { id: string; from: string; to: string }[] = [];
+  const emptied: { id: string; reason: string }[] = [];
 
   // Computed from the full registry, not the filtered subset, so a partial
   // re-ingest cannot re-claim a page that belongs to another source.
@@ -28,10 +30,19 @@ async function cmdIngest(only?: string): Promise<void> {
   const claimed = explicitlyClaimedPaths(fullRegistry);
   const byId = new Map(fullRegistry.map((s) => [s.id, s] as const));
 
+  // Sources that are expected to yield prose. A withdrawn or local-only source
+  // returning nothing is correct; the Green Book returning nothing is an incident.
+  const expectsContent = (id: string) => {
+    const src = byId.get(id);
+    return Boolean(src && src.slug && src.fetcher !== "withdrawn" && src.fetcher !== "local_only" && src.fetcher !== "nao_wp");
+  };
+
   for (const source of registry) {
     const r = await ingestSource(db, source, claimed, byId);
+    if (r.movedTo) moved.push({ id: source.id, from: source.slug ?? "?", to: r.movedTo });
     if (r.skipped) {
       console.log(`  ${DIM}skip${RESET}  ${source.id.padEnd(26)} ${DIM}${r.skipped}${RESET}`);
+      if (expectsContent(source.id)) emptied.push({ id: source.id, reason: r.skipped });
       continue;
     }
     if (r.metadataOnly) {
@@ -49,7 +60,26 @@ async function cmdIngest(only?: string): Promise<void> {
 
   const byStrength = db.prepare("SELECT strength, COUNT(*) n FROM obligations GROUP BY strength ORDER BY n DESC").all() as { strength: string; n: number }[];
   console.log(byStrength.map((r) => `${r.n} ${r.strength}`).join(", "));
+
+  if (moved.length) {
+    console.log(`\n${YELLOW}${moved.length} source(s) have moved on GOV.UK${RESET} ${DIM}- followed this time, but update the registry${RESET}`);
+    for (const m of moved) console.log(`  ${m.id}: ${m.from}\n    -> ${m.to}`);
+  }
+
   db.close();
+
+  // A source that should carry prose and returned none is an incident, not a note.
+  // Previously this printed one grey "skip" line among forty and the stale rows from
+  // the last run stayed in the database, so the corpus still passed its floors and
+  // the export still shipped. `npm run refresh` chains with &&, so failing here stops
+  // a hollowed-out corpus reaching the exporter.
+  if (emptied.length) {
+    console.error(`\n${RED}${emptied.length} source(s) that should have content returned none:${RESET}`);
+    for (const e of emptied) console.error(`  ${e.id}: ${e.reason}`);
+    console.error(`${DIM}Rows from the previous ingest are still in the database, so the corpus may look healthy.${RESET}`);
+    console.error(`${DIM}Check the registry slug and the source on GOV.UK before exporting.${RESET}`);
+    process.exitCode = 1;
+  }
 }
 
 const STRENGTH_STYLE: Record<string, string> = {

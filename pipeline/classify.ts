@@ -46,12 +46,26 @@ export interface Obligation {
 const MODALS: { re: RegExp; modal: string; strength: Strength; conventional: boolean }[] = [
   { re: /\bshall\b/i, modal: "shall", strength: "mandatory", conventional: true },
   { re: /\bmust\b/i, modal: "must", strength: "mandatory", conventional: false },
-  { re: /\b(?:is|are) required to\b/i, modal: "is required to", strength: "mandatory", conventional: false },
   { re: /\bshould\b/i, modal: "should", strength: "recommended", conventional: true },
   { re: /\bmay\b/i, modal: "may", strength: "permitted", conventional: true },
   { re: /\bmight\b/i, modal: "might", strength: "possible", conventional: true },
 ];
 
+/**
+ * "is/are required to" was in this list as a mandatory marker and has been removed.
+ *
+ * English overloads "required": "departments are required to register their
+ * evaluations" is an obligation, but "ongoing dialogue is required to ensure quality"
+ * and "assurance is required to ensure the project is delivered" use it to mean
+ * "needed". Of the 23 obligations it produced across the corpus, roughly seven in ten
+ * were the second kind - and because MODALS is ordered strongest-first, it also
+ * promoted sentences whose actual modal was "should" to a red MANDATORY label.
+ *
+ * Separating the two senses reliably needs more than a regex, and the rule here is
+ * precision over recall: a missed obligation is a gap, a false "mandatory" is
+ * actively misleading. The genuine cases are nearly all restatements of a "must" or
+ * "shall" that is caught elsewhere.
+ */
 const ABBREVIATIONS = /\b(e\.g|i\.e|etc|cf|vs|No|Fig|para|paras|Ch|Sec|Dr|Mr|Ms|Mrs|St)\./gi;
 
 /** Placeholder standing in for a full stop while sentences are split. */

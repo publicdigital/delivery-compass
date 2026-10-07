@@ -6,7 +6,8 @@
   spine: funding
   authority: mandatory
   fetcher: govuk_publication
-  slug: /government/publications/the-green-book-appraisal-and-evaluation-in-central-government
+  # Moved 2026-10-06; the old slug now redirects here.
+  slug: /government/publications/the-green-book--2
   prefer: html
   licence: OGL-v3
 
@@ -16,7 +17,8 @@
   spine: funding
   authority: informative
   fetcher: govuk_collection
-  slug: /government/collections/the-green-book-and-accompanying-guidance-and-documents
+  # Moved 2026-10-06; the old slug now redirects here.
+  slug: /government/collections/the-green-book-and-accompanying-guidance
   # Expands to ~28 member documents, including all supplementary guidance.
   expand: true
   licence: OGL-v3
