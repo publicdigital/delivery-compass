@@ -65,21 +65,33 @@
   status = 404
   force = true
 
-# Netlify injects its own HUD widget script into every page. It is same-origin so the
-# CSP lets it load, but it then applies inline styles and scripts that the CSP blocks,
-# leaving four red errors in the console of a prototype whose whole point is that
-# people report what looks broken. Blocking the script itself is quieter than letting
-# it load and fail, and nothing in the app depends on it. Scoped to /scripts/ so the
-# rest of /.netlify/ (forms, functions) is untouched.
+# Netlify injects its own HUD widget script into every page, which then applies
+# inline styles and scripts that this CSP blocks - four red console errors that are
+# Netlify's, not the app's. Attempting to block it with a redirect does NOT work:
+# /.netlify/* is reserved and routed before redirect rules are consulted. Left alone
+# deliberately. Relaxing the CSP to silence it would be the wrong trade, and nothing
+# in the app depends on it. If it ever matters, it is a Netlify site setting, not
+# something fixable from this repo.
+
+# Working notes, not part of the prototype. Listed individually: Netlify only
+# supports a trailing splat, so "/*.md" matches nothing and fails silently.
 [[redirects]]
-  from = "/.netlify/scripts/*"
+  from = "/HANDOVER.md"
   to = "/index.html"
   status = 404
   force = true
-
-# Working notes, not part of the prototype.
 [[redirects]]
-  from = "/*.md"
+  from = "/CLAUDE.md"
+  to = "/index.html"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/DEPLOY.md"
+  to = "/index.html"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/README.md"
   to = "/index.html"
   status = 404
   force = true

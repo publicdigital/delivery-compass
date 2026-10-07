@@ -33,6 +33,11 @@ h2{font-size:1.25rem;margin:28px 0 10px}
 .lede{color:var(--grey1);margin:0 0 22px;max-width:60ch}
 .panel{display:none}
 .panel.active{display:block}
+/* Must come before any rule that sets display on an element carrying [hidden].
+   The bare form{display:flex} below overrode the hidden attribute on the Netlify
+   form declarations at the foot of index.html, so they rendered as stray empty
+   input boxes under the footer on the live site. */
+[hidden]{display:none !important}
 form{display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap}
 input[type=search]{flex:1;min-width:260px;padding:10px;font-size:1.05rem;border:2px solid var(--black);font-family:inherit}
 input:focus{outline:3px solid var(--focus);border-color:var(--black)}
