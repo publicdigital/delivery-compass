@@ -108,10 +108,27 @@ const CASES: Case[] = [
     expectPath: "governance-principles-for-agile",
     why: "GDS published exactly this; a tester looking for it did not reach it.",
   },
+
+  // --- concept bridges (sources/concepts.yaml) ------------------------------
+  // These share no content words with the document that answers them, so they fail
+  // without the bridge no matter how the ranking is tuned. They are the regression
+  // test for concepts.yaml being loaded and applied at all.
+  {
+    q: "light touch governance for a pilot",
+    expect: ["service-manual", "magenta-book"],
+    expectPath: "test-and-learn",
+    why: "No shared vocabulary with 'Test and Learn'; only the concept bridge connects them.",
+  },
+  {
+    q: "proportionate oversight of an experiment",
+    expect: ["magenta-book", "service-manual"],
+    why: "Bridged through adaptive-governance.",
+  },
 ];
 
 const relations = loadRelations();
 const SECTIONS_JSON = fileURLToPath(new URL("../assets/data/sections.json", import.meta.url));
+const CONCEPTS_JSON = fileURLToPath(new URL("../assets/data/concepts.json", import.meta.url));
 const CORPUS_DB = fileURLToPath(new URL("../data/corpus.db", import.meta.url));
 
 /** Run every case against one retrieval function and report. */
@@ -170,12 +187,15 @@ if (!existsSync(SECTIONS_JSON)) {
   process.exit(1);
 }
 const sections = JSON.parse(readFileSync(SECTIONS_JSON, "utf8")) as { id: number; sourceId: string }[];
+// Concepts are passed in because the deployed app passes them: the suite has to
+// exercise the configuration users actually get, bridges included.
+const concepts = existsSync(CONCEPTS_JSON) ? JSON.parse(readFileSync(CONCEPTS_JSON, "utf8")) : [];
 const index = buildIndex(sections);
 const byId = new Map(sections.map((s) => [s.id, s]));
 const staticRun = evaluate(
   "static (assets/search.js over exported JSON — what ships)",
-  (q) => [...new Set((staticSearch(index, byId, q, 5) as { sourceId: string }[]).map((h) => h.sourceId))],
-  (q) => (staticSearch(index, byId, q, 5) as { docPath: string }[]).map((h) => h.docPath),
+  (q) => [...new Set((staticSearch(index, byId, q, 5, concepts) as { sourceId: string }[]).map((h) => h.sourceId))],
+  (q) => (staticSearch(index, byId, q, 5, concepts) as { docPath: string }[]).map((h) => h.docPath),
 );
 
 // --- sqlite engine: reference, only when the database is present -------------

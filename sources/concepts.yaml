@@ -1,0 +1,192 @@
+# Concepts: the bridge between what people ask and what the guidance calls it.
+#
+# Retrieval here is keyword matching over stemmed words. That works when the asker
+# and the author use the same vocabulary and fails completely when they do not. A
+# tester asked for "new ways of funding and delivering work" and got nothing useful,
+# because HMT's guide on exactly that subject is called "Test and Learn" and shares
+# not one content word with the question.
+#
+# No amount of ranking tuning fixes a vocabulary mismatch. The options are embeddings
+# (which would mean an API key, or shipping a model, or a much larger payload) or a
+# curated map like this one. This is cheaper, inspectable, and correctable by anyone
+# who spots a bad bridge — and unlike an embedding it can be argued with.
+#
+# Each concept has:
+#   triggers  phrases a person might actually type. Matched as substrings against the
+#             lower-cased question, so keep them short and distinctive. A trigger that
+#             fires on common words will pull every query towards this concept.
+#   terms     words the CORPUS uses for the same idea. Added to the search at reduced
+#             weight, never replacing what the person typed.
+#   sources   optional. Registry ids whose documents are the canonical answer; used to
+#             nudge, not to force.
+#   docs      optional. Substrings of a document URL. Finer than sources and usually
+#             what you want: "Test and Learn" is one document inside the Magenta Book's
+#             690 sections, so boosting the whole source does nothing to single it out.
+#   why       why this bridge exists, so a later reader can judge whether it still should.
+#
+# Expansions are always shown to the user. A search that silently looks for things
+# nobody asked for is not something this tool should do.
+
+concepts:
+  - id: test-and-learn
+    triggers:
+      - new ways of delivering
+      - new ways of working
+      - new way of delivering
+      - iterative delivery
+      - iterative policy
+      - adaptive delivery
+      - experiment
+      - experimentation
+      - pilot
+      - piloting
+      - accelerator
+      - agile policy
+      - learn as we go
+      - fail fast
+    terms: [test, learn, adaptive, iterate, iterative, pilot, prototype, evidence]
+    docs: [test-and-learn]
+    why: >-
+      HMT published a Test and Learn guide in May 2026 covering exactly this, including
+      a section on adapting governance. Nobody searching for it uses the words
+      "test and learn" unless they already know it exists.
+
+  - id: funding-models
+    triggers:
+      - new ways of funding
+      - new funding
+      - fund a team
+      - funding a team
+      - flexible funding
+      - fund an agile
+      - funding model
+      - funding models
+      - how do we get money
+      - multi-year funding
+      - product funding
+    terms: [funding, fund, business, case, spending, allocation, resource, profile]
+    sources: [agile-business-case, tap]
+    docs: [test-and-learn]
+    why: >-
+      Funding iterative delivery is poorly served by this corpus and the question gets
+      asked constantly. The honest answer is spread across the agile business case
+      clarification, the Treasury Approvals Process and Test and Learn — none of which
+      a reader finds by typing "funding model".
+
+  - id: adaptive-governance
+    triggers:
+      - light touch governance
+      - lighter governance
+      - proportionate governance
+      - proportionate oversight
+      - governance for agile
+      - agile governance
+      - governance change
+      - governance that
+    terms: [governance, oversight, decision, accountability, adaptive, proportionate]
+    docs: [test-and-learn, governance-principles-for-agile]
+    why: >-
+      GDS's "Governance principles for agile service delivery" and chapter six of Test
+      and Learn both answer this; neither surfaces for a plainly worded question.
+
+  - id: spend-approval
+    triggers:
+      - who signs off
+      - who approves
+      - sign off
+      - approval for
+      - do I need approval
+      - permission to spend
+      - spend control
+      - business case approval
+    terms: [approval, approve, spend, threshold, delegated, authority, treasury]
+    sources: [spend-controls, tap, managing-public-money]
+    why: >-
+      The single most asked delivery question, and the answer changed on 2026-04-01.
+
+  - id: service-assessment
+    triggers:
+      - service assessment
+      - assessed against the standard
+      - alpha assessment
+      - beta assessment
+      - do I need an assessment
+    terms: [assessment, assess, standard, panel, alpha, beta, live]
+    sources: [service-standard, service-manual]
+
+  - id: user-research
+    triggers:
+      - user research
+      - research with users
+      - understand users
+      - user needs
+    terms: [user, research, needs, participant, accessibility]
+    sources: [service-manual]
+
+  - id: benefits
+    triggers:
+      - prove the value
+      - demonstrate value
+      - measure success
+      - what to measure
+      - benefits realisation
+      - did it work
+    terms: [benefit, outcome, measure, evaluation, realisation, indicator]
+    sources: [digital-data-benefits, gate-review-5]
+
+  - id: risk-appetite
+    triggers:
+      - how much risk
+      - risk appetite
+      - tolerate risk
+      - risk tolerance
+    terms: [risk, appetite, tolerance, control, mitigation]
+    sources: [orange-book]
+
+  - id: accessibility
+    triggers:
+      - accessible
+      - accessibility
+      - disabled users
+      - screen reader
+      - wcag
+    terms: [accessibility, accessible, wcag, assistive, inclusive]
+    sources: [accessibility-regs, service-manual]
+
+  - id: ai-use
+    triggers:
+      - using ai
+      - use of ai
+      - artificial intelligence
+      - machine learning
+      - llm
+      - generative ai
+    terms: [intelligence, artificial, model, algorithm, automated, ethics]
+    sources: [ai-playbook, data-ethics]
+    docs: [impact-evaluation-of-ai-interventions]
+
+  - id: legacy-technology
+    triggers:
+      - legacy
+      - old system
+      - technical debt
+      - replatform
+      - migration
+    terms: [legacy, technology, debt, replace, migration, remediation]
+    sources: [tcop, service-manual]
+
+  - id: procurement
+    triggers:
+      - buy
+      - buying
+      - procure
+      - procurement
+      - supplier
+      - contract
+      - framework agreement
+    terms: [procurement, supplier, contract, commercial, framework, tender]
+    sources: [tcop, ai-playbook]
+    why: >-
+      Commercial guidance is largely outside this corpus. The bridge exists so the
+      question reaches what little there is, rather than returning nothing and
+      implying no rules apply. Procurement is a known coverage gap.

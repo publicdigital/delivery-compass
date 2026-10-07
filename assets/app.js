@@ -10,7 +10,7 @@
  * Netlify Forms. That is deliberate: feedback is the one thing here that cannot be
  * regenerated, so it must not live only in the tab that produced it.
  */
-import { buildIndex, searchSections, citationUrl, explainQuery } from "./search.js";
+import { buildIndex, searchSections, citationUrl, explainQuery, matchConcepts } from "./search.js";
 import { renderGraph } from "./map.js";
 
 const $ = (s) => document.querySelector(s);
@@ -42,6 +42,7 @@ let lastQuestion = "";
 let sections = [];
 let sectionById = new Map();
 let obligationsBySection = {};
+let concepts = [];
 let index = null;
 let ready = false;
 
@@ -67,11 +68,13 @@ async function loadJson(name) {
 
 async function boot() {
   try {
-    const [meta, secs, obs] = await Promise.all([
+    const [meta, secs, obs, cons] = await Promise.all([
       loadJson("meta.json"),
       loadJson("sections.json"),
       loadJson("obligations.json"),
+      loadJson("concepts.json").catch(() => []),
     ]);
+    concepts = cons;
 
     sections = secs;
     sectionById = new Map(sections.map((s) => [s.id, s]));
@@ -153,7 +156,7 @@ async function runAsk(q) {
 
   out.innerHTML = '<p class="loading">Searching&hellip;</p>';
 
-  const hits = searchSections(index, sectionById, lastQuestion, 6);
+  const hits = searchSections(index, sectionById, lastQuestion, 6, concepts);
   const explain = queryExplainer(lastQuestion);
 
   if (hits.length === 0) {
@@ -287,7 +290,19 @@ function queryExplainer(question) {
     ? `<p class="meta">Highlighted words are rare or absent in this corpus. They carry a lot of weight in the ranking, so if the results look off-topic, try the question without them.</p>`
     : "";
 
-  return `<div class="explain"><strong>Searched for</strong> ${chips}${note}</div>`;
+  // Expansion is always declared. A search that quietly looks for words nobody typed
+  // is not something this tool should do, however much it improves the results.
+  const bridged = matchConcepts(concepts, question);
+  let bridge = "";
+  if (bridged.concepts.length) {
+    const added = [...new Set(bridged.terms)].slice(0, 10).map((t) => `<span class="term added">${esc(t)}</span>`).join(" ");
+    bridge = `<p class="meta"><strong>Also searched for</strong> ${added}
+      <br>Because the question looks like it is about
+      ${bridged.concepts.map((c) => `<em>${esc(String(c.id).replace(/-/g, " "))}</em>`).join(", ")},
+      and the guidance uses different words for it. These count for less than the words you typed.</p>`;
+  }
+
+  return `<div class="explain"><strong>Searched for</strong> ${chips}${note}${bridge}</div>`;
 }
 
 // --- feedback ----------------------------------------------------------------

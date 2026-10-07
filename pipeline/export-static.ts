@@ -21,6 +21,7 @@ import { gzipSync } from "node:zlib";
 import { openDb } from "./db.ts";
 import { findAllConflictEvidence } from "./conflicts.ts";
 import { buildGraph, loadRelations, type Relation } from "./graph.ts";
+import { loadConcepts } from "./concepts-registry.ts";
 import { loadRegistry } from "./registry.ts";
 import { citationUrl } from "./search.ts";
 import { checkCorpus } from "./verify.ts";
@@ -246,6 +247,7 @@ export function exportStatic(): void {
     "watch.json": write("watch.json", watch),
     "meta.json": write("meta.json", meta),
     "relations.json": write("relations.json", relations),
+    "concepts.json": write("concepts.json", loadConcepts(registry.map((s) => s.id))),
   };
 
   console.log(`Exported to assets/data/ (gzipped sizes, which is what the browser downloads):\n`);

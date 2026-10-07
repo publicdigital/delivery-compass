@@ -133,6 +133,7 @@ details.limits li{margin:6px 0}
 .explain .term.rare{border-color:var(--amber);background:#fff9f4;font-weight:700}
 .explain .term.none{border-color:var(--grey1);background:#fff;color:var(--grey1);text-decoration:line-through}
 .explain .meta{margin-top:8px}
+.explain .term.added{border-color:var(--blue);background:#f4f8fc;color:var(--blue)}
 
 /* --- the guidance landscape, drawn ----------------------------------------- */
 .graph{margin:0 0 28px;padding:0}

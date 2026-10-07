@@ -36,14 +36,20 @@ function normalise(raw: Record<string, unknown>, definedIn: string): Source {
 }
 
 export function loadRegistry(): Source[] {
-  // relations.yaml describes edges, not sources.
-  const files = readdirSync(SOURCES_DIR).filter((f) => f.endsWith(".yaml") && f !== "relations.yaml");
+  // sources/ holds two kinds of file. Everything not named here is expected to be a
+  // list of sources, and a file that is not gets a real error rather than being
+  // skipped - a malformed source file should never vanish quietly.
+  const NOT_SOURCE_LISTS = new Set(["relations.yaml", "concepts.yaml"]);
+  const files = readdirSync(SOURCES_DIR).filter((f) => f.endsWith(".yaml") && !NOT_SOURCE_LISTS.has(f));
   const sources: Source[] = [];
   const seenIds = new Map<string, string>();
 
   for (const file of files) {
     const entries = parse(readFileSync(join(SOURCES_DIR, file), "utf8")) as Record<string, unknown>[] | null;
-    if (!entries) continue;
+    if (entries === null) continue;
+    if (!Array.isArray(entries)) {
+      throw new Error(`sources/${file} is not a list of sources. If it is a different kind of registry file, add it to NOT_SOURCE_LISTS in registry.ts.`);
+    }
     for (const raw of entries) {
       const source = normalise(raw, file);
       const clash = seenIds.get(source.id);

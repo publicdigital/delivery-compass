@@ -211,6 +211,17 @@ const IDF_CAP = 4.5;
 const COVERAGE_FLOOR = 0.45;
 
 /**
+ * Weight given to a term the reader did not type.
+ *
+ * Concept expansion (sources/concepts.yaml) bridges the gap between what people ask
+ * and what the guidance calls itself. It must never outvote the actual question, so
+ * expanded terms count for well under half of a typed one, and they do not count
+ * towards coverage — otherwise a document matching only the expansion would look
+ * like a document matching the whole query.
+ */
+const EXPANSION_WEIGHT = 0.4;
+
+/**
  * Build an inverted index over sections.
  *
  * Built in the browser on load rather than shipped prebuilt: the postings lists
@@ -271,17 +282,25 @@ function bm25Field(tf, docLen, avgLen, idf) {
  *
  * @returns {{id:number, score:number}[]}
  */
-export function scoreDocs(index, question) {
+export function scoreDocs(index, question, expansion = []) {
   const terms = tokenize(question);
   if (terms.length === 0) return [];
 
   const asked = new Set(terms.slice(0, 12));
+  // Expanded terms the reader already typed add nothing; drop them so they do not
+  // get double counted at a lower weight.
+  const extra = [...new Set(expansion.map((t) => stem(String(t).toLowerCase())))]
+    .filter((t) => t.length > 1 && !asked.has(t))
+    .slice(0, 16);
+
   /** @type {Map<number, number>} */
   const scores = new Map();
-  /** @type {Map<number, number>} how many distinct query terms each document matched */
+  /** @type {Map<number, number>} how many of the reader's own terms each document matched */
   const matched = new Map();
 
-  for (const term of asked) {
+  const weighted = [...[...asked].map((t) => [t, 1, true]), ...extra.map((t) => [t, EXPANSION_WEIGHT, false])];
+
+  for (const [term, weight, counts] of weighted) {
     const byDoc = index.postings.get(term);
     if (!byDoc) continue;
     // Probabilistic IDF, floored so a term in almost every document cannot score
@@ -292,8 +311,8 @@ export function scoreDocs(index, question) {
       const s =
         W_HEADING * bm25Field(hTf, index.headingLen.get(docId) ?? 0, index.avgHeading, idf) +
         W_TEXT * bm25Field(tTf, index.textLen.get(docId) ?? 0, index.avgText, idf);
-      scores.set(docId, (scores.get(docId) ?? 0) + s);
-      matched.set(docId, (matched.get(docId) ?? 0) + 1);
+      scores.set(docId, (scores.get(docId) ?? 0) + s * weight);
+      if (counts) matched.set(docId, (matched.get(docId) ?? 0) + 1);
     }
   }
 
@@ -348,11 +367,14 @@ export function explainQuery(index, question) {
  * @param {string} question
  * @param {number} limit
  */
-export function searchSections(index, byId, question, limit = 6) {
-  const scored = scoreDocs(index, question);
+export function searchSections(index, byId, question, limit = 6, concepts = null) {
+  const bridge = concepts ? matchConcepts(concepts, question) : { terms: [], concepts: [] };
+  const scored = scoreDocs(index, question, bridge.terms);
   if (scored.length === 0) return [];
 
   const terms = queryTerms(question);
+  const boosted = new Set(bridge.concepts.flatMap((c) => c.sources ?? []));
+  const boostedDocs = bridge.concepts.flatMap((c) => c.docs ?? []);
   const pool = scored.slice(0, Math.max(limit * 8, 60));
 
   const ranked = pool
@@ -360,7 +382,12 @@ export function searchSections(index, byId, question, limit = 6) {
       const section = byId.get(id);
       if (!section) return null;
       const titleText = `${section.sourceTitle} ${docTitleWords(section.docPath)}`;
-      return { section, rank: score + titleAffinity(titleText, terms) * TITLE_BOOST };
+      // A nudge, not a override: enough to lift the canonical document into view when
+      // a concept names it, not enough to beat a strong direct match elsewhere.
+      const named =
+        (boostedDocs.some((d) => section.docPath.includes(d)) ? 4 : 0) +
+        (boosted.has(section.sourceId) ? 1.5 : 0);
+      return { section, rank: score + titleAffinity(titleText, terms) * TITLE_BOOST + named };
     })
     .filter(Boolean)
     .sort((a, b) => b.rank - a.rank);
@@ -375,6 +402,21 @@ export function searchSections(index, byId, question, limit = 6) {
     if (out.length >= limit) break;
   }
   return out;
+}
+
+/**
+ * Which curated concepts a question touches, and the terms they contribute.
+ *
+ * Substring matching on the raw question rather than on stems, because the triggers
+ * are phrases ("new ways of funding") and phrase structure is exactly what stemming
+ * throws away.
+ *
+ * @returns {{terms: string[], concepts: object[]}}
+ */
+export function matchConcepts(concepts, question) {
+  const q = String(question).toLowerCase();
+  const hit = (concepts ?? []).filter((c) => (c.triggers ?? []).some((t) => q.includes(String(t).toLowerCase())));
+  return { terms: hit.flatMap((c) => c.terms ?? []), concepts: hit };
 }
 
 /** Deep link to the exact heading on GOV.UK. */
