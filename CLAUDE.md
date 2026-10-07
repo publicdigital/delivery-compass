@@ -14,24 +14,24 @@ Node 24 only — uses built-in `node:sqlite` and native TypeScript execution. On
 runtime dependency (`yaml`). No build step, no API key.
 
 ```bash
-npm install && npm run compass -- ingest
+npm install && npm run refresh
 ```
+
+`refresh` = ingest, watch, export, test. Then preview the actual static site:
 
 ```bash
-npm run web
+npm run serve
 ```
 
-Deploying it for other people: **[DEPLOY.md](DEPLOY.md)**. One hosted instance behind
-a shared passcode, corpus baked into the image at build time, feedback on a volume.
+Deploying: **[DEPLOY.md](DEPLOY.md)**. Static files on Netlify behind HTTP Basic Auth,
+via the `publicdigital` prototype pathway. Pushing to `main` is the deploy.
 
 ```bash
-npm run verify   # corpus health; the deploy build gates on this
-npm run feedback # what users said, and what they asked that returned nothing
+npm test                                   # golden suite, both search engines
+npm run compass -- feedback import <csv>   # load a Netlify Forms export, then report
 ```
 
-`npm run compass -- <ingest|ask|watch|map|list|conflicts|expand>`
-
-Tests: `node --experimental-strip-types test/golden.test.ts`
+`npm run compass -- <ingest|ask|watch|map|list|conflicts|verify|feedback|expand>`
 
 ## Rules that matter
 
@@ -47,21 +47,28 @@ even on fresh pages, rather than letting an absent badge read as "checked, fine"
 logotype, no GDS Transport, no GOV.UK brand palette. It was built that way once and
 had to be de-branded. The UI carries an explicit "Unofficial" disclaimer — keep it.
 
-**Feedback is the one irreplaceable thing here.** It lives in its own database
-(`pipeline/feedback.ts`, `FEEDBACK_DB`), never in `corpus.db` — the corpus is a build
-artefact thrown away on every deploy. Every write is also mirrored to stdout as a JSON
-line so a lost volume is not a lost study. Do not merge the two databases.
+**Feedback is the one irreplaceable thing here.** On the hosted instance it goes to
+Netlify Forms (two forms, declared as hidden markup in `index.html` — Netlify finds
+them by parsing deployed HTML, so they must stay real elements). `compass feedback
+import` pulls a CSV export back into the local database so the reporting works on it.
+Never put feedback in `corpus.db`: the corpus is regenerated on every refresh.
 
-**A deployed instance must fail loudly, not quietly.** `compass verify` asserts corpus
-floors and that the FTS index is populated; the Docker build runs it and fails the
-deploy, and `/healthz` returns 503 on the same condition. The failure this exists to
-catch is a GOV.UK fetch that has silently started returning less — which otherwise
-looks like a healthy service that just answers fewer questions.
+**Questions are batched per session, not sent one by one.** The free tier allows 100
+form submissions a month. Batching keeps the denominator — how many questions were
+asked at all — which is what makes a zero-result count mean anything.
 
-**No inline `style=` attributes in `web/index.html`.** The server sends a nonce-based
-CSP, and a nonce cannot whitelist a style attribute. Inline styles are silently
-dropped in the browser; use a class. This was a real bug, caught only by reading the
-console.
+**There is no build step on the deploy.** The org workflow runs `netlify deploy --dir=.`
+over the repo as-is. That is why `assets/data/*.json` is committed, why the client is
+plain `.js` rather than TypeScript, and why the export refuses to write a corpus below
+its floors — that check is now the last line of defence, with no `/healthz` behind it.
+
+**One search implementation, not two.** `assets/search.js` is loaded unchanged by the
+browser and imported by the golden test in Node. `pipeline/search.ts` is kept only as
+the reference the suite compares against. Do not let them drift into two live engines.
+
+**No inline `style=` attributes or inline `<script>`/`<style>` in `index.html`.** The
+CSP in `netlify.toml` forbids both outright. Inline styles are silently dropped in the
+browser; use a class. This was a real bug, caught only by reading the console.
 
 **HTML-first ingestion.** Never parse the seed PDFs into the corpus. Several are
 CID-encoded and extract as garbage; two are print-outs of web pages. A source with no
@@ -79,9 +86,10 @@ GOV.UK models documents, not relationships, so nothing there is derivable. The
 pipeline fetches HTML via the GOV.UK Content API, splits on headings into anchored
 sections, extracts obligations by modal verb, and stores everything in one SQLite file
 with FTS5. `pipeline/conflicts.ts` proposes candidate cross-source conflicts for human
-review (`compass conflicts`); it does not curate them itself. The web UI serves three
-surfaces: Ask, Map, and Watch — all reading from the live-ingested corpus, nothing
-reads from a local file. (A fourth surface, "Your folder", compared the seed PDFs
+review (`compass conflicts`); it does not curate them itself. `pipeline/export-static.ts`
+then flattens all of it — including every query-independent enrichment — into
+`assets/data/*.json`, which is what the deployed site actually reads. The UI serves
+three surfaces: Ask, Map, and Watch. (A fourth surface, "Your folder", compared the seed PDFs
 against live GOV.UK; removed 2026-08-21 once the tool's aim settled on serving other
 people from live guidance, not comparing one person's local downloads. See
 HANDOVER.md §7.)

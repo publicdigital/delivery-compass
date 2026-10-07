@@ -1,0 +1,33 @@
+# Netlify configuration.
+#
+# There is no [build] section on purpose. The org deploy workflow runs
+# `netlify deploy --prod --dir=.` with no build step, so the repo is published
+# as-is. That is why assets/data/*.json is committed rather than generated in CI:
+# refreshing the corpus is `npm run refresh` locally, then commit and push.
+
+# Registered here rather than via inline `export const config`, which a bare
+# `netlify deploy` silently treats as a plain static asset. Covers /* so the
+# password also applies to the form endpoint, not just the pages.
+[[edge_functions]]
+  function = "basic-auth"
+  path = "/*"
+
+# The app has no inline scripts or styles, so the CSP can forbid both outright
+# rather than relying on nonces (which needed a server to generate them).
+# connect-src and form-action stay 'self': the only thing leaving the browser is
+# a feedback post back to this same origin.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+
+# The corpus is a build artefact refreshed by redeploy, so it may be cached hard
+# within a visit but must not be served stale after one.
+[[headers]]
+  for = "/assets/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

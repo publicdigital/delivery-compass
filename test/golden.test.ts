@@ -7,11 +7,22 @@
  * get right is never sending someone to the wrong document, and never presenting
  * superseded guidance without a warning - so the caveat expectations are strict.
  *
+ * It runs the cases twice:
+ *
+ *   static  - assets/search.js over the exported JSON. This is what a user actually
+ *             gets, so it is the one that has to pass. It needs only committed files,
+ *             so it still runs on a clean clone with no corpus.db.
+ *   sqlite  - the original FTS5 implementation, when corpus.db is present. Kept as a
+ *             reference point: the browser engine replaced it, and a silent drop in
+ *             agreement between the two is worth seeing before users do.
+ *
  * Run: node --experimental-strip-types test/golden.test.ts
  */
-import { openDb } from "../pipeline/db.ts";
+import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { caveatsFor, loadRelations } from "../pipeline/graph.ts";
-import { searchSections } from "../pipeline/search.ts";
+// @ts-expect-error - plain ES module, deliberately untyped so the browser loads it as-is
+import { buildIndex, searchSections as staticSearch } from "../assets/search.js";
 
 interface Case {
   q: string;
@@ -71,51 +82,97 @@ const CASES: Case[] = [
   { q: "what is a theory of change", expect: ["magenta-book"] },
 ];
 
-const db = openDb();
 const relations = loadRelations();
+const SECTIONS_JSON = fileURLToPath(new URL("../assets/data/sections.json", import.meta.url));
+const CORPUS_DB = fileURLToPath(new URL("../data/corpus.db", import.meta.url));
 
-let passed = 0;
-let caveatChecks = 0;
-let caveatPassed = 0;
-const failures: string[] = [];
+/** Run every case against one retrieval function and report. */
+function evaluate(label: string, lookup: (q: string) => string[]): { failures: string[]; sourcesByQ: Map<string, string[]> } {
+  let passed = 0;
+  let caveatChecks = 0;
+  let caveatPassed = 0;
+  const failures: string[] = [];
+  const sourcesByQ = new Map<string, string[]>();
 
-for (const c of CASES) {
-  const hits = searchSections(db, c.q, 5);
-  const sources = [...new Set(hits.map((h) => h.sourceId))];
-  const hit = c.expect.some((e) => sources.includes(e));
+  for (const c of CASES) {
+    const sources = lookup(c.q);
+    sourcesByQ.set(c.q, sources);
 
-  if (hit) {
-    passed++;
-  } else {
-    failures.push(`  MISS  "${c.q}"\n        expected one of [${c.expect.join(", ")}]\n        got [${sources.join(", ") || "nothing"}]`);
-  }
+    if (c.expect.some((e) => sources.includes(e))) {
+      passed++;
+    } else {
+      failures.push(`  MISS  "${c.q}"\n        expected one of [${c.expect.join(", ")}]\n        got [${sources.join(", ") || "nothing"}]`);
+    }
 
-  if (c.expectCaveatOn) {
-    const caveats = caveatsFor(sources, relations).map((x) => x.supersededSourceId);
-    for (const needed of c.expectCaveatOn) {
-      // Only meaningful if the stale source was actually returned.
-      if (!sources.includes(needed)) continue;
-      caveatChecks++;
-      if (caveats.includes(needed)) {
-        caveatPassed++;
-      } else {
-        failures.push(`  NO WARNING  "${c.q}" returned ${needed} without a supersession caveat`);
+    if (c.expectCaveatOn) {
+      const caveats = caveatsFor(sources, relations).map((x) => x.supersededSourceId);
+      for (const needed of c.expectCaveatOn) {
+        // Only meaningful if the stale source was actually returned.
+        if (!sources.includes(needed)) continue;
+        caveatChecks++;
+        if (caveats.includes(needed)) caveatPassed++;
+        else failures.push(`  NO WARNING  "${c.q}" returned ${needed} without a supersession caveat`);
       }
     }
   }
+
+  console.log(`\n${label}`);
+  console.log(`  Retrieval: ${passed}/${CASES.length} questions found an expected source in the top 5`);
+  console.log(`  Caveats:   ${caveatPassed}/${caveatChecks} superseded sources correctly flagged`);
+  if (caveatChecks === 0) {
+    failures.push(`  NO CAVEAT ASSERTIONS RAN in ${label} - the supersession path is untested, which is how a 0/0 pass hid a gap before.`);
+  }
+  return { failures, sourcesByQ };
 }
 
-console.log(`\nRetrieval: ${passed}/${CASES.length} questions found an expected source in the top 5`);
-console.log(`Caveats:   ${caveatPassed}/${caveatChecks} superseded sources correctly flagged`);
-if (caveatChecks === 0) {
-  failures.push("  NO CAVEAT ASSERTIONS RAN - the supersession path is untested, which is how a 0/0 pass hid a gap before.");
+// --- static engine: what a user actually gets --------------------------------
+if (!existsSync(SECTIONS_JSON)) {
+  console.error("assets/data/sections.json is missing. Run `npm run export` first.");
+  process.exit(1);
+}
+const sections = JSON.parse(readFileSync(SECTIONS_JSON, "utf8")) as { id: number; sourceId: string }[];
+const index = buildIndex(sections);
+const byId = new Map(sections.map((s) => [s.id, s]));
+const staticRun = evaluate("static (assets/search.js over exported JSON — what ships)", (q) =>
+  [...new Set((staticSearch(index, byId, q, 5) as { sourceId: string }[]).map((h) => h.sourceId))],
+);
+
+// --- sqlite engine: reference, only when the database is present -------------
+let sqliteRun: ReturnType<typeof evaluate> | null = null;
+if (existsSync(CORPUS_DB)) {
+  const { openDb } = await import("../pipeline/db.ts");
+  const { searchSections: sqliteSearch } = await import("../pipeline/search.ts");
+  const db = openDb();
+  sqliteRun = evaluate("sqlite (pipeline/search.ts over corpus.db — reference)", (q) =>
+    [...new Set(sqliteSearch(db, q, 5).map((h) => h.sourceId))],
+  );
+  db.close();
+
+  // Agreement is reported, never asserted. The two engines rank differently by
+  // construction, and the cases above are the actual contract; this number exists
+  // so a large divergence is visible rather than discovered by a user.
+  let overlap = 0;
+  let union = 0;
+  for (const c of CASES) {
+    const a = new Set(staticRun.sourcesByQ.get(c.q) ?? []);
+    const b = new Set(sqliteRun.sourcesByQ.get(c.q) ?? []);
+    for (const s of a) if (b.has(s)) overlap++;
+    union += new Set([...a, ...b]).size;
+  }
+  console.log(`\nAgreement: ${Math.round((overlap / Math.max(union, 1)) * 100)}% of returned sources are common to both engines.`);
+} else {
+  console.log("\nsqlite reference skipped — data/corpus.db not present (expected on a clean clone).");
 }
 
+// Only the static engine gates: it is the one users hit.
+const failures = staticRun.failures;
 if (failures.length) {
   console.log(`\n${failures.join("\n")}`);
 } else {
-  console.log("\nAll cases passed.");
+  console.log("\nAll cases passed against the engine that ships.");
 }
-db.close();
+if (sqliteRun?.failures.length) {
+  console.log(`\nReference engine also has failures (not gating):\n${sqliteRun.failures.join("\n")}`);
+}
 
 process.exitCode = failures.length > 0 ? 1 : 0;

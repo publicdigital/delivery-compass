@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delivery Compass</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="An unofficial prototype for navigating UK government delivery guidance.">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<header><div class="wrap">
+  <strong>Delivery Compass</strong>
+  <span>An unofficial navigator for UK government delivery guidance &mdash; prototype, shared for feedback</span>
+</div></header>
+
+<nav><div class="wrap" role="tablist">
+  <button role="tab" data-panel="ask" aria-selected="true">Ask</button>
+  <button role="tab" data-panel="map" aria-selected="false">Map</button>
+  <button role="tab" data-panel="watch" aria-selected="false">Watch</button>
+</div></nav>
+
+<main class="wrap">
+  <div class="stats" id="stats"><div class="loading">Loading corpus statistics&hellip;</div></div>
+
+  <details class="limits" open>
+    <summary>Before you rely on anything here &mdash; what this does and does not tell you</summary>
+    <ul>
+      <li><strong>It quotes, it never interprets.</strong> Every requirement shown is the source&rsquo;s own sentence, cited to the exact heading. There is no model writing summaries.</li>
+      <li><strong>It covers a curated list of sources, not all government guidance.</strong> If a question returns nothing, that is a gap in this corpus &mdash; not evidence that no rule exists.</li>
+      <li><strong>Conflict and supersession warnings are hand-curated and incomplete.</strong> The absence of a warning does not mean two documents agree. Unverified candidates are marked as such.</li>
+      <li><strong>Dates are the publisher&rsquo;s, not a currency guarantee.</strong> Every quote carries the date of the page it came from, deliberately even when recent. Confirm against the linked source.</li>
+      <li><strong>It is a prototype.</strong> Tell me where it is wrong or useless &mdash; the form at the bottom of this page goes straight to whoever is building it.</li>
+    </ul>
+  </details>
+
+  <section class="panel active" id="panel-ask">
+    <h1>Ask</h1>
+    <p class="lede">Answers are quoted from the guidance, never paraphrased, and always cited to the exact section. Mandatory requirements are separated from recommendations. The strongest matches show enough of the source text to read as a narrative; weaker matches link straight through instead.</p>
+    <form id="ask-form">
+      <input type="search" id="q" placeholder="e.g. when do I need a service assessment?" aria-label="Your question">
+      <button class="primary" type="submit">Search</button>
+    </form>
+    <p class="examples">Try:
+      <button data-q="who approves digital spending in my department">who approves digital spending</button>
+      <button data-q="when do I need a service assessment">service assessments</button>
+      <button data-q="what must an SRO do">the SRO role</button>
+      <button data-q="how do I set risk appetite">risk appetite</button>
+      <button data-q="what goes in the economic case">the economic case</button>
+    </p>
+    <div id="ask-results"></div>
+  </section>
+
+  <section class="panel" id="panel-map">
+    <h1>Map</h1>
+    <p class="lede">Who owns what, and how the pieces connect. The fragmentation is the point: no single body coordinates this, so the map is the only place the whole picture exists.</p>
+    <div id="map-results" class="loading">Loading&hellip;</div>
+  </section>
+
+  <section class="panel" id="panel-watch">
+    <h1>Watch</h1>
+    <p class="lede">Change notes in the publisher&rsquo;s own words, newest first, across every registered source.</p>
+    <div id="watch-results" class="loading">Loading&hellip;</div>
+  </section>
+
+  <section class="fb" id="feedback">
+    <h2>Tell me if this is any use</h2>
+    <p class="lede">This is a prototype being tested with a handful of delivery people. What you could not find matters as much as what you could.</p>
+    <form id="fb-form">
+      <label for="fb-comment">What were you trying to find out, and did you get there?
+        <span class="hint">Anything at all &mdash; a missing source, a wrong answer, a question you expected it to handle.</span></label>
+      <textarea id="fb-comment" required></textarea>
+      <div class="row">
+        <div>
+          <label for="fb-role">Your role <span class="hint">Optional. Helps me tell a PMO reader from an SRO.</span></label>
+          <input type="text" id="fb-role" autocomplete="off" placeholder="e.g. delivery manager, DDaT">
+        </div>
+        <div>
+          <label for="fb-contact">Contact <span class="hint">Optional. Only if you are happy to be asked a follow-up.</span></label>
+          <input type="text" id="fb-contact" autocomplete="off" placeholder="email or Teams name">
+        </div>
+      </div>
+      <p><button class="primary" type="submit">Send feedback</button></p>
+      <p class="status" id="fb-status" role="status"></p>
+    </form>
+    <p class="privacy"><strong>What gets recorded:</strong> the questions typed into Ask (with how many results came back), and whatever you write above. No accounts, no analytics, no cookies beyond the one that lets you past the passcode, and no IP addresses stored. A random id generated in this tab, forgotten when you close it, is used only to tell one person asking five questions from five people asking one.</p>
+  </section>
+
+  <p class="footer-note">
+    <strong>Unofficial.</strong> Not affiliated with, endorsed by, or published by GOV.UK or any government department.
+    A navigation aid, not an authority &mdash; always confirm against the linked source before relying on anything here.
+    Quoted content is Crown copyright, reused under the Open Government Licence v3.0 except where a source states otherwise.
+  </p>
+</main>
+
+<!-- Netlify Forms declarations.
+     Netlify discovers forms by parsing deployed HTML at deploy time, so these must
+     exist as real markup even though every submission is sent by JavaScript. They are
+     hidden from users and from assistive technology; the visible feedback form above
+     posts into "compass-feedback".
+
+     Two forms, because they have very different volumes. Ratings and comments are
+     one-per-answer at most. Questions are logged in per-session batches instead of one
+     submission each: the free tier allows 100 submissions a month, and logging every
+     question separately would exhaust that in a single enthusiastic session while
+     losing nothing but the batching. -->
+<form name="compass-feedback" netlify netlify-honeypot="bot-field" hidden aria-hidden="true">
+  <input type="text" name="bot-field">
+  <input type="text" name="kind"><input type="text" name="useful"><input type="text" name="question">
+  <textarea name="comment"></textarea><input type="text" name="role"><input type="text" name="contact">
+  <input type="text" name="surface"><input type="text" name="session"><input type="text" name="at">
+</form>
+<form name="compass-queries" netlify netlify-honeypot="bot-field" hidden aria-hidden="true">
+  <input type="text" name="bot-field">
+  <input type="text" name="session"><input type="text" name="count">
+  <textarea name="queries"></textarea><input type="text" name="zeroResults"><input type="text" name="at">
+</form>
+
+<script type="module" src="assets/app.js"></script>
+</body>
+</html>

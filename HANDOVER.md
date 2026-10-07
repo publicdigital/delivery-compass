@@ -461,3 +461,70 @@ If serving through this repo's dev-preview tooling rather than a plain terminal:
 deliberately — a relative path made Node call `process.cwd()` during module
 resolution, which some sandboxes deny. `pipeline/cli.ts` and `web/server.ts` compute
 their seed-folder default the same cwd-free way, via `import.meta.url`.
+
+---
+
+## Session 7 — 2026-10-07 — moved to hosting for user testing
+
+The ask: get this somewhere standalone so real people can test it.
+
+**Decision taken: reshape for the org's Netlify pathway**, rather than deploy the Node
+server as built on Fly. Both were offered. The Fly route was ready — Dockerfile,
+fly.toml and a written DEPLOY.md — but Netlify won on being the org standard, free,
+zero local tooling, auto-deploying on push, and inside the prototype fleet audit
+alongside Contract Radar. Switch-off date set to the 100-day maximum, 2027-01-15.
+
+The cost of that choice was real and was paid in this session: the org's hosting is
+static files plus short-lived functions, and Delivery Compass was a persistent Node
+server with SQLite, FTS5, a signed session cookie and a feedback database. Three of the
+five rows in the org's "doesn't work" table.
+
+### What changed
+
+- **Retrieval moved into the browser.** `assets/search.js` is a plain ES module
+  implementing a Porter stemmer, BM25 with the same field weights (heading ×3, text ×1)
+  and the same title-affinity blend (×8) as the FTS5 version. It is loaded unchanged by
+  the browser *and* imported by the golden test, so the suite exercises what ships.
+  Index build is ~370ms over 3,279 sections; a query is ~0.4ms.
+- **The corpus is committed as JSON.** `pipeline/export-static.ts` flattens SQLite into
+  `assets/data/` (1.2MB gzipped), precomputing everything that does not depend on the
+  question: confirmed conflicts per source, candidate conflicts per obligation, section
+  formatting, the map graph, the change feed. The deploy has no build step —
+  `netlify deploy --dir=.` publishes the repo as-is — so this had to be in git.
+- **Feedback moved to Netlify Forms.** No functions: the deploy never runs `npm install`,
+  so a function importing `@netlify/blobs` would not bundle. Questions are batched per
+  session because the free tier allows 100 submissions a month.
+  `compass feedback import <csv>` loads an export back into the local database so the
+  existing analysis commands still work.
+- **Removed**: `web/server.ts`, `web/index.html`, `Dockerfile`, `fly.toml`,
+  `render.yaml`, `docker/`. All recoverable at commit `9bc13f8` if the Fly route is
+  ever wanted back.
+
+### Did the rewrite damage retrieval?
+
+No. Both engines pass 21/21 on the golden set. They agree on only 51% of returned
+sources, which sounds alarming and is not: spot-checking showed the browser engine
+returning a *better* top hit twice (asked for "theory of change" it returns the section
+titled "Theory of change"; SQLite returned a climate-appraisal page) and spreading
+across more relevant sources where SQLite returned the same source four times. The
+suite now runs both and reports agreement rather than asserting it.
+
+### What is NOT done
+
+- **The deploy has not succeeded yet.** The workflow needs a `NETLIFY_AUTH_TOKEN`
+  repository secret, pushed in by a bridge workflow in `claude-prototype-deploy` that
+  requires admin rights on that repo. `olilovell` has read access only, so the dispatch
+  returned 403. One admin action unblocks it — see the end of DEPLOY.md for the exact
+  ask and the manual alternative. Until then every push fails at the Netlify step.
+- **Nobody has been invited.** Same as after session 6. That remains Oli's to do.
+- **The conflict sweep is still untriaged.** `compass conflicts 20` proposes candidates;
+  none have been confirmed into `relations.yaml` in seven sessions. It matters more now
+  that strangers will read the tool's silence as meaning something.
+
+### Judgement worth keeping
+
+Feedback now sits with Netlify rather than on a single volume reachable only with an
+admin token. That is a wider blast radius for free-text written by government staff,
+and it is the price of this hosting rather than an improvement. It is fine at the scale
+agreed — a handful of invited testers — and is flagged in DEPLOY.md as the thing to
+revisit if this widens.

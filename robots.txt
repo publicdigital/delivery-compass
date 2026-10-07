@@ -1,0 +1,4 @@
+# Unofficial prototype, shared with a handful of named testers. Not for indexing.
+# The site also sits behind HTTP Basic Auth, so this is belt and braces.
+User-agent: *
+Disallow: /

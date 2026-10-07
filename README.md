@@ -18,11 +18,11 @@ npm install
 ```
 
 ```bash
-npm run compass -- ingest
+npm run refresh
 ```
 
 ```bash
-npm run web
+npm run serve
 ```
 
 Then open http://localhost:3000.
@@ -142,3 +142,12 @@ node --experimental-strip-types test/classify.test.ts
 GOV.UK content is Crown copyright under the Open Government Licence v3.0. Each
 registry entry records its own `licence`; NAO material is marked
 `redistribute: false` and is linked only.
+
+## Hosted instance
+
+Deployed through the `publicdigital` prototype pathway: static files on Netlify behind
+HTTP Basic Auth, with feedback in Netlify Forms. Pushing to `main` is the deploy.
+There is no build step, so the exported corpus under `assets/data/` is committed.
+
+Full detail, including how to refresh the corpus and read the feedback:
+**[DEPLOY.md](DEPLOY.md)**. Switch-off date: **2027-01-15**.

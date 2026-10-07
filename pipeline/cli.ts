@@ -9,6 +9,7 @@ import { findConflictCandidates } from "./conflicts.ts";
 import { loadRegistry } from "./registry.ts";
 import { checkCorpus } from "./verify.ts";
 import { feedbackSummary, listFeedback, queryReport, toCsv } from "./feedback.ts";
+import { importCsv } from "./import-feedback.ts";
 
 const BOLD = "\x1b[1m", DIM = "\x1b[2m", RESET = "\x1b[0m";
 const RED = "\x1b[31m", YELLOW = "\x1b[33m", GREEN = "\x1b[32m", CYAN = "\x1b[36m";
@@ -265,7 +266,20 @@ async function cmdVerify(): Promise<void> {
   console.log(`${GREEN}Corpus is healthy enough to serve.${RESET}`);
 }
 
-async function cmdFeedback(arg?: string): Promise<void> {
+async function cmdFeedback(arg?: string, file?: string): Promise<void> {
+  // The hosted instance writes to Netlify Forms, not to this database. Importing an
+  // export is how the two meet, so the reporting below works on hosted data too.
+  if (arg === "import") {
+    if (!file) {
+      console.error("usage: compass feedback import <netlify-export.csv>");
+      console.error("Download it from the Netlify dashboard: Forms > compass-feedback / compass-queries > Export CSV.");
+      process.exit(1);
+    }
+    const r = importCsv(file);
+    console.log(`Imported ${r.feedback} submission(s) and ${r.queries} question(s)${r.skipped ? `, skipped ${r.skipped} empty or unparseable row(s)` : ""}.`);
+    console.log(`${DIM}Re-importing a later export is safe; only new rows are added.${RESET}\n`);
+    // Fall through to the summary, which is what you actually wanted to see.
+  }
   if (arg === "csv") { process.stdout.write(toCsv(listFeedback(10000) as unknown as Record<string, unknown>[])); return; }
   if (arg === "queries") { process.stdout.write(toCsv(queryReport(10000) as unknown as Record<string, unknown>[])); return; }
 
@@ -299,6 +313,7 @@ async function cmdFeedback(arg?: string): Promise<void> {
     for (const q of served) console.log(`  ${String(q.sessions).padStart(3)} browser(s)  ${q.q}`);
   }
   console.log(`\n${DIM}compass feedback csv | compass feedback queries  - full export to stdout${RESET}`);
+  console.log(`${DIM}compass feedback import <csv>                    - load a Netlify Forms export${RESET}`);
 }
 
 const [cmd, ...args] = process.argv.slice(2);
@@ -311,7 +326,7 @@ switch (cmd) {
   case "conflicts": await cmdConflicts(args[0]); break;
   case "expand": await cmdExpand(args[0]); break;
   case "verify": await cmdVerify(); break;
-  case "feedback": await cmdFeedback(args[0]); break;
+  case "feedback": await cmdFeedback(args[0], args[1]); break;
   default:
     console.log(`Delivery Compass
 
@@ -324,5 +339,6 @@ switch (cmd) {
   compass expand <slug>      expand a GOV.UK collection into member documents
   compass verify             assert the corpus is healthy enough to serve (exit 1 if not)
   compass feedback [csv|queries]  what users said, and what they asked that missed
+  compass feedback import <csv>   load a Netlify Forms export into the local database
 `);
 }

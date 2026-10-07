@@ -1,7 +1,11 @@
 node_modules/
 data/*.db
+# SQLite writes -wal and -shm alongside the database; they hold real rows and were
+# caught being staged once, because "*.db" does not match them.
+data/*.db-*
 data/cache/
 .env
 
-# Feedback captured by a deployed instance. Lives on the host's volume, never in git.
+# Feedback captured by a deployed instance. Lives in Netlify Forms, never in git.
 feedback.db
+feedback.db-*

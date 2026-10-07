@@ -1,200 +1,160 @@
 # Deploying Delivery Compass
 
-This turns the local prototype into one hosted instance that a handful of delivery
-people can open in a browser, use, and leave feedback on. It is deliberately a
-research instance, not a service: one machine, a shared passcode, and a bias towards
-learning whether Ask/Map/Watch are the right three surfaces at all
-(HANDOVER.md §7, step 1).
+One hosted instance, behind a password, for a handful of invited delivery people to
+use and leave feedback on. It is a research instance, not a service.
 
-## What gets deployed, and what does not
+It is deployed through the `publicdigital` prototype pathway: a repo with the
+`claude-prototype` topic, a GitHub Action that publishes to Netlify on every push to
+`main`, and HTTP Basic Auth on every request.
 
-- **The corpus is baked into the container image**, re-ingested from GOV.UK during the
-  build. Nothing is fetched on boot, so a cold start is fast and a new machine does
-  not re-hammer the Content API. The build runs `compass verify` and **fails** if the
-  corpus comes out below its floors — a GOV.UK fetch that has silently started failing
-  breaks the deploy instead of quietly shipping half a corpus.
-- **Feedback lives on a mounted volume**, in its own `feedback.db`, separate from the
-  corpus. A redeploy replaces the corpus and leaves the feedback alone. Every
-  submission is also written to the platform log as a JSON line, so there are two
-  copies of the one thing here that cannot be regenerated.
-- **No seed PDFs, no local files.** Nothing served depends on anything on your laptop.
-- **No analytics, no third-party anything.** The container talks to GOV.UK at build
-  time and to nobody at run time.
+## How it is put together
 
-## Prerequisites
+The site is **static files plus Netlify Forms**. There is no server.
 
-Just the Fly CLI — the build happens on Fly's remote builder, so you do not need
-Docker locally.
+That is a deliberate consequence of the hosting, not a preference. The org's
+prototype hosting is a static site plus short-lived serverless functions — no
+persistent process, no server-side sessions, no database inside the prototype. The
+original build was a Node server with SQLite and FTS5, so moving here meant:
 
-```bash
-brew install flyctl && fly auth signup
-```
+| Was | Now |
+| --- | --- |
+| FTS5 search in SQLite, per request | The corpus ships as JSON; the search index is built in the browser on load (~400ms) and queries run in under a millisecond |
+| Corpus baked into a container at build time | Corpus exported to `assets/data/` and **committed to the repo** — the deploy has no build step |
+| Signed session cookie behind a shared passcode | HTTP Basic Auth in a Netlify Edge Function |
+| Feedback in its own SQLite database on a volume | Netlify Forms, pulled back out as CSV |
+| `/healthz` returning 503 on a thin corpus | `npm run export` refuses to write a corpus below its floors |
 
-## First deploy
-
-Pick your own app name first: they are globally unique, so `delivery-compass` is
-probably taken. Edit `app = "..."` in `fly.toml`, then:
-
-```bash
-fly launch --no-deploy --copy-config --name your-app-name --region lhr
-```
-
-Create the volume the feedback database sits on (1GB is far more than enough; it is
-the smallest size Fly sells):
-
-```bash
-fly volumes create compass_data --region lhr --size 1
-```
-
-Set the secrets. Generate real random values rather than choosing memorable ones —
-the passcode is the only thing between the instance and the open internet:
-
-```bash
-fly secrets set ACCESS_CODE="$(openssl rand -base64 12)" ADMIN_TOKEN="$(openssl rand -hex 24)" SESSION_SECRET="$(openssl rand -hex 32)"
-```
-
-Read them back, because you need to hand the passcode to your testers and keep the
-admin token to yourself:
-
-```bash
-fly ssh console -C "printenv ACCESS_CODE ADMIN_TOKEN"
-```
-
-Deploy, with a fresh corpus:
-
-```bash
-fly deploy --build-arg CORPUS_REFRESH="$(date -u +%FT%H%M)"
-```
-
-Then check it came up healthy before you send the link to anyone:
-
-```bash
-curl -s https://your-app-name.fly.dev/healthz | python3 -m json.tool
-```
-
-`"ok": true` means the corpus cleared its floors and the search index is populated.
-A 503 means the process is serving but the corpus is thin — read `failures` in the
-response, and do not share the link yet.
-
-## Environment variables
-
-| Variable | Effect if unset | Notes |
-| --- | --- | --- |
-| `ACCESS_CODE` | **Instance is open to anyone with the URL** | Shared passcode. Set it. |
-| `ADMIN_TOKEN` | `/admin` returns 404 and no export exists | Long random string. Never share it with testers. |
-| `SESSION_SECRET` | Derived from `ACCESS_CODE` | Set it explicitly so rotating the passcode does not sign everyone out mid-session. |
-| `FEEDBACK_DB` | `data/feedback.db` inside the app directory | Point at the volume (`/data/feedback.db`) or feedback dies with the container. |
-| `COMPASS_DB` | the corpus in the image | Only needed to serve a corpus from somewhere other than the image. |
-| `PORT` / `HOST` | `3000` / `0.0.0.0` | Fly sets these via `fly.toml`. |
-
-The `/healthz` and `/robots.txt` endpoints are deliberately outside the passcode gate;
-`/admin` is deliberately outside it too, because a tester holding the passcode is not
-an administrator. `/admin` returns 404 rather than 401 for a bad token, so its
-existence is not advertised.
+The retrieval rewrite is the part worth knowing about. `assets/search.js` reimplements
+BM25 with the same field weights and the same title-affinity blend, and the golden
+suite runs **both** engines so a divergence shows up in a test rather than in front of
+a user. See "Checking retrieval still holds" below.
 
 ## Refreshing the corpus
 
-The deployed corpus is only as current as the last build. To refresh it, rebuild:
+The deployed corpus is only as current as the last commit. There is no build step on
+the deploy, so refreshing it is a local job:
 
 ```bash
-fly deploy --build-arg CORPUS_REFRESH="$(date -u +%FT%H%M)"
+npm run refresh
 ```
 
-Without that build arg Docker will reuse the cached corpus layer and you will
-redeploy the same corpus you already had. The build re-runs `ingest`, `watch` and
-`verify`, so a refresh also updates the Watch surface and re-checks corpus health.
+That runs ingest, watch, export and the golden suite in order. Then commit the changed
+JSON under `assets/data/` and push — the push is the deploy.
 
-Worth doing weekly at most while this is under test. Every build is a full polite
-crawl of GOV.UK; there is no value in hammering it for a prototype nobody is
-depending on yet.
+```bash
+git add assets/data && git commit -m "Refresh corpus" && git push
+```
+
+Worth doing weekly at most while this is under test. Every ingest is a full polite
+crawl of GOV.UK; there is no value in hammering it for a prototype nobody depends on.
+
+If `npm run export` refuses to write, that is the floors check doing its job — read
+the ingest output above it for a source that has started returning something other
+than HTML. Do not lower the floors in `pipeline/verify.ts` to get a clean export.
 
 ## Reading the feedback
 
-Three routes to the same data, in order of convenience:
+Two forms collect it, and both are in the Netlify dashboard under **Forms**:
 
-1. **In a browser**: `https://your-app-name.fly.dev/admin?token=<ADMIN_TOKEN>` — a
-   private page with the counts, the comments, and the questions that came back with
-   nothing. Two CSV download links on it.
-2. **On the command line**, against the live instance:
+- **`compass-feedback`** — one row per rating or written comment.
+- **`compass-queries`** — one row per session, holding a JSON array of every question
+  asked and how many results each returned. Questions are batched per session rather
+  than sent one at a time because the free tier allows 100 submissions a month; one
+  engaged tester would otherwise spend a fifth of that in a single sitting.
 
-```bash
-fly ssh console -C "sh -c 'cd /app && node --experimental-strip-types pipeline/cli.ts feedback'"
-```
-
-3. **Pull the database down** and query it locally, which is what you want before
-   writing anything up:
+Export both as CSV, then load them into the local database so the analysis commands
+work on them:
 
 ```bash
-fly ssh sftp get /data/feedback.db ./feedback.db
+npm run compass -- feedback import ~/Downloads/compass-queries.csv
 ```
 
-```bash
-FEEDBACK_DB=./feedback.db npm run compass -- feedback
-```
+Re-importing a later export is safe — only new rows are added.
 
 **What to look at first.** Not the ratings. The **questions that returned nothing**,
 and the **questions rated "no" or "partly"** with the comment attached. Those are the
-registry's to-do list written by the people you are trying to serve, and they are the
-evidence for whether Ask/Map/Watch are the right surfaces. A search returning
-*something* is weak evidence it returned the *right* thing — FTS matches on any term,
-so a nonsense question can still find six sections.
+registry's to-do list written by the people you are trying to serve. A search
+returning *something* is weak evidence it returned the *right* thing.
+
+## Checking retrieval still holds
+
+```bash
+npm test
+```
+
+Runs 21 hand-marked questions against the engine that ships, and — when `data/corpus.db`
+is present — against the original SQLite engine too, reporting how much the two agree.
+Only the shipping engine gates the result. Agreement sat at 51% when the engines were
+swapped: they rank differently, and on spot checks the browser engine was the better
+of the two, so the number is reported rather than asserted. A sudden collapse in it is
+still worth a look.
 
 ## What to tell the people you invite
 
 Say all four of these, because the interface only says the first three:
 
 - It is unofficial, unfinished, and quotes guidance verbatim rather than interpreting it.
-- If it finds nothing, that is a gap in a curated corpus of 41 sources — not evidence
-  that no rule exists.
+- If it finds nothing, that is a gap in a curated corpus — not evidence that no rule exists.
 - The absence of a conflict warning does not mean two documents agree. Conflict
   curation is incomplete and known to be.
 - **The questions they type are recorded**, along with anything they write in the
   form. That is the point of the instance. Nothing else is: no accounts, no analytics,
-  no IP addresses stored, and the only cookie is the one that gets them past the
-  passcode.
+  no IP addresses stored, and no cookies.
 
 ## Data protection
 
 Personal data is collected only where someone volunteers it: the optional role and
-contact fields. Questions and comments are free text, so treat the database as
-capable of containing anything a user chose to type. It is stored on a single
-encrypted-at-rest Fly volume in London, reachable only with the admin token, and
-there is no export to anywhere else. If you widen this beyond a handful of invited
-testers, that is the point at which it needs a retention period and a line in a
-privacy notice rather than a paragraph here.
+contact fields. Questions and comments are free text, so treat the stored submissions
+as capable of containing anything a user chose to type. They sit in Netlify Forms
+under the Public Digital team, reachable by whoever can see that Netlify account.
 
-## Cost
+Note the change from the previous design: feedback used to live on a single volume
+reachable only with an admin token. It is now held by Netlify. That is a wider blast
+radius for the same data, and it is the price of this hosting. If this widens beyond a
+handful of invited testers, that is the point at which it needs a retention period and
+a line in a privacy notice rather than a paragraph here.
 
-Roughly the price of a coffee per month. A `shared-cpu-1x` 512MB machine that scales
-to zero between visits plus a 1GB volume lands in low single-digit dollars while a
-prototype is being tested by a handful of people. Fly's current pricing is the
-authority, not this file.
+## Switch-off
 
-## Alternatives
+`PROTOTYPE.yml` records a switch-off date of **2027-01-15**, 100 days after creation
+and the org maximum. A daily org-wide audit reports prototypes that are due or
+overdue. It does not disable anything — it is a commitment to go and turn this off:
+delete the Netlify site, and archive or delete the repo.
 
-- **Render**: `render.yaml` is included. The persistent disk needs a paid instance
-  type; on the free tier the feedback database is wiped on every deploy.
-- **Any VPS or container host**: `docker build . && docker run -p 8080:8080 -v ...`
-  works with the same environment variables. Terminate TLS in front of it — the
-  access cookie is only marked `Secure` when the proxy sets `X-Forwarded-Proto: https`.
+## First deploy, and the one thing that is not automatic
 
-## Troubleshooting
+Pushing to `main` triggers `.github/workflows/deploy.yml`, which calls the org's
+reusable workflow. On the very first run it creates the Netlify site, then commits
+`.netlify/state.json` back so later deploys reuse it.
 
-**The build fails at `compass verify`.** That is the check doing its job. Read the
-ingest output above it: a source that used to return HTML and now returns a PDF, or a
-Content API response shape that has changed. Fix the registry or the fetcher; do not
-lower the floors in `pipeline/verify.ts` to get a green build.
+That workflow needs a `NETLIFY_AUTH_TOKEN` repository secret, which is normally pushed
+in automatically by the `provision-prototype-secret.yml` bridge in
+`publicdigital/claude-prototype-deploy`. **Dispatching that bridge needs admin rights
+on that repo**, which the author of this prototype does not have, so it could not be
+triggered here. Until the secret exists, the deploy workflow fails at the Netlify step.
 
-**`/healthz` returns 503 but the site loads.** The corpus is below its floors. The app
-serves anyway rather than showing nothing, but it will answer fewer questions than it
-should.
+Either:
 
-**Feedback disappears after a deploy.** `FEEDBACK_DB` is not pointing at the volume,
-or the volume did not mount. Check `fly volumes list` and the `[[mounts]]` block. The
-log-mirrored copies are your fallback: `fly logs | grep '"evt":"feedback"'`.
+1. Ask an admin to run the bridge — in `claude-prototype-deploy`, Actions →
+   "Provision prototype secret" → Run workflow, with `repo` set to `delivery-compass`
+   (the bare name, no `publicdigital/` prefix); or
+2. Add the secret by hand — create a Netlify personal access token (Netlify → User
+   settings → Applications → Personal access tokens) and add it to this repo as
+   `NETLIFY_AUTH_TOKEN` under Settings → Secrets and variables → Actions.
 
-**Testers are asked for the passcode repeatedly.** `SESSION_SECRET` is unset and the
-passcode changed, or the machine restarted with a derived secret. Set it explicitly.
+Then re-run the failed job, or Actions → Deploy → Run workflow. No new commit is needed.
 
-**Everyone gets 404 on `/admin`.** `ADMIN_TOKEN` is unset, or the token in the URL
-does not match. Both look identical from outside, on purpose.
+Two further things to check on that first deploy, both known failure modes of this
+pathway rather than of this prototype:
+
+- If the site loads but shows Netlify's own "sign in" gate instead of a browser
+  password box, that is Netlify's Project visibility feature sitting in front of the
+  Edge Function. Fix it once in Project configuration → General → Visitor access.
+- If the site loads with **no** password prompt at all, check the deploy log for a
+  "Bundling edge functions" line. Its absence means `netlify.toml` did not reach the
+  repo root, and the auth function deployed as an inert static file.
+
+## Credentials
+
+Generated per prototype and stored nowhere else — see the session that created this
+repo, or reset them by editing `netlify/edge-functions/basic-auth.ts` and pushing.

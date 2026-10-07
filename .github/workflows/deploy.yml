@@ -1,0 +1,21 @@
+name: Deploy
+
+# Thin caller workflow. All the actual deploy logic lives in the reusable
+# workflow over in claude-prototype-deploy — this file just triggers it on
+# every push to main and passes secrets through via `secrets: inherit`.
+# This works without ever exposing NETLIFY_AUTH_TOKEN to this repo's
+# contributors because it's a repository secret pushed here automatically
+# at repo-creation time by claude-prototype-deploy's
+# provision-prototype-secret.yml bridge workflow (see docs/ADMIN-SETUP.md
+# in claude-prototype-deploy) — inherit just forwards it, nothing here can
+# read its value.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    uses: publicdigital/claude-prototype-deploy/.github/workflows/deploy-prototype.yml@main
+    secrets: inherit

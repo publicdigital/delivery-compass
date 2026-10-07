@@ -1,0 +1,122 @@
+/* Delivery Compass.
+   Deliberately NOT GOV.UK branding: this does not run on a GOV.UK domain, so it must
+   not borrow the crown, the logotype, GDS Transport, or the GOV.UK brand palette -
+   that would imply official status it does not have. Structure and accessibility
+   follow GDS practice; the visual identity does not.
+
+   Extracted from an inline <style> when the app moved to static hosting. The old
+   server injected a CSP nonce; static hosting sets a stricter CSP in netlify.toml
+   instead, which needs every style and script to be an external file. */
+
+:root {
+  --black:#14171a; --grey1:#5c666d; --grey3:#f2f3f4; --border:#c3c8cb;
+  --blue:#2b5f8f; --red:#a8271b; --amber:#8a5200; --green:#1e6b3a; --purple:#584594;
+  --focus:#ffd23f;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--black);background:#fff;line-height:1.45}
+a{color:var(--blue)}
+a:focus{background:var(--focus);color:var(--black);outline:3px solid var(--focus)}
+header{background:#fff;color:var(--black);padding:16px 0;border-bottom:3px solid var(--black)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+header .wrap{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+header strong{font-size:1.4rem}
+header span{color:var(--grey1);font-size:.9rem}
+nav{background:var(--grey3);border-bottom:1px solid var(--border)}
+nav .wrap{display:flex;gap:0;flex-wrap:wrap}
+nav button{background:none;border:0;border-bottom:4px solid transparent;padding:14px 18px;font-size:1rem;cursor:pointer;font-family:inherit;color:var(--black)}
+nav button[aria-selected="true"]{border-bottom-color:var(--blue);font-weight:700;background:#fff}
+nav button:focus{background:var(--focus);outline:3px solid var(--focus)}
+main{padding:28px 0 60px}
+h1{font-size:1.9rem;margin:0 0 6px}
+h2{font-size:1.25rem;margin:28px 0 10px}
+.lede{color:var(--grey1);margin:0 0 22px;max-width:60ch}
+.panel{display:none}
+.panel.active{display:block}
+form{display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+input[type=search]{flex:1;min-width:260px;padding:10px;font-size:1.05rem;border:2px solid var(--black);font-family:inherit}
+input:focus{outline:3px solid var(--focus);border-color:var(--black)}
+button.primary{background:var(--green);color:#fff;border:0;padding:10px 20px;font-size:1.05rem;cursor:pointer;box-shadow:0 2px 0 #002d18;font-family:inherit}
+button.primary:hover{background:#005a30}
+.examples{margin:0 0 22px;font-size:.9rem;color:var(--grey1)}
+.examples button{background:none;border:0;color:var(--blue);text-decoration:underline;cursor:pointer;padding:2px 4px;font-family:inherit;font-size:.9rem}
+.card{border-left:5px solid var(--border);padding:12px 16px;margin:0 0 16px;background:#fff}
+.card.mandatory{border-left-color:var(--red);background:#fef7f7}
+.card.recommended{border-left-color:var(--amber);background:#fff9f4}
+.card.warn{border-left-color:var(--red);background:#fef7f7}
+.card.section{border-left-color:var(--blue);background:var(--grey3)}
+.tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;color:#fff;margin-right:6px}
+.tag.mandatory{background:var(--red)}.tag.recommended{background:var(--amber);color:var(--black)}
+.tag.permitted{background:var(--blue)}.tag.possible{background:var(--grey1)}
+.tag.superseded{background:var(--red)}
+.tag.advisory{background:var(--grey1)}.tag.informative{background:var(--grey1)}
+.tag.spine{background:var(--purple)}
+.tag.age-fresh{background:var(--green)}
+.tag.age-mid{background:var(--amber);color:var(--black)}
+.tag.age-old{background:var(--red)}
+.tag.age-unknown{background:var(--grey1)}
+blockquote{margin:8px 0;padding:0 0 0 14px;border-left:3px solid var(--border);font-size:1.05rem}
+/* "Underline poor grammar" surface for cross-source conflicts: solid wavy = a human
+   has confirmed it (relations.yaml); dotted wavy = the automatic sweep's unverified
+   guess. Two tiers because only 2 conflicts are confirmed so far but conflicts are
+   expected throughout a corpus owned by many bodies - showing only confirmed ones
+   would badly understate the problem, showing sweep output as fact would overstate it. */
+blockquote.conflict-confirmed{text-decoration:underline wavy var(--red);text-decoration-thickness:2px;text-underline-offset:4px}
+blockquote.conflict-candidate{text-decoration:underline wavy var(--amber);text-decoration-style:dotted;text-decoration-thickness:2px;text-underline-offset:4px}
+.conflict-note{font-size:.85rem;margin-top:8px;padding:6px 10px}
+.conflict-note.confirmed{background:#fef2f0;color:var(--red);border-left:3px solid var(--red)}
+.conflict-note.candidate{background:#fffaf0;color:var(--amber);border-left:3px dotted var(--amber)}
+.conflict-note strong{color:inherit}
+.meta{font-size:.85rem;color:var(--grey1);margin-top:6px}
+.caveat-note{font-size:.85rem;color:var(--grey1);margin-top:8px;padding-top:8px;border-top:1px dotted var(--border)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+th{background:var(--grey3);font-weight:700}
+.stats{display:flex;gap:26px;flex-wrap:wrap;background:var(--grey3);padding:14px 18px;margin-bottom:24px}
+.stats div span{display:block;font-size:1.5rem;font-weight:700}
+.stats div small{color:var(--grey1);font-size:.8rem}
+.body-group{margin-bottom:22px}
+.body-group h3{margin:0 0 6px;font-size:1.05rem}
+.body-group ul{margin:0;padding-left:20px}
+.body-group li{margin:3px 0}
+.edge{font-family:ui-monospace,monospace;font-size:.85rem;padding:3px 0}
+.loading{color:var(--grey1);padding:20px 0}
+.footer-note{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);color:var(--grey1);font-size:.85rem;max-width:70ch}
+.empty{padding:20px;background:var(--grey3)}
+/* Limitations, stated up front rather than only in the small print. With strangers
+   using this, the dangerous reading is "it showed me nothing, so there is nothing" -
+   see the conflict-silence caution in CLAUDE.md. */
+details.limits{border:1px solid var(--border);border-left:5px solid var(--amber);background:#fff9f4;padding:10px 16px;margin:0 0 24px}
+details.limits summary{font-weight:700;cursor:pointer}
+details.limits summary:focus{background:var(--focus);outline:3px solid var(--focus)}
+details.limits ul{margin:10px 0 4px;padding-left:20px;max-width:78ch}
+details.limits li{margin:6px 0}
+/* Feedback: a rating strip on each answer, and one form at the foot of the page. */
+.rate{background:var(--grey3);border-left:5px solid var(--blue);padding:12px 16px;margin:0 0 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rate strong{margin-right:4px}
+.rate button{background:#fff;border:2px solid var(--black);padding:6px 14px;font-size:.95rem;cursor:pointer;font-family:inherit}
+.rate button:hover{background:var(--black);color:#fff}
+.rate button:focus{background:var(--focus);outline:3px solid var(--focus)}
+.rate .done{font-weight:700;color:var(--green)}
+.fb{border-top:3px solid var(--black);margin-top:44px;padding-top:20px}
+.fb h2{margin-top:0}
+.fb .lede{margin-bottom:14px}
+.fb label{display:block;font-weight:700;margin:14px 0 4px}
+.fb .hint{font-weight:400;color:var(--grey1);font-size:.88rem;display:block}
+.fb textarea,.fb input[type=text]{width:100%;max-width:64ch;padding:9px;font-size:1rem;border:2px solid var(--black);font-family:inherit}
+.fb textarea{min-height:7rem;resize:vertical}
+.fb textarea:focus,.fb input[type=text]:focus{outline:3px solid var(--focus)}
+/* flex-end so the two inputs line up even though one label wraps to two lines. */
+.fb .row{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end}
+.fb .row > div{flex:1;min-width:16rem}
+.fb .status{margin-top:12px;font-weight:700}
+.fb .status.ok{color:var(--green)}
+.fb .status.bad{color:var(--red)}
+.privacy{color:var(--grey1);font-size:.85rem;max-width:70ch;margin-top:14px}
+/* Used by the rendered result cards. These were inline style attributes until a
+   nonce-based CSP was added - a nonce cannot whitelist a style attribute, so they
+   had to become classes or the spacing quietly disappeared in production. */
+.para{margin:8px 0}
+.para-tight{margin:8px 0 0}
+.inline{display:inline}
+.alert{color:var(--red)}

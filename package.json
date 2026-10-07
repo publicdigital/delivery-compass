@@ -6,7 +6,9 @@
   "description": "A navigator for UK government delivery guidance",
   "scripts": {
     "compass": "node --experimental-strip-types pipeline/cli.ts",
-    "web": "node --experimental-strip-types web/server.ts",
+    "export": "node --experimental-strip-types pipeline/export-static.ts",
+    "serve": "node --experimental-strip-types scripts/serve.ts",
+    "refresh": "npm run compass -- ingest && npm run compass -- watch && npm run export && npm test",
     "typecheck": "tsc --noEmit",
     "verify": "node --experimental-strip-types pipeline/cli.ts verify",
     "feedback": "node --experimental-strip-types pipeline/cli.ts feedback",
@@ -18,5 +20,8 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

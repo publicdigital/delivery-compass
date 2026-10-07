@@ -1,0 +1,33 @@
+# Metadata for this prototype. This file is how the publicdigital org
+# tracks every prototype from the outside — GitHub (not Netlify) is the
+# source of truth here, via this file plus the `claude-prototype` repo
+# topic. Keep the field names and format below unchanged so the fleet-check
+# audit (see claude-prototype-fleet-check/scripts/check_expiry.py in that
+# private repo) can parse it.
+#
+# All fields are required. Filled in automatically by the `new-prototype`
+# skill when this repo was created — edit switch_off_date by hand later if
+# you get a real, agreed extension (see the 100-day rule below).
+
+# Who this prototype is for, e.g. "Acme Corp" or "Internal — Marketing".
+client: "Internal — Public Digital"
+
+# Short name for the prototype itself, e.g. "Onboarding flow redesign".
+project: "Delivery Compass — navigating UK government delivery guidance"
+
+# GitHub username of the person who created this prototype.
+owner_github: "olilovell"
+
+# Date this repo was created, format YYYY-MM-DD.
+created_date: "2026-10-07"
+
+# Date this prototype should be switched off, format YYYY-MM-DD.
+#
+# RULE: must be no more than 100 days after created_date. This is enforced
+# at creation time by the new-prototype skill. A daily org-wide audit
+# (fleet-check.yml in the private claude-prototype-fleet-check repo) reports
+# prototypes that are due soon or overdue — it does NOT automatically delete
+# or disable anything, so an overdue date does not stop the site working. Treat it as
+# a commitment to actually go turn the prototype off (delete the Netlify
+# site and archive or delete this repo), not a technical enforcement.
+switch_off_date: "2027-01-15"
