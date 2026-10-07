@@ -161,7 +161,16 @@ details.limits li{margin:6px 0}
 .graph figcaption{padding:10px 0 0}
 .g-legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--grey1)}
 .g-key{display:inline-flex;align-items:center;gap:6px}
-.g-key i{width:13px;height:13px;border-radius:50%;background:var(--c,var(--grey1));display:inline-block}
+.g-key i{width:13px;height:13px;border-radius:50%;background:var(--grey1);display:inline-block}
+/* Spine swatches. These must be classes: the CSP forbids inline style attributes,
+   so setting the colour with style="--c:…" renders grey in production and correct
+   locally, which is the worst of both. Keep in step with SPINE_COLOUR in map.js. */
+.g-key i.spine-funding{background:#2b5f8f}
+.g-key i.spine-assurance{background:#584594}
+.g-key i.spine-digital{background:#1e6b3a}
+.g-key i.spine-risk{background:#a8271b}
+.g-key i.spine-evaluation{background:#8a5200}
+.g-key i.spine-oversight{background:#5c666d}
 .g-key i.ring{background:#fff;border:2.5px solid var(--black)}
 .g-key i.faded{background:var(--grey1);opacity:.25}
 .g-key i.line{width:18px;height:0;border-radius:0;border-top:2.5px solid var(--red)}

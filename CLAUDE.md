@@ -66,9 +66,12 @@ its floors — that check is now the last line of defence, with no `/healthz` be
 browser and imported by the golden test in Node. `pipeline/search.ts` is kept only as
 the reference the suite compares against. Do not let them drift into two live engines.
 
-**No inline `style=` attributes or inline `<script>`/`<style>` in `index.html`.** The
-CSP in `netlify.toml` forbids both outright. Inline styles are silently dropped in the
-browser; use a class. This was a real bug, caught only by reading the console.
+**No inline `style=` attributes or inline `<script>`/`<style>` in anything the browser
+loads.** The CSP in `netlify.toml` forbids both, and a nonce cannot whitelist a style
+attribute in any case. They render perfectly against the local dev server, which sends
+no CSP, and are silently dropped in production — the map's legend swatches shipped grey
+this way. Broken twice now, so `test/csp.test.ts` checks `index.html` and every file
+in `assets/` on each `npm test`. Use a class.
 
 **HTML-first ingestion.** Never parse the seed PDFs into the corpus. Several are
 CID-encoded and extract as garbage; two are print-outs of web pages. A source with no

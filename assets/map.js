@@ -171,8 +171,12 @@ export function renderGraph(nodes, edges) {
     </g>`;
   }).join("");
 
+  // A class per spine, not style="--c:…". The CSP forbids inline style attributes and
+  // a nonce cannot whitelist one, so the swatches silently rendered grey in production
+  // while looking right locally. This is the second time that trap has been sprung
+  // here; see the rule in CLAUDE.md.
   const legend = spines.map((s) =>
-    `<span class="g-key"><i style="--c:${SPINE_COLOUR[s] ?? "#5c666d"}"></i>${esc(s)}</span>`).join("");
+    `<span class="g-key"><i class="spine-${esc(s)}"></i>${esc(s)}</span>`).join("");
 
   const conflicts = edges.filter((e) => CONFLICT_TYPES.has(e.type)).length;
   const orphans = nodes.filter((n) => !edges.some((e) => e.from === n.id || e.to === n.id)).length;
