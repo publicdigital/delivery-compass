@@ -143,6 +143,14 @@ GOV.UK content is Crown copyright under the Open Government Licence v3.0. Each
 registry entry records its own `licence`; NAO material is marked
 `redistribute: false` and is linked only.
 
+## What this is and why it is built this way
+
+**[docs/what-we-built-and-why.md](docs/what-we-built-and-why.md)** is the written-up
+account: the problem, the architecture, the design rules and the reasoning behind
+them, what the tool found about the domain, and what the exercise taught us about
+building a navigator for any fragmented body of rules. Section 7 is the part that
+transfers to a different corpus.
+
 ## Hosted instance
 
 Deployed through the `publicdigital` prototype pathway: static files on Netlify behind

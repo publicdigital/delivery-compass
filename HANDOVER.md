@@ -647,3 +647,15 @@ Draft scoping at `docs/accelerator-governance-draft.md`. Deliberately outside
 never sit where a reader could mistake it for something HMT published. Note that
 Public Digital is in the consortium delivering the programme, which needs declaring
 in anything published.
+
+### Written up — 2026-10-08
+
+`docs/what-we-built-and-why.md` is the standing account of what this is and why it
+is built the way it is: the problem, the architecture, the design rules with the
+reasoning, the domain findings, what it cost, where it is weak, and the generalised
+pattern. Written because the learning is expected to underpin a separate product
+idea, so section 7 ("what this taught us about building this kind of thing") is
+deliberately domain-independent and section 10 states the reusable shape.
+
+Every figure in it was checked against `assets/data/*.json` at the time of writing.
+If the corpus is refreshed, those numbers will drift; the arguments will not.
