@@ -3,7 +3,8 @@
 # There is no [build] section on purpose. The org deploy workflow runs
 # `netlify deploy --prod --dir=.` with no build step, so the repo is published
 # as-is. That is why assets/data/*.json is committed rather than generated in CI:
-# refreshing the corpus is `npm run refresh` locally, then commit and push.
+# refreshing the corpus means committing new JSON. .github/workflows/refresh.yml
+# does that weekly; `npm run refresh` then commit and push does it by hand.
 
 # Registered here rather than via inline `export const config`, which a bare
 # `netlify deploy` silently treats as a plain static asset. Covers /* so the

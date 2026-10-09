@@ -10,6 +10,7 @@ import { loadRegistry } from "./registry.ts";
 import { checkCorpus } from "./verify.ts";
 import { feedbackSummary, listFeedback, queryReport, toCsv } from "./feedback.ts";
 import { importCsv } from "./import-feedback.ts";
+import { flagForReview } from "./review.ts";
 
 const BOLD = "\x1b[1m", DIM = "\x1b[2m", RESET = "\x1b[0m";
 const RED = "\x1b[31m", YELLOW = "\x1b[33m", GREEN = "\x1b[32m", CYAN = "\x1b[36m";
@@ -63,7 +64,10 @@ async function cmdIngest(only?: string): Promise<void> {
 
   if (moved.length) {
     console.log(`\n${YELLOW}${moved.length} source(s) have moved on GOV.UK${RESET} ${DIM}- followed this time, but update the registry${RESET}`);
-    for (const m of moved) console.log(`  ${m.id}: ${m.from}\n    -> ${m.to}`);
+    for (const m of moved) {
+      console.log(`  ${m.id}: ${m.from}\n    -> ${m.to}`);
+      flagForReview(`**Moved:** \`${m.id}\` now lives at \`${m.to}\` (registry says \`${m.from}\`). Followed this time; update the registry slug.`);
+    }
   }
 
   db.close();
@@ -75,7 +79,10 @@ async function cmdIngest(only?: string): Promise<void> {
   // a hollowed-out corpus reaching the exporter.
   if (emptied.length) {
     console.error(`\n${RED}${emptied.length} source(s) that should have content returned none:${RESET}`);
-    for (const e of emptied) console.error(`  ${e.id}: ${e.reason}`);
+    for (const e of emptied) {
+      console.error(`  ${e.id}: ${e.reason}`);
+      flagForReview(`**Returned no content:** \`${e.id}\` (${e.reason}). The refresh stopped here; nothing was exported.`);
+    }
     console.error(`${DIM}Rows from the previous ingest are still in the database, so the corpus may look healthy.${RESET}`);
     console.error(`${DIM}Check the registry slug and the source on GOV.UK before exporting.${RESET}`);
     process.exitCode = 1;
@@ -155,6 +162,7 @@ async function cmdWatch(argDays?: string): Promise<void> {
   const db = openDb();
   const registry = loadRegistry();
   const days = Number(argDays ?? 180);
+  const fetcherById = new Map(registry.map((s) => [s.id, s.fetcher] as const));
 
   process.stderr.write(`${DIM}polling ${registry.length} sources`);
   const events = await poll(db, registry, () => process.stderr.write("."));
@@ -170,6 +178,12 @@ async function cmdWatch(argDays?: string): Promise<void> {
       console.log(`  ${tag}${e.kind}${RESET} ${BOLD}${e.sourceTitle}${RESET} ${DIM}(${e.body})${RESET}`);
       console.log(`    ${e.note.replace(/\s+/g, " ").slice(0, 200)}`);
       if (e.liveUrl) console.log(`    ${CYAN}${e.liveUrl}${RESET}`);
+      // A source the registry already records as withdrawn reports itself withdrawn
+      // on every poll, and on a runner with no previous snapshot that is every run.
+      // Only a withdrawal the registry does not know about needs a person.
+      if (e.kind === "withdrawn" && fetcherById.get(e.sourceId) === "withdrawn") continue;
+      const link = e.liveUrl ? ` ${e.liveUrl}` : "";
+      flagForReview(`**${e.kind}:** ${e.sourceTitle} (${e.body}). ${e.note.slice(0, 300)}${link}`);
     }
     console.log();
   }

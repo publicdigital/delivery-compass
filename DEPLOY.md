@@ -35,7 +35,27 @@ a user. See "Checking retrieval still holds" below.
 ## Refreshing the corpus
 
 The deployed corpus is only as current as the last commit. There is no build step on
-the deploy, so refreshing it is a local job:
+the deploy, so the refresh commits its output and then deploys it.
+
+**It runs itself.** `.github/workflows/refresh.yml` runs every Monday at 06:17 UTC,
+and on demand from Actions → Refresh corpus → Run workflow. It starts from an empty
+database (the export needs only the latest snapshot per source), runs the same
+`npm run refresh`, commits `assets/data/` and dispatches the deploy. A push made by the
+workflow's own token does not trigger push-to-deploy, which is why the deploy is
+dispatched explicitly.
+
+What it cannot do is curate. When a run finds something a person has to decide, it
+opens an issue with the details: a slug that has moved, a withdrawal the registry does
+not know about, a source that returned nothing, or a change note published since the
+last run. A changed page is listed even though its new text is already in the corpus,
+because the relations in `sources/relations.yaml` are what might now be wrong. A
+failed run opens an issue too, and the live site keeps the previous corpus.
+
+Two things to check on the first scheduled run. Issues must be enabled on the repo, or
+the review step fails after the deploy has already gone out. And if `main` is ever
+branch-protected, the bot's push will be refused.
+
+To run the same refresh by hand:
 
 ```bash
 npm run refresh

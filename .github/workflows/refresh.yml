@@ -1,0 +1,97 @@
+name: Refresh corpus
+
+# Re-ingests every registered source from GOV.UK, re-exports assets/data/, runs the
+# golden suite, commits the result and deploys it. Replaces doing `npm run refresh`
+# by hand. Only the mechanical half is automated: anything a person has to decide
+# (a moved slug, an unexpected withdrawal, a changed page whose relations may no
+# longer hold) is raised as an issue for the curator rather than guessed at.
+#
+# The runner starts with no data/corpus.db, which is fine: the export reads only the
+# latest snapshot per source, so a clean ingest produces the same corpus as a laptop
+# with months of history.
+
+on:
+  schedule:
+    # Mondays, 06:17 UTC. Weekly is plenty for guidance that changes a few times a
+    # month, and each run is a full polite crawl of GOV.UK (150ms between calls).
+    - cron: "17 6 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write # commit the refreshed corpus
+  actions: write # dispatch the deploy workflow
+  issues: write # raise the curator's review queue
+
+concurrency:
+  group: refresh-corpus
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      COMPASS_REVIEW: ${{ runner.temp }}/review.md
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # ingest, watch, export, test, chained with &&. Each stage refuses to pass a
+      # thin or emptied corpus on to the next, so a failure here means nothing below
+      # runs and the live site keeps last week's corpus.
+      - name: Refresh
+        run: npm run refresh
+
+      - name: Report
+        id: report
+        if: ${{ !cancelled() }}
+        run: |
+          node --experimental-strip-types scripts/refresh-report.ts "$COMPASS_REVIEW" > "$RUNNER_TEMP/report.md"
+          cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
+
+      # Commits even when only the timestamps moved: the site shows "corpus last
+      # refreshed", and that date should be the date it was last checked.
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add assets/data
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "Refresh corpus (scheduled)"
+            git push
+          fi
+
+      # A push made with GITHUB_TOKEN does not trigger other workflows, so the usual
+      # push-to-deploy never fires. workflow_dispatch is the documented exception.
+      - name: Deploy
+        run: gh workflow run deploy.yml --ref main
+
+      - name: Raise review issue
+        if: ${{ steps.report.outputs.needs_review == 'true' }}
+        run: |
+          gh issue create \
+            --title "Corpus refresh $(date -u +%F): items for the curator" \
+            --body-file "$RUNNER_TEMP/report.md"
+
+      - name: Raise failure issue
+        if: ${{ failure() }}
+        run: |
+          {
+            echo "The scheduled refresh failed, so the live site is still serving the previous corpus."
+            echo
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            [ -f "$RUNNER_TEMP/report.md" ] && cat "$RUNNER_TEMP/report.md"
+          } > "$RUNNER_TEMP/failure.md"
+          gh issue create \
+            --title "Corpus refresh $(date -u +%F) failed" \
+            --body-file "$RUNNER_TEMP/failure.md"
