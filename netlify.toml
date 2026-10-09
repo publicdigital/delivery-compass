@@ -13,6 +13,21 @@
   function = "basic-auth"
   path = "/*"
 
+# The MCP server (docs/mcp-and-notebooks.md). No build step, so the function must
+# need no installed packages: it imports assets/search.js and reads the exported
+# corpus, which has to be shipped alongside it explicitly.
+[functions]
+  directory = "netlify/functions"
+[functions.mcp]
+  included_files = ["assets/data/*.json"]
+
+# Registered here, not via inline `export const config`, for the reason given above.
+[[redirects]]
+  from = "/mcp"
+  to = "/.netlify/functions/mcp"
+  status = 200
+  force = true
+
 # The app has no inline scripts or styles, so the CSP can forbid both outright
 # rather than relying on nonces (which needed a server to generate them).
 # connect-src and form-action stay 'self': the only thing leaving the browser is
@@ -57,6 +72,11 @@
   force = true
 [[redirects]]
   from = "/scripts/*"
+  to = "/index.html"
+  status = 404
+  force = true
+[[redirects]]
+  from = "/netlify/*"
   to = "/index.html"
   status = 404
   force = true

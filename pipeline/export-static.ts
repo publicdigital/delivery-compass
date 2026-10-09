@@ -216,6 +216,33 @@ export function exportStatic(): void {
     edges,
   };
 
+  // --- sources --------------------------------------------------------------
+  // The registry itself, for the MCP server (netlify/functions/mcp). The site gets
+  // by with map.json; an assistant asked "who owns this, and is it still current?"
+  // needs the canonical URL, the licence and the withdrawal record too. The
+  // function cannot read sources/*.yaml: the deploy installs no packages, so there
+  // is no YAML parser at runtime.
+  const sourceRecords = registry.map((s) => {
+    const st = stats.get(s.id);
+    return {
+      id: s.id,
+      title: s.title,
+      body: s.body,
+      spine: s.spine,
+      authority: s.authority,
+      licence: s.licence,
+      fetcher: s.fetcher,
+      url: s.slug ? `https://www.gov.uk${s.slug}` : (s.endpoint ?? null),
+      externalAttachment: s.externalAttachment ?? null,
+      parent: s.parent ?? null,
+      contentStatus: st?.status ?? "not_indexed",
+      sections: st?.status === "full" ? st.sections : 0,
+      withdrawnOn: s.withdrawnOn ?? null,
+      withdrawnReason: s.withdrawnReason ?? null,
+      replacement: s.replacement ?? null,
+    };
+  });
+
   // --- watch ----------------------------------------------------------------
   const watch = recentPublishedChanges(db, 730, 60);
 
@@ -247,6 +274,7 @@ export function exportStatic(): void {
     "watch.json": write("watch.json", watch),
     "meta.json": write("meta.json", meta),
     "relations.json": write("relations.json", relations),
+    "sources.json": write("sources.json", sourceRecords),
     "concepts.json": write("concepts.json", loadConcepts(registry.map((s) => s.id))),
   };
 

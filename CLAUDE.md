@@ -63,7 +63,7 @@ plain `.js` rather than TypeScript, and why the export refuses to write a corpus
 its floors — that check is now the last line of defence, with no `/healthz` behind it.
 
 **One search implementation, not two.** `assets/search.js` is loaded unchanged by the
-browser and imported by the golden test in Node. `pipeline/search.ts` is kept only as
+browser, imported by the golden test in Node, and imported by the MCP function. `pipeline/search.ts` is kept only as
 the reference the suite compares against. Do not let them drift into two live engines.
 
 **No inline `style=` attributes or inline `<script>`/`<style>` in anything the browser
@@ -96,6 +96,26 @@ three surfaces: Ask, Map, and Watch. (A fourth surface, "Your folder", compared 
 against live GOV.UK; removed 2026-08-21 once the tool's aim settled on serving other
 people from live guidance, not comparing one person's local downloads. See
 HANDOVER.md §7.)
+
+## The MCP server
+
+`netlify/functions/mcp/` serves the same corpus to other people's assistants (Claude,
+Copilot, ChatGPT and anything else that speaks MCP) at `/mcp`. Design and reasoning:
+[docs/mcp-and-notebooks.md](docs/mcp-and-notebooks.md). Four read-only tools:
+`search_guidance`, `get_source`, `coverage`, `recent_changes`.
+
+- **Plain JS, no packages.** The deploy installs nothing, so the protocol is
+  hand-written in `core.mjs` (JSON-RPC: initialize, ping, tools/list, tools/call) and
+  the function reads `assets/data/*.json` via `included_files`.
+- **The model writes the answer now, not us.** So the honesty rules are enforced on
+  what goes *in*: warnings travel in the same result as the text they apply to, every
+  result is dated, MANDATORY lines are verbatim, empty means "gap". `test/mcp.test.ts`
+  checks each of these. Do not add a tool that returns text without its warnings.
+- **Own auth.** The Basic Auth edge function lets `/mcp` through (assistants cannot
+  answer a password prompt) and the function checks its own key, as `?key=` or a
+  Bearer token. Only the key's SHA-256 is in `mcp.mjs`; the key itself is in the
+  gitignored `.env`. Never commit the key: a push of it was blocked once already.
+- Locally, `npm run serve` routes `/mcp` to the real handler.
 
 ## The thing to be careful about
 

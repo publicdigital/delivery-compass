@@ -75,6 +75,38 @@ If `npm run export` refuses to write, that is the floors check doing its job —
 the ingest output above it for a source that has started returning something other
 than HTML. Do not lower the floors in `pipeline/verify.ts` to get a clean export.
 
+## The MCP server
+
+The same deploy publishes an MCP endpoint at
+`https://publicdigital-delivery-compass.netlify.app/mcp`, so assistants can query the
+corpus directly. It is a Netlify Function (`netlify/functions/mcp/`), registered in
+`netlify.toml` with a rewrite from `/mcp` and `included_files` for the corpus.
+
+It does not sit behind the Basic Auth password, because assistants cannot answer one.
+It checks its own key instead. The repo holds only the key's SHA-256, in
+`netlify/functions/mcp/mcp.mjs`; the key itself is in the gitignored `.env` of whoever
+set it up. To rotate it, generate a new key, replace the hash and push. An `MCP_KEY`
+environment variable in Netlify, if set, replaces the hashed key. Clients pass it either way:
+
+- as a query string, `.../mcp?key=KEY`, which works in every client, including
+  Claude's custom connector dialog; or
+- as a header, `Authorization: Bearer KEY`, where the client allows custom headers.
+
+Adding it to Claude Code, for example:
+
+```bash
+claude mcp add --transport http compass "https://publicdigital-delivery-compass.netlify.app/mcp?key=KEY"
+```
+
+Check it after a deploy without a client (expect `401` with no key, JSON with one):
+
+```bash
+curl -s -X POST https://publicdigital-delivery-compass.netlify.app/mcp -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"ping"}'
+```
+
+A `404` there means the function did not deploy. Check the deploy log for a
+"Bundling functions" or "Packaging functions" line.
+
 ## Form detection must be switched on, once, by hand
 
 **Netlify disables form detection by default on new sites.** Until it is enabled,

@@ -20,7 +20,14 @@
 // plain static asset instead of bundling it as an Edge Function when it
 // relied on inline config alone with no netlify.toml present at all.
 
+// /mcp is the one exception. MCP clients (Claude, Copilot, ChatGPT) cannot answer a
+// Basic Auth challenge, so the MCP function checks a key of its own instead
+// (netlify/functions/mcp/mcp.mjs). Matched exactly, so nothing else slips through.
+const OWN_AUTH = new Set(["/mcp", "/.netlify/functions/mcp"]);
+
 export default async (request: Request, context: Netlify.Context) => {
+  if (OWN_AUTH.has(new URL(request.url).pathname)) return context.next();
+
   const expected = "Basic " + btoa("compass:q6IrR1zm1R9mA2cpei0uCH");
 
   if (request.headers.get("authorization") === expected) {
