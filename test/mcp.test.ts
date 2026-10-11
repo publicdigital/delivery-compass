@@ -43,7 +43,9 @@ check(listed.every((t: Record<string, unknown>) => !("run" in t) && t.inputSchem
 const tcop = call("search_guidance", { question: "spend control process", source_id: "tcop" });
 check(!tcop.isError, "search restricted to tcop should succeed");
 check(/WARNING \(SUPERSEDED/.test(tcop.text), "a tcop result must carry the curated supersession warning in the same result");
-check(/Cite: https:\/\/www\.gov\.uk\//.test(tcop.text), "every result needs a GOV.UK citation");
+check(/Cite inline as: \(\[[^\]]+\]\(https:\/\/www\.gov\.uk\/[^)]+\)\)/.test(tcop.text), "every result needs an inline-ready GOV.UK citation");
+check(/Do not add a sources or references list/.test(tcop.text), "results should repeat the inline citation rule");
+check(/Cite inline, never at the end/.test(init.result?.instructions ?? ""), "server instructions should ask for inline citations");
 check(/page last updated|page date unknown/.test(tcop.text), "every result must be dated, even fresh ones");
 
 const empty = call("search_guidance", { question: "zzqxv flibbertigibbet" });

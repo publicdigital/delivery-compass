@@ -91,6 +91,22 @@ function warningsFor(c, sourceId) {
 
 const RANK = { mandatory: 0, recommended: 1, permitted: 2, possible: 3 };
 
+/**
+ * The short form to put in a sentence, right after the point it supports. Models copy
+ * the shape they are given: a bare "Cite: <url>" line per result got gathered into a
+ * list at the end of answers, which testers disliked. A ready-made inline link does not.
+ */
+function inlineCitation(h) {
+  const heading = String(h.heading || "").trim();
+  const label = heading && heading !== h.sourceTitle ? `${h.sourceTitle}: ${heading}` : h.sourceTitle;
+  return `([${label}](${citationUrl(h)}))`;
+}
+
+/** Repeated in every result with sections, because not every client passes on server instructions. */
+const CITE_RULE =
+  "How to cite: put the \"Cite inline as\" link in your sentence, straight after the point it supports. " +
+  "Do not add a sources or references list at the end.";
+
 function footer(c) {
   return `\n---\nCorpus last refreshed ${day(c.meta.indexedAt)}. Unofficial: Delivery Compass is not a government service. ` +
     `Text is quoted from GOV.UK under the Open Government Licence v3.0; follow the links for the authoritative version.`;
@@ -119,6 +135,7 @@ function searchGuidance(c, { question, source_id, limit = 6 }) {
     out.push(`Also searched for: ${[...new Set(bridge.terms)].join(", ")} (because the question looks like it is about ${bridge.concepts.map((x) => x.id).join(", ")})`);
   }
   if (source_id) out.push(`Restricted to source: ${source_id}`);
+  if (hits.length) out.push(CITE_RULE);
   out.push("");
 
   if (hits.length === 0) {
@@ -132,7 +149,7 @@ function searchGuidance(c, { question, source_id, limit = 6 }) {
     const src = c.sourceById.get(h.sourceId);
     out.push(`## ${i + 1}. ${h.headingPath || h.heading}`);
     out.push(`Source: ${h.sourceTitle} (\`${h.sourceId}\`), ${h.body}. Authority: ${src?.authority ?? h.authority}. ${age(h.updatedAt)}.`);
-    out.push(`Cite: ${citationUrl(h)}`);
+    out.push(`Cite inline as: ${inlineCitation(h)}`);
     for (const w of warningsFor(c, h.sourceId)) out.push(w);
 
     const obs = (c.obligations[String(h.id)] ?? []).slice().sort((a, b) => (RANK[a.strength] ?? 9) - (RANK[b.strength] ?? 9));
@@ -331,7 +348,8 @@ export const INSTRUCTIONS = `Delivery Compass serves UK government delivery guid
 
 When you answer from these tools:
 - Quote requirements labelled MANDATORY verbatim, in quotation marks. Never paraphrase one.
-- Cite every claim to the link returned with it. If something comes from your own knowledge rather than these tools, say so.
+- Cite inline, never at the end. Each result has a "Cite inline as" link: put it in your sentence straight after the point it supports, for example: Digital and technology spend above the department's delegated limit needs HM Treasury approval ([Getting approval to spend money on a service: When you need extra approval or support](https://www.gov.uk/...)). Do not write a "Sources" or "References" section, and do not use numbered footnotes.
+- If something comes from your own knowledge rather than these tools, say so.
 - When a result carries a WARNING (superseded or conflict), state it before or alongside the text it applies to.
 - Mention the page date when a result says the page is old.
 - "Possible conflict (NOT verified)" notes are machine suggestions. Present them as such, never as fact.

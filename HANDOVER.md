@@ -659,3 +659,24 @@ deliberately domain-independent and section 10 states the reusable shape.
 
 Every figure in it was checked against `assets/data/*.json` at the time of writing.
 If the corpus is refreshed, those numbers will drift; the arguments will not.
+
+### MCP tester feedback — 2026-10-10, acted on 2026-10-11
+
+First feedback on the MCP route was really positive. One change asked for: citation
+links *inline*, next to the claim they support, rather than collected at the end of
+the answer. Noted on 2026-10-10, built on 2026-10-11.
+
+Rewording the server instructions alone wasn't enough, because models copy the shape
+they're given, and a bare `Cite: <url>` line under each result reads like an entry
+for a references list. So, in `netlify/functions/mcp/core.mjs`:
+
+- every search result now carries `Cite inline as: ([Source: Heading](url))`, a
+  ready-made markdown link to drop into a sentence;
+- every result with sections repeats the rule (put the link straight after the point,
+  no sources list), because not every client passes server instructions on;
+- the instructions say "Cite inline, never at the end", give an example sentence, and
+  rule out a sources section and numbered footnotes.
+
+`test/mcp.test.ts` checks all three. The same change was made to the PD Library's
+server at the same time. Clients vary in how closely they follow this, so check a real
+answer in Claude and one other assistant.
