@@ -42,7 +42,7 @@ function authorised(req) {
 export default async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (!authorised(req)) {
-    return json({ jsonrpc: "2.0", id: null, error: { code: -32001, message: "Missing or wrong key. Use ?key= or a Bearer token." } }, 401);
+    return json({ jsonrpc: "2.0", id: null, error: { code: -32001, message: "Missing or wrong key. Add ?key=YOUR_KEY to the end of the connector URL, or send it as a Bearer token." } }, 401);
   }
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: { allow: "POST", ...CORS } });
 

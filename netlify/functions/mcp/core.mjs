@@ -1,5 +1,5 @@
 /**
- * Delivery Compass as an MCP server: the protocol and the tools, with no transport.
+ * The Gov Delivery Library MCP server (Delivery Compass's corpus): the protocol and the tools, with no transport.
  *
  * MCP is JSON-RPC 2.0. This module takes one parsed message and returns one response
  * object (or null for a notification). mcp.mjs wraps it in HTTP for Netlify, and
@@ -108,7 +108,7 @@ const CITE_RULE =
   "Do not add a sources or references list at the end.";
 
 function footer(c) {
-  return `\n---\nCorpus last refreshed ${day(c.meta.indexedAt)}. Unofficial: Delivery Compass is not a government service. ` +
+  return `\n---\nCorpus last refreshed ${day(c.meta.indexedAt)}. Unofficial: the Gov Delivery Library is not a government service. ` +
     `Text is quoted from GOV.UK under the Open Government Licence v3.0; follow the links for the authoritative version.`;
 }
 
@@ -239,7 +239,7 @@ function getSource(c, { source_id }) {
 function coverage(c) {
   const m = c.meta;
   const out = [
-    "# What Delivery Compass covers",
+    "# What the Gov Delivery Library covers",
     "",
     `${m.sources} of ${m.registered} registered sources are indexed: ${m.sections} sections and ${m.obligations} extracted obligations, ${m.mandatory} of them mandatory. ` +
       `${m.relations} curated relationships between sources. Corpus last refreshed ${day(m.indexedAt)}; refreshed weekly from GOV.UK.`,
@@ -344,7 +344,7 @@ export const TOOLS = [
   },
 ];
 
-export const INSTRUCTIONS = `Delivery Compass serves UK government delivery guidance from a hand-curated registry of sources, refreshed weekly from GOV.UK. It is unofficial.
+export const INSTRUCTIONS = `The Gov Delivery Library serves UK government delivery guidance from a hand-curated registry of sources, refreshed weekly from GOV.UK. It is unofficial.
 
 When you answer from these tools:
 - Quote requirements labelled MANDATORY verbatim, in quotation marks. Never paraphrase one.
@@ -376,7 +376,7 @@ export function handleMessage(msg, getCorpus = corpus) {
       return ok(id, {
         protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "delivery-compass", title: "Delivery Compass", version: SERVER_VERSION },
+        serverInfo: { name: "gov-delivery-library", title: "Gov Delivery Library", version: SERVER_VERSION },
         instructions: INSTRUCTIONS,
       });
     }
