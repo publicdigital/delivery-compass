@@ -680,3 +680,12 @@ for a references list. So, in `netlify/functions/mcp/core.mjs`:
 `test/mcp.test.ts` checks all three. The same change was made to the PD Library's
 server at the same time. Clients vary in how closely they follow this, so check a real
 answer in Claude and one other assistant.
+
+### Renamed for users: Gov Delivery Library (2026-10-13)
+
+"Compass" means other things inside PD, so the MCP server now introduces itself as
+**Gov Delivery Library** (`serverInfo`, instructions, coverage and footer text). The
+repo, site URL and code names stay `delivery-compass`. The connector name people see in
+Claude is whatever they type when adding it, so tell testers to use "Gov Delivery
+Library". The 401 message now says to add `?key=YOUR_KEY` to the connector URL, which
+is the usual cause of "Missing or wrong key".
