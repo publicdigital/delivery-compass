@@ -411,3 +411,14 @@ relations:
     evidence: >-
       GovS 005 v2.2, 7.2: organisations "should use the Data and AI Ethics Framework to
       ensure data and AI are used appropriately, responsibly and transparently".
+
+  # P8 (found in WP5, approved by Oli 2026-10-15). The quote is from the Secure by
+  # Design site, which is linked, not ingested.
+  - from: service-standard
+    to: secure-by-design
+    type: requires
+    scope: creating a secure service (Service Standard point 9)
+    evidence: >-
+      Secure by Design, About (security.gov.uk, read 2026-10-15): "The Service Standard
+      Point 9 (Create a secure service which protects users' privacy) advises service
+      teams that they must follow the Secure by Design principles."

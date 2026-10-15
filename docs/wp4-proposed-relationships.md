@@ -123,7 +123,7 @@ list. Still on it: `project-routemap`, `nista-par`, `nista-action-plan`, `ai-eva
 
 ## Found in WP5, proposed
 
-### P8. `service-standard` requires `secure-by-design`, on Service Standard point 9. **Recommended: yes.**
+### P8. `service-standard` requires `secure-by-design`, on Service Standard point 9. **Approved by Oli 2026-10-15; added.**
 
 Secure by Design's own About page (security.gov.uk, read 2026-10-15): "The Service
 Standard Point 9 (Create a secure service which protects users' privacy) advises

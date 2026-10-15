@@ -25,7 +25,7 @@ Ready to go live, with one known gap. Oli accepted acceptance searches #6, #8 an
 | Sections | 4,182 | 5,062 | +880 |
 | Extracted obligations | 6,229 | 8,944 | +2,715 |
 | Mandatory obligations | 611 | 850 | +239 |
-| Curated relationships | 27 | 48 | +21 |
+| Curated relationships | 27 | 49 | +22 |
 | Sources with no relationship | 13 | 10 | −3 |
 | Spines | 6 | 7 | `commercial` |
 
@@ -138,7 +138,7 @@ Decisions taken during the work, all by Oli on 2026-10-15:
 **Waiting on Oli:**
 
 1. **GovS 002:** ask Government Project Delivery for an openly served copy. The Teal Book's nightly PDF shows they can do this.
-2. **Proposal P8:** Service Standard requires Secure by Design (point 9). Recommended yes; see `docs/wp4-proposed-relationships.md`.
+2. ~~**Proposal P8**~~: approved by Oli on 2026-10-15 and added (Service Standard requires Secure by Design, point 9). 49 relationships.
 3. **Two conflicts worth raising with the publishers.**
    - The **August 2026 Gate 4 workbook** still asks for technology spend control sign-off.
    - The **DDaT Playbook** (2023) still routes TCoP assurance through Cabinet Office spend control.
@@ -171,7 +171,7 @@ Decisions taken during the work, all by Oli on 2026-10-15:
 
 ## 7. Deploying
 
-1. Read this report, and decide §6 item 2 (§3 is settled).
+1. Read this report. (§3 and §6 item 2 are settled.)
 2. Merge `go-live-sources` into `main`. The push to `main` triggers the deploy workflow.
 3. Check the live connector: `coverage` should report 39 of 48 sources indexed, with an "Out of scope" section.
 
