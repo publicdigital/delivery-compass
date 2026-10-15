@@ -148,3 +148,13 @@ per source at ingest.
 5. **Owners that differ from the plan.** Use GOV.UK's owners (DDaT Profession,
    Government Commercial Agency, Analysis Function, GOTT) rather than the plan's?
    Recommended: yes, per rule 2.
+
+## 6. Answers (Oli, 2026-10-15)
+
+1. GovS 002: register as not indexed with a clear reason pointing to the Teal Book.
+   Oli asks Government Project Delivery for an openly served copy.
+2. PAR and action plan: register as not indexed, "Word document only".
+3. DDaT and Sourcing: index each playbook plus its HTML guidance notes; exclude the
+   duplicate DDaT HTML copy.
+4. and 5. Owners follow GOV.UK's lead organisation: TCoP becomes GDS; new sources use
+   GOV.UK's owners, not the plan's.
