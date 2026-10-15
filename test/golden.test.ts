@@ -131,6 +131,21 @@ const CASES: Case[] = [
     expectPath: "Guidance_on_Developing_Business_Cases.pdf",
     why: "The 2026 combined guide is PDF only. Fails if it stops parsing or an old edition comes back.",
   },
+  {
+    q: "reviewer with agile delivery experience",
+    expect: ["agile-assurance"],
+    why: "NISTA's agile assurance guide, PDF only.",
+  },
+  {
+    q: "integrated assurance and approval plan",
+    expect: ["integrated-assurance"],
+    why: "A PDF with no outline: headings come from type size.",
+  },
+  {
+    q: "benefits realisation assurance",
+    expect: ["benefits-assurance", "gate-review-5"],
+    why: "Gate 5 and the Teal Book cover this more densely than NISTA's guide; either is a good answer (Oli, 2026-10-15).",
+  },
   // --- the Teal Book, the one source read from a PDF off GOV.UK ---------------
   {
     q: "what does the teal book say about tailoring",

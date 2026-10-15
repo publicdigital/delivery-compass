@@ -123,7 +123,8 @@ function footer(c) {
 function searchGuidance(c, { question, source_id, limit = 6 }) {
   if (!question || !String(question).trim()) throw new ToolError("question is required");
   const n = Math.min(Math.max(Number(limit) || 6, 1), 10);
-  let hits = searchSections(c.index, c.sectionById, question, source_id ? 80 : n, c.concepts);
+  // Restricted to one source, every passage comes from it by design: no per-document cap.
+  let hits = searchSections(c.index, c.sectionById, question, source_id ? 80 : n, c.concepts, source_id ? Infinity : undefined);
   if (source_id) {
     if (!c.sourceById.has(source_id)) throw new ToolError(`unknown source_id "${source_id}". Call coverage for the list.`);
     hits = hits.filter((h) => h.sourceId === source_id);

@@ -356,7 +356,17 @@ export function explainQuery(index, question) {
 }
 
 /**
- * Full retrieval: score, blend in title affinity, then de-duplicate.
+ * At most this many results from any one document. A long PDF (one document, dozens
+ * of sections) that matches a question's words can otherwise fill the whole answer:
+ * NISTA's agile assurance guide took 3 of the top 5 for "how should governance change
+ * for agile delivery" and pushed out the GDS page a tester had gone looking for.
+ * Breadth across documents is worth more to a reader than a third passage from one.
+ * A search restricted to one source passes Infinity, since there breadth is not the point.
+ */
+export const PER_DOC = 2;
+
+/**
+ * Full retrieval: score, blend in title affinity, then de-duplicate and cap per document.
  *
  * Registry entries legitimately overlap — the Service Manual crawl reaches the
  * spend-controls guide, which is also registered in its own right — so the same
@@ -366,8 +376,10 @@ export function explainQuery(index, question) {
  * @param {Map<number, object>} byId  section id -> section record
  * @param {string} question
  * @param {number} limit
+ * @param {object[]|null} concepts
+ * @param {number} perDocLimit  most sections any one document may contribute
  */
-export function searchSections(index, byId, question, limit = 6, concepts = null) {
+export function searchSections(index, byId, question, limit = 6, concepts = null, perDocLimit = PER_DOC) {
   const bridge = concepts ? matchConcepts(concepts, question) : { terms: [], concepts: [] };
   const scored = scoreDocs(index, question, bridge.terms);
   if (scored.length === 0) return [];
@@ -393,11 +405,14 @@ export function searchSections(index, byId, question, limit = 6, concepts = null
     .sort((a, b) => b.rank - a.rank);
 
   const seen = new Set();
+  const perDoc = new Map();
   const out = [];
   for (const { section } of ranked) {
     const key = `${section.docPath}#${section.anchor ?? section.heading}`;
     if (seen.has(key)) continue;
+    if ((perDoc.get(section.docPath) ?? 0) >= perDocLimit) continue;
     seen.add(key);
+    perDoc.set(section.docPath, (perDoc.get(section.docPath) ?? 0) + 1);
     out.push(section);
     if (out.length >= limit) break;
   }

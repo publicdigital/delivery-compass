@@ -292,7 +292,7 @@ Priority:
 | 2 | five case model | `business-cases` or `green-book` |
 | 3 | reviewer with agile delivery experience | `agile-assurance` |
 | 4 | integrated assurance and approval plan | `integrated-assurance` |
-| 5 | benefits realisation assurance | `benefits-assurance` |
+| 5 | benefits realisation assurance | `benefits-assurance` or `gate-review-5` (widened in WP2, Oli 2026-10-15) |
 | 6 | comply or explain digital procurement | `ddat-playbook` |
 | 7 | digital functional standard | `govs-005` |
 | 8 | project assessment review | `nista-par` |

@@ -798,3 +798,25 @@ discovery in `docs/wp0-discovery.md`. WP1 outcome:
   was unaffected).
 - Reference engine (non-gating) now also misses "what goes in the economic case";
   the shipping engine passes 30/30.
+
+### Go-live plan, WP2: NISTA's August 2026 assurance guides (2026-10-15)
+
+- `agile-assurance` (21 sections), `integrated-assurance` (14) and
+  `benefits-assurance` (13) indexed through `govuk_pdf`. Each PDF states OGL on its
+  page 2; each landing page carries only the current version, so the agile guide's
+  2021 v1.2 cannot creep back in.
+- Two reader fixes they needed: **footnote markers** (a small raised number) split
+  sentences in two, and are now dropped; and for a PDF with **no outline**
+  (`integrated-assurance`), the large-type cover was read as the top heading of the
+  whole guide and the contents page as a section. Cover and contents are now never
+  sections. Teal Book and business-case output unchanged.
+- **Ranking change (Oli approved): at most two results per document** (`PER_DOC` in
+  `assets/search.js`). The agile guide had taken 3 of the top 5 for "how should
+  governance change for agile delivery" and pushed out the GDS page a tester went
+  looking for. With the cap, that and every other golden question pass, and no other
+  result changed. A search restricted to one source (`source_id`) is uncapped.
+- "benefits realisation assurance" finds Gate Review 5 and the Teal Book's benefits
+  chapter first; NISTA's guide ranks lower. Oli judged those good answers, so the
+  golden case and WP8 search #5 accept `gate-review-5` too.
+- Shipping engine 33/33. The non-gating sqlite reference engine has no cap and
+  now misses three.

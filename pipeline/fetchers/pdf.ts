@@ -103,6 +103,13 @@ export async function openPdf(data: Uint8Array): Promise<Pdf> {
         for (const raw of content.items) {
           if (!("str" in raw)) continue;
           const [, , , , x, y] = raw.transform as number[];
+          // A footnote marker is a small number raised above the line it sits in. As
+          // its own run at its own height it would end the line and split the
+          // sentence in two, which the obligation extractor then reads as two
+          // fragments. It adds nothing to the text, so drop it.
+          if (current && /^\d{1,2}$/.test(raw.str.trim()) && raw.height < current.height * 0.85 && y! > current.y && y! - current.y < current.height) {
+            continue;
+          }
           if (raw.str.trim()) {
             if (current && Math.abs(current.y - y!) < 2) {
               // A link or bold phrase is its own run, often with no space character
@@ -169,6 +176,9 @@ export function buildSections(
   const out = new Map<Boundary, Section>();
   let ordinal = 0;
   for (const boundary of sorted) {
+    // A contents page is a boundary (so its lines don't run into the section
+    // before it) but never a section of its own.
+    if (/^(table of )?contents$/i.test(boundary.title)) continue;
     const text = paragraphs(stripHeading(textBy.get(boundary) ?? [], boundary.title));
     if (!text) continue; // a heading with no prose of its own, as splitSections does
     out.set(boundary, {
@@ -255,8 +265,9 @@ export function typeSizeBoundaries(lines: Line[], skip: (line: Line) => boolean)
   for (const l of lines) if (!skip(l)) body.set(Math.round(l.height), (body.get(Math.round(l.height)) ?? 0) + l.text.length);
   const bodySize = [...body].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0;
 
+  // The cover (first page) is set large throughout and is never a section.
   const isHeading = (l: Line) =>
-    !skip(l) && Math.round(l.height) >= bodySize * 1.2 && squash(l.text).length <= 150 && /^[A-Z0-9]/.test(squash(l.text));
+    l.page > 0 && !skip(l) && Math.round(l.height) >= bodySize * 1.2 && squash(l.text).length <= 150 && /^[A-Z0-9]/.test(squash(l.text));
 
   const heads: { line: Line; title: string }[] = [];
   for (let i = 0; i < lines.length; i++) {

@@ -112,14 +112,18 @@
   prefer: html
   licence: OGL-v3
 
+# NISTA's three assurance guides, NISTA-branded versions of 2026-08-20. PDF only on
+# GOV.UK; each checked 2026-10-15 to extract as clean text, OGL on its page 2. The
+# landing page carries only the current version, so older ones (the agile guide's
+# v1.2 of October 2021, for instance) are never indexed. integrated-assurance has no
+# PDF outline, so its headings come from type size.
 - id: agile-assurance
   title: Assurance for agile delivery of digital services
   body: NISTA
   spine: assurance
   authority: advisory
-  fetcher: govuk_publication
+  fetcher: govuk_pdf
   slug: /government/publications/assurance-for-agile-delivery-of-digital-services
-  prefer: html
   licence: OGL-v3
   # Bridges the funding/assurance spine and the digital spine.
 
@@ -128,9 +132,8 @@
   body: NISTA
   spine: assurance
   authority: advisory
-  fetcher: govuk_publication
+  fetcher: govuk_pdf
   slug: /government/publications/implementing-integrated-assurance-for-major-projects
-  prefer: html
   licence: OGL-v3
 
 - id: benefits-assurance
@@ -138,9 +141,8 @@
   body: NISTA
   spine: assurance
   authority: advisory
-  fetcher: govuk_publication
+  fetcher: govuk_pdf
   slug: /government/publications/assurance-of-benefits-realisation-in-major-projects
-  prefer: html
   licence: OGL-v3
 
 - id: project-routemap
