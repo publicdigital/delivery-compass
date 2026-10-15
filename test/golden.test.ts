@@ -147,6 +147,12 @@ const CASES: Case[] = [
     expect: ["benefits-assurance", "gate-review-5"],
     why: "Gate 5 and the Teal Book cover this more densely than NISTA's guide; either is a good answer (Oli, 2026-10-15).",
   },
+  {
+    q: "project delivery functional standard",
+    expect: ["govs-002"],
+    why: "GovS 002 is read from a committed snapshot (snapshot_pdf). Fails if the snapshot stops parsing. " +
+      "On topic-only questions the Teal Book, which elaborates it at 17 times the length, usually ranks first.",
+  },
   // --- added for go-live (docs/go-live-plan.md WP3) ---------------------------
   {
     q: "comply or explain digital procurement",
@@ -160,6 +166,14 @@ const CASES: Case[] = [
     q: "when should we use consultants",
     expect: ["consultancy-playbook"],
     why: "PDF only, with a second PDF on the same publication that pdf_title must not pick.",
+  },
+  // --- added after go-live (WP3c) ---------------------------------------------
+  { q: "how do I quality assure a model", expect: ["aqua-book"] },
+  { q: "managing knowledge assets", expect: ["rose-book"] },
+  {
+    q: "do I need to publish a record of an algorithmic tool",
+    expect: ["atrs"],
+    why: "The Data and AI Ethics Framework's ATRS section ranks first; the standard's own guidance is 2nd.",
   },
   // --- the Teal Book, the one source read from a PDF off GOV.UK ---------------
   {

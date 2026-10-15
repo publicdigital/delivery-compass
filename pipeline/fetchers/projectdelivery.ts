@@ -19,7 +19,7 @@
  * are positional (section-1, section-2...) and would silently drift.
  */
 import type { Section } from "../normalise.ts";
-import { buildSections, downloadPdf, openPdf, outlineBoundaries, sha, squash, type Boundary } from "./pdf.ts";
+import { buildSections, downloadPdf, openPdf, outlineBoundaries, sha, squash, textFragment, type Boundary } from "./pdf.ts";
 
 const SITE = "https://projectdelivery.gov.uk/teal-book/home/";
 
@@ -43,20 +43,6 @@ export interface TealBook {
 
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-
-/**
- * Text fragment for a heading. Every chapter page repeats its headings in a
- * contents list, and a bare fragment jumps to the first match, which is that list.
- * So the fragment also names the first few words after the heading (`,-suffix`),
- * which only the real heading has. If the suffix ever fails to match, the browser
- * simply opens the chapter at the top. "-", "&" and "," are fragment syntax, so
- * they are escaped on top of the usual URI encoding.
- */
-const enc = (s: string) => encodeURIComponent(s).replace(/-/g, "%2D").replace(/,/g, "%2C");
-const textFragment = (heading: string, text: string) => {
-  const lead = text.split(/\s+/).slice(0, 3).join(" ");
-  return `:~:text=${enc(heading)}${lead ? `,-${enc(lead)}` : ""}`;
-};
 
 // Running header and footer. The footer carries the generation date, which changes
 // every night: leaving it in would make the content hash move daily and report a

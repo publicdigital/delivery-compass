@@ -237,6 +237,7 @@ export function exportStatic(): void {
       pdf: s.pdf ?? null,
       notIndexedReason: s.notIndexedReason ?? null,
       authorityNote: s.authorityNote ?? null,
+      snapshot: s.snapshot ? { version: s.snapshot.version, taken: s.snapshot.taken } : null,
       parent: s.parent ?? null,
       contentStatus: st?.status ?? "not_indexed",
       sections: st?.status === "full" ? st.sections : 0,

@@ -2,7 +2,10 @@ import { createHash } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import { extractObligations } from "./classify.ts";
 import { getContent, type ContentItem } from "./fetchers/govuk.ts";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { downloadGovukPdf, parseGovukPdf } from "./fetchers/govuk-pdf.ts";
+import { textFragment } from "./fetchers/pdf.ts";
 import { downloadTealBook, parseTealBook } from "./fetchers/projectdelivery.ts";
 import { splitSections, type Section } from "./normalise.ts";
 import { recordOffsiteText } from "./offsite-state.ts";
@@ -73,6 +76,29 @@ async function resolveGovukPdf(source: Source): Promise<{ docs: Doc[]; skipped?:
   if (parsed.sections.length < 5) return { docs: [], movedTo, skipped: `PDF parsed to only ${parsed.sections.length} sections; check it extracts cleanly` };
 
   return { docs: [{ path: url, html: "", updatedAt: item.public_updated_at ?? null, sections: parsed.sections }], movedTo };
+}
+
+/**
+ * A committed copy of a public PDF that no script can fetch (see types.ts). Cited at
+ * `endpoint`, the publisher's own page; with text_fragments, each section links to
+ * its heading on that page (the web edition carries the PDF's headings word for word).
+ */
+async function resolveSnapshotPdf(source: Source): Promise<{ docs: Doc[]; skipped?: string }> {
+  if (!source.snapshot || !source.endpoint) return { docs: [], skipped: "registry entry needs snapshot and endpoint" };
+  let data: Uint8Array;
+  try {
+    data = new Uint8Array(readFileSync(fileURLToPath(new URL(`../${source.snapshot.file}`, import.meta.url))));
+  } catch (e) {
+    return { docs: [], skipped: `snapshot missing: ${source.snapshot.file}` };
+  }
+  const anchor = source.snapshot.textFragments
+    ? (b: { trail: string[]; title: string }, text: string) => textFragment(b.title, text)
+    : () => null;
+  const parsed = await parseGovukPdf(data, anchor);
+  if (parsed.sections.length < 5) return { docs: [], skipped: `snapshot parsed to only ${parsed.sections.length} sections` };
+  const item = source.slug ? await getContent(source.slug) : null;
+  const updatedAt = item && !("httpError" in item) ? (item.public_updated_at ?? null) : null;
+  return { docs: [{ path: source.endpoint, html: "", updatedAt, sections: parsed.sections }] };
 }
 
 /**
@@ -291,6 +317,8 @@ export async function ingestSource(
 
   if (source.fetcher === "projectdelivery_pdf") {
     ({ docs, skipped, updatedAt: offsiteUpdatedAt, warnings: result.warnings } = await resolveProjectDeliveryPdf(source));
+  } else if (source.fetcher === "snapshot_pdf") {
+    ({ docs, skipped } = await resolveSnapshotPdf(source));
   } else if (source.fetcher === "govuk_pdf") {
     ({ docs, skipped, movedTo } = await resolveGovukPdf(source));
   } else if (source.fetcher === "govuk_attachment") {
@@ -324,7 +352,8 @@ export async function ingestSource(
 
   if (docs.length === 0) return { ...result, skipped: skipped ?? "no content", movedTo };
 
-  const liveUrl = source.slug ? `https://www.gov.uk${source.slug}`
+  const liveUrl = source.fetcher === "snapshot_pdf" && source.endpoint ? source.endpoint
+    : source.slug ? `https://www.gov.uk${source.slug}`
     : source.endpoint ?? `https://www.gov.uk${docs[0]!.path}`;
   let publicUpdatedAt: string | null;
   if (offsiteUpdatedAt) {

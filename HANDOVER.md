@@ -928,3 +928,70 @@ the WP7 watch list carried forward). Also fixed in WP8: `green-book-health` now 
 why it is not indexed (its 2013 PDF does not extract) and its owner is HM Treasury per
 GOV.UK; a doubled "NOT INDEXED: not indexed:" prefix is gone. WP3c and WP7 deferred to
 after go-live. Nothing deployed: merging `go-live-sources` to `main` is the deploy.
+
+### Go-live plan, WP3c: Aqua Book, Rose Book, ATRS (2026-10-15, after go-live)
+
+On branch `wp3c-wp7`. All three from their HTML editions, OGL v3 confirmed on each
+rendered GOV.UK page. 42 of 51 indexed; 5,413 sections; 895 mandatory obligations.
+
+- **`aqua-book`** (125 sections), `evaluation`, advisory, via `govuk_content`. GOV.UK's
+  title is "The AQuA Book"; this is the 2025 edition. **Owner is the Government
+  Operational Research Service**: it is GOV.UK's lead (primary publishing)
+  organisation, listed first, with the Analysis Function, GAD and ONS. Not HM Treasury
+  (the plan), and not the Analysis Function (the brief for this session).
+- **`rose-book`** (160 sections), `funding`, advisory: the 2024 book plus Annexes A
+  to E, all HTML. Owner the Government Office for Technology Transfer.
+- **`atrs`** (66 sections), `digital`, **mandatory**, with `authority_note` "for
+  government departments and some arm's-length bodies". Its own text: "It is mandatory
+  for all government departments, and for ALBs which deliver public or frontline
+  services, or directly interact with the general public." Others may publish
+  voluntarily.
+- **5 relationships added** (stated outright, D10): Aqua elaborates Magenta; Rose
+  elaborates Managing Public Money and the Teal Book; the AI Playbook and the Data and
+  AI Ethics Framework each require ATRS. 54 in all; 9 sources with none. **P9 to P11
+  proposed** for Oli in `docs/wp4-proposed-relationships.md`. No Aqua to Green Book
+  edge: the Aqua Book says the Green Book refers to it, but the current Green Book
+  does not.
+- Golden set 40/40 on the shipping engine (new: "how do I quality assure a model",
+  "managing knowledge assets", "do I need to publish a record of an algorithmic
+  tool"). The non-gating sqlite reference engine went from 35/37 to 37/40: "who
+  approves digital spending in my department" now misses there because spend-controls
+  slips from 5th to 6th. None of the new sources is in its results; the shift comes
+  from corpus-wide term statistics, and that engine has no per-document cap.
+
+### Go-live plan, WP7: watch list (2026-10-15, after go-live)
+
+**`docs/watch-list.md`**: the three items from the go-live report (a new NISTA assurance
+framework, a new Aqua Book edition, MOD Evidence-Led Assurance Parts 2 and 3), each with
+how it would be noticed. The weekly refresh sees changes to registered pages, new
+versions under a registered publication, new members of an expanded collection, and
+moves and withdrawals. It does **not** see a new publication at a new address: nothing
+sweeps NISTA's or HM Treasury's output. Until `compass discover` exists, sweep by hand
+with `pipeline/list-org.ts` (slugs in the file). NISTA swept 2026-10-15: newest item
+2026-09-10, no new framework yet. The Aqua Book on GOV.UK is already a 2025 "new
+edition"; the plan's May 2026 "new edition in progress" was not checked.
+
+### GovS 002 indexed from a committed snapshot (2026-10-15, after go-live)
+
+Oli supplied GovS 002 v2.1 and its CIAF, saying both are publicly downloadable. True,
+but only via the library page's Download link (`/download/66847/`), which answers
+scripts with the Cloudflare challenge. The page's markup also names
+`/wp-content/uploads/2025/08/...-Formatted.pdf`, which returns 404 even to a browser.
+So the weekly refresh still cannot fetch it. Oli chose to index from his downloaded
+copies (`data/snapshots/`, new fetcher `snapshot_pdf`), keep watching the GOV.UK page
+for a new version, and ask Government Project Delivery for a fetchable link.
+
+- `govs-002`: 50 sections, 62 MANDATORY (61 "shall"; `declares_convention` now takes
+  effect at last), citations deep-link to each heading on the HTML edition, which
+  carries the PDF's headings word for word. `govs-002-ciaf`: 51 sections, cited at its
+  library page (no HTML edition). Relation: CIAF elaborates GovS 002, quoted.
+- The PDF has no outline and two columns, which exposed three gaps in the type-size
+  fallback, all fixed in `pdf.ts`: wrapped headings whose second line starts in lower
+  case were not joined; contents-page entries (heading-sized, ending in page numbers)
+  became sections; and text was assigned by height on the page, which interleaves two
+  columns. Headings found by type size now carry their line index and text follows
+  reading order. Teal Book and every outline-based PDF unchanged (checked).
+- Golden: "project delivery functional standard" expects `govs-002` (41/41). On
+  topic-only questions the Teal Book usually outranks it; that is fair.
+- Built on the WP3c/WP7 branch (`wp3c-wp7`), which another session left committed and
+  idle in this same checkout, and merged to `main` together.

@@ -422,3 +422,59 @@ relations:
       Secure by Design, About (security.gov.uk, read 2026-10-15): "The Service Standard
       Point 9 (Create a secure service which protects users' privacy) advises service
       teams that they must follow the Secure by Design principles."
+
+  # --- Go-live plan WP3c (2026-10-15): stated outright in the text (decision D10) --
+  - from: aqua-book
+    to: magenta-book
+    type: elaborates
+    scope: producing quality analysis
+    evidence: >-
+      Magenta Book, 4.4 Data quality: "The Aqua Book and the Green Book provide further
+      guidance on producing quality analysis for government."
+
+  - from: rose-book
+    to: managing-public-money
+    type: elaborates
+    scope: managing knowledge assets
+    evidence: >-
+      Rose Book (2024): "This guidance is to advise and support organisations in scope
+      with their knowledge asset management and, in turn, fulfil their responsibilities
+      as set out in Managing Public Money (MPM)."
+
+  - from: rose-book
+    to: teal-book
+    type: elaborates
+    scope: knowledge asset management in projects
+    evidence: >-
+      Teal Book, 24.4 What is information and data management?: "The Rose Book:
+      Knowledge asset management in government provides further guidance on this."
+
+  - from: ai-playbook
+    to: atrs
+    type: requires
+    scope: algorithmic transparency, for departments and in-scope arm's-length bodies
+    evidence: >-
+      AI Playbook, Principle 7: "If you're a central government department or an arm's
+      length body within scope, you're required to use the Algorithmic Transparency
+      Recording Standard (ATRS)."
+
+  - from: data-ethics
+    to: atrs
+    type: requires
+    scope: algorithmic transparency, for departments and in-scope arm's-length bodies
+    evidence: >-
+      Data and AI Ethics Framework, Using the Algorithmic Transparency Recording
+      Standard: "All central government departments and arm's length bodies that provide
+      public or frontline services, or routinely interact with the general public, must
+      use the ATRS."
+
+  # GovS 002's assessment framework (indexed 2026-10-15 from a snapshot).
+  - from: govs-002-ciaf
+    to: govs-002
+    type: elaborates
+    scope: assessing an organisation's adherence to the standard
+    evidence: >-
+      GovS 002 CIAF v2.1: "This assessment framework is designed to help drive continuous
+      improvement within and across government, by helping government organisations
+      assess their adherence to, and practical application of the project delivery
+      functional standard".

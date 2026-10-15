@@ -131,3 +131,56 @@ service teams that they must follow the Secure by Design principles." Proposed, 
 added, because the Service Standard's text in the corpus does not name Secure by
 Design itself, and the Secure by Design page cannot be ingested (it is linked only).
 The existing edge `tcop` requires `secure-by-design` has no evidence line either.
+
+## WP3c (after go-live, 2026-10-15): Aqua Book, Rose Book, ATRS
+
+### Added (stated outright in the source text)
+
+| From | Type | To | Quote |
+|---|---|---|---|
+| `aqua-book` | elaborates | `magenta-book` | Magenta Book 4.4: "The Aqua Book and the Green Book provide further guidance on producing quality analysis for government." |
+| `rose-book` | elaborates | `managing-public-money` | Rose Book: "to advise and support organisations in scope with their knowledge asset management and, in turn, fulfil their responsibilities as set out in Managing Public Money" |
+| `rose-book` | elaborates | `teal-book` | Teal Book 24.4: "The Rose Book: Knowledge asset management in government provides further guidance on this." |
+| `ai-playbook` | requires | `atrs` | AI Playbook, Principle 7: "If you're a central government department or an arm's length body within scope, you're required to use the Algorithmic Transparency Recording Standard (ATRS)." |
+| `data-ethics` | requires | `atrs` | Data and AI Ethics Framework: "All central government departments and arm's length bodies that provide public or frontline services, or routinely interact with the general public, must use the ATRS." |
+
+54 relationships. Sources with none: 9 (`managing-public-money` is off the list).
+
+### Proposed: Oli to decide
+
+#### P9. `govs-005` requires `atrs`. **Recommended: yes, as `requires`, matching P7.**
+
+GovS 005 v2.2, 7.1: "Organisations should follow cross-government strategies,
+standards and governance for government digital and data, including guidance from the
+Data Standards Authority, the Government Data Quality Framework, the Data and AI Ethics
+Framework, the Algorithmic Transparency Recording Standard, and relevant security,
+privacy and technology standards". "should" in a mandatory standard, the same judgement
+as P7 (approved).
+
+#### P10. `rose-book` elaborates `green-book`, on knowledge assets. **Recommended: yes.**
+
+Green Book, "Assets": "The Rose Book provides guidance on how to identify, protect and
+exploit knowledge assets." A pointer rather than "further guidance on this", so
+proposed, not added. The Rose Book in turn applies Green Book appraisal ("In line with
+good practice set out in the HM Treasury's Green Book, such appraisal should be set
+alongside a 'do nothing' option").
+
+#### P11. `aqua-book` elaborates `teal-book`, on analysis and data use. **Recommended: yes.**
+
+The Teal Book points to the Aqua Book in about a dozen chapters. The strongest, 24.6.1.4:
+"the Government Functional Standard for Analysis and the Aqua Book (requires sign in)
+set out standards for data use in analysis, and these should be followed where such
+activities are part of the scope of the work."
+
+#### Not proposed: `aqua-book` and `green-book`
+
+The plan asked for this link. The Aqua Book (2025) says "It is also referred to by the
+Green Book", but the Green Book's current text (2026 edition, as indexed) does not
+mention the Aqua Book at all. The only text linking them is the Magenta Book naming
+both as guidance on quality analysis, which supports the `magenta-book` edge above, not
+one between these two. No edge.
+
+#### Not proposed: `service-manual` and `atrs`
+
+The Service Manual says "The Algorithmic Transparency Standard helps you outline and
+publish this information": a pointer, not a requirement, and it uses an old name.

@@ -125,3 +125,18 @@
   slug: /government/publications/government-functional-standard-govs-005-digital
   prefer: html
   licence: OGL-v3
+
+# Go-live plan WP3c (decision D4: HTML edition exists). Authority from its own text
+# (checked 2026-10-15): "It is mandatory for all government departments, and for ALBs
+# which deliver public or frontline services, or directly interact with the general
+# public." Others may publish records voluntarily. OGL v3 checked on the rendered page.
+- id: atrs
+  title: Algorithmic Transparency Recording Standard
+  body: Government Digital Service
+  spine: digital
+  authority: mandatory
+  authority_note: for government departments and some arm's-length bodies
+  fetcher: govuk_publication
+  slug: /government/publications/guidance-for-organisations-using-the-algorithmic-transparency-recording-standard
+  prefer: html
+  licence: OGL-v3

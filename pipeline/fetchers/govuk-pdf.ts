@@ -17,7 +17,7 @@
  * which browsers' PDF viewers honour).
  */
 import type { Section } from "../normalise.ts";
-import { buildSections, downloadPdf, openPdf, outlineBoundaries, runningLines, typeSizeBoundaries } from "./pdf.ts";
+import { buildSections, downloadPdf, openPdf, outlineBoundaries, runningLines, typeSizeBoundaries, type Boundary } from "./pdf.ts";
 
 /** Bookmarks that are not sections: Word and InDesign bookmark every table and figure. */
 const NOT_A_SECTION = /^(table|figure|box|chart|diagram|annex table)\s*\d+|^(cover|contents|table of contents)$/i;
@@ -30,7 +30,14 @@ export interface GovukPdf {
 
 export const downloadGovukPdf = (url: string) => downloadPdf(url, "weekly corpus refresh");
 
-export async function parseGovukPdf(data: Uint8Array): Promise<GovukPdf> {
+/**
+ * Also used for committed snapshots (`snapshot_pdf`), which cite a web page rather
+ * than the PDF and so pass their own anchor.
+ */
+export async function parseGovukPdf(
+  data: Uint8Array,
+  anchor: (b: Boundary, text: string) => string | null = (b) => `page=${b.page + 1}`,
+): Promise<GovukPdf> {
   const pdf = await openPdf(data);
   const lines = await pdf.lines();
   const running = runningLines(lines, pdf.numPages);
@@ -42,7 +49,7 @@ export async function parseGovukPdf(data: Uint8Array): Promise<GovukPdf> {
     method = "type size";
   }
 
-  const sections = [...buildSections(lines, boundaries, running, (b) => `page=${b.page + 1}`).values()];
+  const sections = [...buildSections(lines, boundaries, running, anchor).values()];
   await pdf.destroy();
   return { sections, method };
 }

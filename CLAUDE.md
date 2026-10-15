@@ -78,6 +78,15 @@ in `assets/` on each `npm test`. Use a class.
 CID-encoded and extract as garbage; two are print-outs of web pages. A source with no
 HTML edition is skipped and reported, not guessed at.
 
+**Committed snapshots, as a last resort** (`snapshot_pdf`, files in `data/snapshots/`).
+For a document that is public but that no script can fetch: GovS 002 and its CIAF,
+whose only download link is behind the Cloudflare challenge. Oli downloads the PDF by
+hand; it is committed and read like any checked PDF. It does **not** update itself, so
+the registry keeps its GOV.UK `slug`: a new version noted there raises the weekly
+curator issue, and someone downloads it again and bumps `snapshot.version` and
+`snapshot.taken`. Never use this for a document a script can fetch, and never for one
+that is not public.
+
 **PDFs, where they have been checked.** All PDF reading goes through one reader,
 `pipeline/fetchers/pdf.ts`, with two callers: the Teal Book (below) and `govuk_pdf`
 (`fetchers/govuk-pdf.ts`), for GOV.UK publications whose only edition is a PDF. A PDF
