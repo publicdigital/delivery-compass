@@ -120,3 +120,14 @@ reads.
 48 relationships (27 before WP4). Sources with no curated relationship: **10** (13 at
 the WP0 baseline), so the plan's threshold is met, and Gates 0, 2 and 4 are off the
 list. Still on it: `project-routemap`, `nista-par`, `nista-action-plan`, `ai-evaluation`, `green-book-collection`, `managing-public-money`, `better-regulation`, `gmpp`, `nao-reports`, `uc-lessons-learned`.
+
+## Found in WP5, proposed
+
+### P8. `service-standard` requires `secure-by-design`, on Service Standard point 9. **Recommended: yes.**
+
+Secure by Design's own About page (security.gov.uk, read 2026-10-15): "The Service
+Standard Point 9 (Create a secure service which protects users' privacy) advises
+service teams that they must follow the Secure by Design principles." Proposed, not
+added, because the Service Standard's text in the corpus does not name Secure by
+Design itself, and the Secure by Design page cannot be ingested (it is linked only).
+The existing edge `tcop` requires `secure-by-design` has no evidence line either.

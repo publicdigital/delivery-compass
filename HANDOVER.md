@@ -888,3 +888,19 @@ discovery in `docs/wp0-discovery.md`. WP1 outcome:
   and Gate 4 a CONFLICT warning** on technology spend control. A conflict is now
   worded as two sources that "disagree" on every surface (MCP, web, CLI), not as one
   being "out of date", since for Gate 4 the conflicting page is the newer one.
+
+### Go-live plan, WP5: metadata (2026-10-15)
+
+- Owners: `tcop` and `data-ethics` now **Government Digital Service** (GOV.UK lists
+  GDS first for TCoP, with CDDO still second; GDS only for the ethics framework).
+  `secure-by-design` is now **Government Cyber Unit**, not GDS as the plan expected:
+  the framework's own About page says it "has been developed by the Government Cyber
+  Unit (GCU)". Its page moved to `security.gov.uk/policy-and-guidance/secure-by-design/`;
+  registry link updated. No owner field says CDDO any more.
+- `gmpp` was already current: it indexes the April 2026 data (81 projects) and the
+  landing page's "from over 200 projects to 81 projects". No change.
+- Other "CDDO" mentions, left as they are for Oli: an evidence quote in
+  `relations.yaml` (historical, accurate), and prose in README.md, `docs/sources-engine.md`
+  and `docs/what-we-built-and-why.md` naming CDDO in lists of bodies.
+- The Secure by Design page also says Service Standard point 9 requires its
+  principles; proposed as P8 in `docs/wp4-proposed-relationships.md`.
