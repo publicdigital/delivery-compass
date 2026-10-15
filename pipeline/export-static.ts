@@ -234,6 +234,7 @@ export function exportStatic(): void {
       fetcher: s.fetcher,
       url: s.slug ? `https://www.gov.uk${s.slug}` : (s.endpoint ?? null),
       externalAttachment: s.externalAttachment ?? null,
+      pdf: s.pdf ?? null,
       parent: s.parent ?? null,
       contentStatus: st?.status ?? "not_indexed",
       sections: st?.status === "full" ? st.sections : 0,

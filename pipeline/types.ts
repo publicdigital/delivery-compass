@@ -18,7 +18,10 @@ export type FetcherName =
   // A real canonical source exists, but not on GOV.UK, and it isn't fetchable
   // (e.g. blocks non-browser requests). Distinct from local_only, where no public
   // canonical exists at all - kept registered so the gap is visible, not silent.
-  | "off_platform";
+  | "off_platform"
+  // The Teal Book: off GOV.UK, HTML behind a bot challenge, but published as a
+  // nightly PDF generated from the same pages. See pipeline/fetchers/projectdelivery.ts.
+  | "projectdelivery_pdf";
 
 export interface Source {
   id: string;
@@ -36,6 +39,8 @@ export interface Source {
   licence: string;
   redistribute?: boolean;
   externalAttachment?: string;
+  /** For projectdelivery_pdf: the PDF that is read. `endpoint` is the web page cited. */
+  pdf?: string;
   supersedesUrl?: string;
   /** Document sets out the "shall denotes a requirement" convention in its front matter. */
   declaresConvention: boolean;

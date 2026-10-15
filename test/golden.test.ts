@@ -124,6 +124,18 @@ const CASES: Case[] = [
     expect: ["magenta-book", "service-manual"],
     why: "Bridged through adaptive-governance.",
   },
+  // --- the Teal Book, the one source read from a PDF off GOV.UK ---------------
+  {
+    q: "what does the teal book say about tailoring",
+    expect: ["teal-book"],
+    expectPath: "projectdelivery.gov.uk/teal-book/home/part-b-tailoring-and-adopting/",
+    why: "Named directly. Fails if the nightly PDF stops parsing or its chapter URLs drift.",
+  },
+  {
+    q: "stages of a programme and project life cycle",
+    expect: ["teal-book"],
+    why: "Teal Book chapter 14 is the only source that sets out the life cycle stage by stage.",
+  },
 ];
 
 const relations = loadRelations();

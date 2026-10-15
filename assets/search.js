@@ -419,8 +419,11 @@ export function matchConcepts(concepts, question) {
   return { terms: hit.flatMap((c) => c.terms ?? []), concepts: hit };
 }
 
-/** Deep link to the exact heading on GOV.UK. */
+/**
+ * Deep link to the exact heading. A doc path is a GOV.UK path, or a full URL for
+ * a source hosted elsewhere (the Teal Book), whose anchor is a text fragment.
+ */
 export function citationUrl(section) {
-  const base = `https://www.gov.uk${section.docPath}`;
+  const base = /^https?:/.test(section.docPath) ? section.docPath : `https://www.gov.uk${section.docPath}`;
   return section.anchor ? `${base}#${section.anchor}` : base;
 }

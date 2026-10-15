@@ -25,6 +25,7 @@ function normalise(raw: Record<string, unknown>, definedIn: string): Source {
     licence: String(raw.licence ?? "unknown"),
     redistribute: raw.redistribute as boolean | undefined,
     externalAttachment: raw.external_attachment as string | undefined,
+    pdf: raw.pdf as string | undefined,
     supersedesUrl: raw.supersedes_url as string | undefined,
     declaresConvention: Boolean(raw.declares_convention),
     withdrawnOn: raw.withdrawn_on ? String(raw.withdrawn_on) : undefined,

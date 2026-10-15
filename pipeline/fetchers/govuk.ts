@@ -1,3 +1,4 @@
+import { readOffsiteState } from "../offsite-state.ts";
 import type { Attachment, ChangeNote, Source, SourceState } from "../types.ts";
 
 const API = "https://www.gov.uk/api/content";
@@ -81,6 +82,22 @@ export async function checkSource(source: Source, parentSlug?: string): Promise<
       publicUpdatedAt: parent.public_updated_at,
       changeHistory: toChangeNotes(parent),
       attachments: toAttachments(parent),
+    };
+  }
+  // Off GOV.UK, so nothing to ask an API. Ingest has already read the text and
+  // recorded whether it changed; report that, with our own notes standing in for
+  // the publisher's change history.
+  if (source.fetcher === "projectdelivery_pdf") {
+    const state = readOffsiteState(source.id);
+    if (!state) return { ...base, error: "no recorded text yet; run ingest first" };
+    return {
+      ...base,
+      ok: true,
+      documentType: "projectdelivery_pdf",
+      title: source.title,
+      publicUpdatedAt: state.changedAt,
+      firstPublishedAt: state.firstRecordedAt,
+      changeHistory: state.notes,
     };
   }
   if (source.fetcher === "local_only" || !source.slug) {

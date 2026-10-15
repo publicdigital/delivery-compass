@@ -178,6 +178,6 @@ export function obligationsForSections(db: DatabaseSync, sectionIds: number[]): 
 
 /** Deep link to the exact heading on GOV.UK. */
 export function citationUrl(hit: { docPath: string; anchor: string | null }): string {
-  const base = `https://www.gov.uk${hit.docPath}`;
+  const base = /^https?:/.test(hit.docPath) ? hit.docPath : `https://www.gov.uk${hit.docPath}`;
   return hit.anchor ? `${base}#${hit.anchor}` : base;
 }

@@ -61,7 +61,7 @@ export async function poll(
       body: source.body,
       spine: source.spine,
       authority: source.authority,
-      liveUrl: source.slug ? `https://www.gov.uk${source.slug}` : undefined,
+      liveUrl: source.slug ? `https://www.gov.uk${source.slug}` : source.endpoint,
     };
 
     if (!state.ok) {

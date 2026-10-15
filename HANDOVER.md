@@ -689,3 +689,77 @@ repo, site URL and code names stay `delivery-compass`. The connector name people
 Claude is whatever they type when adding it, so tell testers to use "Gov Delivery
 Library". The 401 message now says to add `?key=YOUR_KEY` to the connector URL, which
 is the usual cause of "Missing or wrong key".
+
+### The Teal Book added, read from its own nightly PDF (2026-10-15)
+
+Asked to add the Teal Book to the connector and keep it current. It is Government
+Project Delivery's "core and definitive reference" for project delivery, version 3.0
+published 2026-07-01, and it is **not on GOV.UK**: the GOV.UK search API cannot find
+it, and the only GOV.UK mention is a link on the Government Project Delivery "about"
+page to `projectdelivery.gov.uk/teal-book/home/`.
+
+That site is WordPress behind Cloudflare, and every page answers a non-browser request
+with a bot challenge (`cf-mitigated: challenge`). We do not get round that; CLAUDE.md
+now says so in as many words. The way in is one the publisher offers on purpose: a
+**PDF of the whole book, regenerated overnight** from the web pages, served with no
+challenge (`wp-content/uploads/teal_book/The-Teal-Book-daily-generated.pdf`, ~36MB,
+554 pages). The licence is OGL (site Crown copyright page and the PDF's own page 2).
+
+The PDF-avoidance rule does not bite here, and this was checked before building on it.
+The file is made by wkhtmltopdf from the live HTML, so it extracts as clean text, and
+it carries a 1,081-entry heading outline that does the job GOV.UK heading ids do
+elsewhere. `pipeline/fetchers/projectdelivery.ts` reads it with `pdfjs-dist` (the
+second dependency, pipeline-only):
+
+- the outline gives chapters and section boundaries; text is assigned to the heading
+  above it by page and position, and wrapped lines are rejoined into paragraphs so the
+  obligation extractor sees whole sentences;
+- the running header and the "Generated ... on <date>" footer are stripped, by margin
+  position and by pattern. Leaving the footer in would change the hash every night;
+- **citations go to the chapter web pages**, derived from the outline titles (part
+  slug + chapter slug, all 48 checked against the live site on 2026-10-15), with a
+  `#:~:text=` fragment that jumps to the heading. The site's own anchors are
+  positional (`section-1`, `section-2`...) and would drift silently. The fragment
+  carries the section's first three words as a suffix (`,-Reports%20should%20be`)
+  because every chapter page repeats its headings in a contents list, and a bare
+  fragment matched that list instead. Not verified by a real click (the in-app
+  browser will not follow scripted text-fragment links); if a suffix fails to match,
+  the link still opens the right chapter, at the top.
+
+Result: 48 chapter pages, 876 sections, 1,716 obligations (46 mandatory, the rest
+mostly "should"). Registered as `teal-book`, advisory, assurance spine, owner
+"Government Project Delivery", with one curated edge: `teal-book elaborates govs-002`,
+quoting the Teal Book's own statement that it builds on the functional standard.
+
+**Keeping it current** is the part that needed new machinery. GOV.UK gives
+`public_updated_at` and change notes; this site gives nothing to a script, and the
+PDF's file date moves every night whether a word changed or not. So the text itself
+is the signal: ingest hashes each chapter and the whole book, and compares with the
+last refresh. The baseline has to be in git, because the scheduled runner starts with
+an empty database: `data/offsite-state.json`, which the refresh workflow now commits
+alongside `assets/data/`. When the text changes, ingest writes a note naming the
+chapters that moved (and the version, if the cover changed). `watch` reports those
+notes as the source's change history, so they reach `watch.json`, the
+`recent_changes` tool and the weekly curator issue like any GOV.UK change note. The
+notes are ours, not the publisher's, and every surface says so; the publisher's own
+update list is at `teal-book/home/#all-updates`, which a script cannot read.
+
+The source's date is likewise **when we last saw the text change**, not a publication
+date, and the MCP results say exactly that rather than "page last updated". It starts
+at 2026-10-15, the day it was first recorded.
+
+Failure modes, each one loud: a 403 or an HTML challenge page instead of the PDF, or
+a PDF that parses to under 100 sections, counts as "returned no content", which stops
+the refresh and raises the failure issue, so last week's Teal Book stays live. A new
+top-level part the parser does not know (an appendix, say) is left out and flagged
+for the curator, with a pointer to where to teach it the URL.
+
+Two golden questions guard it: one asks for the Teal Book on tailoring and asserts
+the Part B URL, so URL drift fails the suite.
+
+Also checked: a faked change (chapter 20 hash and version edited in the state file)
+produced "Version 2.9 is now 3.0. Text changed in 1 chapter(s): Chapter 20: Risk
+management" in `watch` and the change-notes list; the real state was restored after.
+The sqlite reference engine (non-gating) misses "how should governance change for
+agile delivery" and "light touch governance for a pilot"; the shipping engine passes
+29/29.

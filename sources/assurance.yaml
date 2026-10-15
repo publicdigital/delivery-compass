@@ -17,6 +17,22 @@
   # Canonical file has moved off GOV.UK to projectdelivery.gov.uk.
   external_attachment: https://projectdelivery.gov.uk/library-product/government-functional-standard-govs-002-project-delivery/
 
+# The Teal Book: Government Project Delivery's "core and definitive reference on how
+# project delivery should be done in government", building on GovS 002. Version 3.0,
+# 2026-07-01. Not on GOV.UK. Its web pages answer non-browser requests with a
+# Cloudflare challenge, which we do not get round; the publisher also serves the whole
+# book as a PDF regenerated nightly from those pages, and that is what is read.
+# Citations go to the chapter pages. See pipeline/fetchers/projectdelivery.ts.
+- id: teal-book
+  title: "The Teal Book: Project delivery in government"
+  body: Government Project Delivery
+  spine: assurance
+  authority: advisory
+  fetcher: projectdelivery_pdf
+  endpoint: https://projectdelivery.gov.uk/teal-book/home/
+  pdf: https://projectdelivery.gov.uk/wp-content/uploads/teal_book/The-Teal-Book-daily-generated.pdf
+  licence: OGL-v3
+
 - id: nista-assurance-toolkit
   title: NISTA assurance review toolkit
   body: NISTA

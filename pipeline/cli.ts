@@ -35,11 +35,16 @@ async function cmdIngest(only?: string): Promise<void> {
   // returning nothing is correct; the Green Book returning nothing is an incident.
   const expectsContent = (id: string) => {
     const src = byId.get(id);
+    if (src?.fetcher === "projectdelivery_pdf") return true;
     return Boolean(src && src.slug && src.fetcher !== "withdrawn" && src.fetcher !== "local_only" && src.fetcher !== "nao_wp");
   };
 
   for (const source of registry) {
     const r = await ingestSource(db, source, claimed, byId);
+    for (const w of r.warnings ?? []) {
+      console.log(`  ${YELLOW}warn${RESET}  ${source.id.padEnd(26)} ${w}`);
+      flagForReview(`**${source.title}:** ${w}`);
+    }
     if (r.movedTo) moved.push({ id: source.id, from: source.slug ?? "?", to: r.movedTo });
     if (r.skipped) {
       console.log(`  ${DIM}skip${RESET}  ${source.id.padEnd(26)} ${DIM}${r.skipped}${RESET}`);

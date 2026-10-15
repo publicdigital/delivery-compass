@@ -55,9 +55,11 @@ those PDFs are CID-encoded and extract as garbage, and two are browser print-out
 web pages. Meanwhile GOV.UK's Content API (`/api/content/<path>`) returns clean HTML
 bodies with stable heading anchors, plus `public_updated_at` and human-authored
 `change_history` notes. Ingestion is HTML-first; a source with no HTML edition is
-skipped and reported rather than silently ingested as noise.
+skipped and reported rather than silently ingested as noise. The one exception is
+the Teal Book, which is not on GOV.UK and is read from its publisher's nightly PDF;
+CLAUDE.md says why that one is safe.
 
-**The registry is the real asset.** `sources/*.yaml` holds 41 curated entries across
+**The registry is the real asset.** `sources/*.yaml` holds 42 curated entries across
 six spines, each with its canonical slug, owning body and licence.
 `compass expand <collection-slug>` discovers a collection's member documents for
 curation — one call on the Green Book collection surfaces 27 of them — but that's a

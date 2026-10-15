@@ -10,8 +10,9 @@ others (§7). Re-deriving that context is expensive.
 
 ## Running it
 
-Node 24 only — uses built-in `node:sqlite` and native TypeScript execution. One
-runtime dependency (`yaml`). No build step, no API key.
+Node 24 only — uses built-in `node:sqlite` and native TypeScript execution. Two
+dependencies, both pipeline-only: `yaml`, and `pdfjs-dist` for the Teal Book. Nothing
+the browser or the MCP function loads uses either. No build step, no API key.
 
 ```bash
 npm install && npm run refresh
@@ -77,13 +78,24 @@ in `assets/` on each `npm test`. Use a class.
 CID-encoded and extract as garbage; two are print-outs of web pages. A source with no
 HTML edition is skipped and reported, not guessed at.
 
+**One exception: the Teal Book** (`teal-book`, `pipeline/fetchers/projectdelivery.ts`).
+It is not on GOV.UK, and projectdelivery.gov.uk answers non-browser requests for its
+pages with a Cloudflare challenge. **Never try to get past that challenge** (a browser
+user agent, a headless browser, a solver): it is the publisher saying no. What it does
+serve openly is a PDF of the whole book, regenerated nightly from the web pages by
+wkhtmltopdf, with a full heading outline. That PDF extracts cleanly, which is the
+thing the rule above protects. Citations go to the chapter web pages with a
+`#:~:text=` fragment, never to the PDF. Its change detection is a hash of the text,
+kept in the committed `data/offsite-state.json`, because the runner starts with an
+empty database and the PDF's own date moves every night.
+
 **Be polite to GOV.UK.** 150ms between API calls. It is a public good.
 
 **NAO content is not OGL.** Link it, never redistribute extracted text.
 
 ## Architecture in one paragraph
 
-`sources/*.yaml` is a curated registry of 41 sources across six spines; it is the real
+`sources/*.yaml` is a curated registry of 42 sources across six spines; it is the real
 intellectual asset. `sources/relations.yaml` holds hand-curated edges between them —
 GOV.UK models documents, not relationships, so nothing there is derivable. The
 pipeline fetches HTML via the GOV.UK Content API, splits on headings into anchored

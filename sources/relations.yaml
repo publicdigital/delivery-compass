@@ -82,6 +82,15 @@ relations:
     type: elaborates
     scope: multi-criteria decision analysis in options appraisal
 
+  - from: teal-book
+    to: govs-002
+    type: elaborates
+    scope: how to direct and manage portfolios, programmes and projects
+    evidence: >-
+      The Teal Book home page (2026-10-15): "The Teal Book builds on the expectations of
+      the Government Functional Standard for Project Delivery and serves as the core and
+      definitive reference on how project delivery should be done in government."
+
   - from: publishing-business-cases
     to: business-cases
     type: elaborates

@@ -67,7 +67,13 @@ const corpus = () => (cached ??= loadCorpus());
 const day = (iso) => (iso ? String(iso).slice(0, 10) : "unknown");
 
 /** Same thresholds as the site's age badge. Always stated, because silence is a claim. */
-function age(iso) {
+function age(iso, src) {
+  // The Teal Book has no publication date we can read (see
+  // pipeline/fetchers/projectdelivery.ts). Its date is when this tool last saw the
+  // text change, and calling that "page last updated" would claim more than we know.
+  if (src?.fetcher === "projectdelivery_pdf") {
+    return `text last seen to change ${iso ? day(iso) : "on an unknown date"} (re-read weekly from the publisher's daily PDF)`;
+  }
   if (!iso) return "page date unknown, so currency cannot be vouched for";
   const years = (Date.now() - new Date(iso).getTime()) / (365.25 * 86400000);
   if (years >= 3) return `page last updated ${day(iso)}, over three years ago: verify it is still current`;
@@ -109,7 +115,7 @@ const CITE_RULE =
 
 function footer(c) {
   return `\n---\nCorpus last refreshed ${day(c.meta.indexedAt)}. Unofficial: the Gov Delivery Library is not a government service. ` +
-    `Text is quoted from GOV.UK under the Open Government Licence v3.0; follow the links for the authoritative version.`;
+    `Text is quoted from GOV.UK and projectdelivery.gov.uk under the Open Government Licence v3.0; follow the links for the authoritative version.`;
 }
 
 // --- tools ---------------------------------------------------------------------
@@ -148,7 +154,7 @@ function searchGuidance(c, { question, source_id, limit = 6 }) {
   hits.forEach((h, i) => {
     const src = c.sourceById.get(h.sourceId);
     out.push(`## ${i + 1}. ${h.headingPath || h.heading}`);
-    out.push(`Source: ${h.sourceTitle} (\`${h.sourceId}\`), ${h.body}. Authority: ${src?.authority ?? h.authority}. ${age(h.updatedAt)}.`);
+    out.push(`Source: ${h.sourceTitle} (\`${h.sourceId}\`), ${h.body}. Authority: ${src?.authority ?? h.authority}. ${age(h.updatedAt, src)}.`);
     out.push(`Cite inline as: ${inlineCitation(h)}`);
     for (const w of warningsFor(c, h.sourceId)) out.push(w);
 
@@ -165,7 +171,7 @@ function searchGuidance(c, { question, source_id, limit = 6 }) {
       }
     }
     out.push("", "Section text (verbatim):", quote(h.text));
-    if (h.truncated) out.push(`(Section continues on GOV.UK: ${citationUrl(h)})`);
+    if (h.truncated) out.push(`(Section continues at ${citationUrl(h)})`);
     out.push("");
   });
   return out.join("\n") + footer(c);
@@ -198,6 +204,10 @@ function getSource(c, { source_id }) {
   const out = [`# ${s.title}`, "", `- id: \`${s.id}\``, `- Owner: ${s.body}`, `- Spine: ${s.spine}`, `- Authority: ${s.authority}`,
     `- Licence: ${s.licence}`, `- Canonical URL: ${s.url ?? "none"}`];
   if (s.externalAttachment) out.push(`- Substantive file: ${s.externalAttachment}`);
+  if (s.fetcher === "projectdelivery_pdf") {
+    out.push(`- How it is read: the publisher's own PDF of the whole book, regenerated nightly from the website (${s.pdf}), re-read weekly. ` +
+      "Citations link to the matching chapter on the website. The website itself cannot be read automatically.");
+  }
   if (s.parent) out.push(`- Part of: \`${s.parent}\``);
   out.push(`- Status: ${s.contentStatus === "full" ? `${STATUS.full} (${s.sections} sections)` : notIndexedReason(s)}`);
   if (s.replacement) out.push(`- Replacement: ${s.replacement}`);
@@ -219,7 +229,9 @@ function getSource(c, { source_id }) {
 
   const notes = c.watch.filter((w) => w.sourceId === s.id);
   if (notes.length) {
-    out.push("", "## Recent change notes (the publisher's own words)");
+    out.push("", s.fetcher === "projectdelivery_pdf"
+      ? "## Recent changes (detected by this tool comparing weekly text, not the publisher's words)"
+      : "## Recent change notes (the publisher's own words)");
     for (const w of notes) out.push(`- ${day(w.timestamp)}: ${w.note}`);
   }
 
@@ -242,7 +254,7 @@ function coverage(c) {
     "# What the Gov Delivery Library covers",
     "",
     `${m.sources} of ${m.registered} registered sources are indexed: ${m.sections} sections and ${m.obligations} extracted obligations, ${m.mandatory} of them mandatory. ` +
-      `${m.relations} curated relationships between sources. Corpus last refreshed ${day(m.indexedAt)}; refreshed weekly from GOV.UK.`,
+      `${m.relations} curated relationships between sources. Corpus last refreshed ${day(m.indexedAt)}; refreshed weekly from GOV.UK and the Government Project Delivery website (the Teal Book).`,
     "",
     "The registry is curated by hand. Anything outside it is out of scope, so silence from this server is not assurance that no rule applies.",
     "",
@@ -271,7 +283,8 @@ function recentChanges(c, { days = 90, source_id }) {
   const cutoff = new Date(Date.now() - d * 86400000).toISOString();
   const notes = c.watch.filter((w) => w.timestamp >= cutoff && (!source_id || w.sourceId === source_id));
   const out = [`# Change notes, last ${d} days${source_id ? `, \`${source_id}\`` : ""}`,
-    "In the publisher's own words, newest first. Only notes the publisher wrote are listed: a page can change without one.", ""];
+    "In the publisher's own words, newest first. Only notes the publisher wrote are listed: a page can change without one. " +
+      "The exception is the Teal Book (`teal-book`): its publisher's notes cannot be read automatically, so its entries are this tool's own, from comparing each week's text with the last.", ""];
   if (notes.length === 0) out.push("None recorded in this window.");
   for (const w of notes) out.push(`- **${day(w.timestamp)}** ${w.sourceTitle} (\`${w.sourceId}\`, ${w.body}): ${w.note}${w.liveUrl ? ` ${w.liveUrl}` : ""}`);
   return out.join("\n") + footer(c);
@@ -344,7 +357,7 @@ export const TOOLS = [
   },
 ];
 
-export const INSTRUCTIONS = `The Gov Delivery Library serves UK government delivery guidance from a hand-curated registry of sources, refreshed weekly from GOV.UK. It is unofficial.
+export const INSTRUCTIONS = `The Gov Delivery Library serves UK government delivery guidance from a hand-curated registry of sources, refreshed weekly from GOV.UK and the Government Project Delivery website. It is unofficial.
 
 When you answer from these tools:
 - Quote requirements labelled MANDATORY verbatim, in quotation marks. Never paraphrase one.

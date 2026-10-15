@@ -2,7 +2,9 @@ import { createHash } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import { extractObligations } from "./classify.ts";
 import { getContent, type ContentItem } from "./fetchers/govuk.ts";
-import { splitSections } from "./normalise.ts";
+import { downloadPdf, parseTealBook } from "./fetchers/projectdelivery.ts";
+import { splitSections, type Section } from "./normalise.ts";
+import { recordOffsiteText } from "./offsite-state.ts";
 import type { Source } from "./types.ts";
 
 export interface IngestResult {
@@ -14,13 +16,51 @@ export interface IngestResult {
   metadataOnly?: boolean;
   /** Set when the registry slug now redirects; the registry should be updated. */
   movedTo?: string;
+  /** Things a curator should look at that did not stop the ingest. */
+  warnings?: string[];
 }
 
-/** A single ingestible document: one page of HTML with a canonical path. */
+/**
+ * A single ingestible document: one page of HTML with a canonical path. The path
+ * is a GOV.UK path, or a full URL for a source that lives elsewhere. A source that
+ * is not HTML arrives already split, in `sections`.
+ */
 interface Doc {
   path: string;
   html: string;
   updatedAt: string | null;
+  sections?: Section[];
+}
+
+/**
+ * The Teal Book: one nightly PDF, split by its outline into one doc per chapter,
+ * each cited at the chapter's web page. Also records the text's hash, which is how
+ * a change is noticed at all (see offsite-state.ts).
+ */
+async function resolveProjectDeliveryPdf(
+  source: Source,
+): Promise<{ docs: Doc[]; skipped?: string; updatedAt?: string; warnings?: string[] }> {
+  if (!source.pdf || !source.endpoint) return { docs: [], skipped: "registry entry needs both pdf and endpoint" };
+  let book;
+  try {
+    book = await parseTealBook(await downloadPdf(source.pdf));
+  } catch (e) {
+    return { docs: [], skipped: `PDF unavailable: ${(e as Error).message}` };
+  }
+  const sections = book.chapters.reduce((n, c) => n + c.sections.length, 0);
+  // A PDF that downloads but parses to almost nothing means the publisher changed
+  // how it is generated. Treat it as no content, which stops the refresh, rather
+  // than replacing a 900-section book with a stub.
+  if (sections < 100) return { docs: [], skipped: `PDF parsed to only ${sections} sections; its structure has probably changed` };
+
+  const { state } = recordOffsiteText(source.id, book, `${source.endpoint}#all-updates`);
+  const docs = book.chapters
+    .filter((c) => c.sections.length > 0)
+    .map((c) => ({ path: c.url, html: "", updatedAt: state.changedAt, sections: c.sections }));
+  const warnings = book.unrecognised.length
+    ? [`The PDF has top-level parts this parser does not recognise, so they were left out: ${book.unrecognised.join("; ")}. Teach pipeline/fetchers/projectdelivery.ts their URLs.`]
+    : undefined;
+  return { docs, updatedAt: state.changedAt, warnings };
 }
 
 /**
@@ -203,8 +243,11 @@ export async function ingestSource(
   let docs: Doc[];
   let skipped: string | undefined;
   let movedTo: string | undefined;
+  let offsiteUpdatedAt: string | undefined;
 
-  if (source.fetcher === "govuk_attachment") {
+  if (source.fetcher === "projectdelivery_pdf") {
+    ({ docs, skipped, updatedAt: offsiteUpdatedAt, warnings: result.warnings } = await resolveProjectDeliveryPdf(source));
+  } else if (source.fetcher === "govuk_attachment") {
     if (!source.parent) return { ...result, skipped: "no parent" };
     const parent = byId.get(source.parent);
     if (!parent) return { ...result, skipped: `unknown parent "${source.parent}"` };
@@ -235,9 +278,13 @@ export async function ingestSource(
 
   if (docs.length === 0) return { ...result, skipped: skipped ?? "no content", movedTo };
 
-  const liveUrl = source.slug ? `https://www.gov.uk${source.slug}` : `https://www.gov.uk${docs[0]!.path}`;
+  const liveUrl = source.slug ? `https://www.gov.uk${source.slug}`
+    : source.endpoint ?? `https://www.gov.uk${docs[0]!.path}`;
   let publicUpdatedAt: string | null;
-  if (source.slug) {
+  if (offsiteUpdatedAt) {
+    // Not a publication date: the date this tool last saw the text change.
+    publicUpdatedAt = offsiteUpdatedAt;
+  } else if (source.slug) {
     const state = await getContent(source.slug);
     publicUpdatedAt = "httpError" in state ? null : (state.public_updated_at ?? null);
   } else {
@@ -279,7 +326,7 @@ export async function ingestSource(
   if (declares) db.prepare("UPDATE sources SET declares_convention = 1 WHERE id = ?").run(source.id);
 
   for (const doc of docs) {
-    for (const section of splitSections(doc.html)) {
+    for (const section of doc.sections ?? splitSections(doc.html)) {
       totalChars += section.text.length;
       if (section.anchor) anchored++;
       const info = insertSection.run(

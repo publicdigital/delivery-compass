@@ -15,6 +15,7 @@
     "test": "node --experimental-strip-types test/csp.test.ts && node --experimental-strip-types test/golden.test.ts && node --experimental-strip-types test/mcp.test.ts"
   },
   "dependencies": {
+    "pdfjs-dist": "4.10.38",
     "yaml": "^2.6.1"
   },
   "devDependencies": {
