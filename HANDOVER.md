@@ -883,3 +883,8 @@ discovery in `docs/wp0-discovery.md`. WP1 outcome:
   pass.
 - One extraction slip seen: the integrated assurance PDF yields "submion" for
   "submission" once. Isolated (checked); quotes use the PDF's printed word.
+- Oli approved P1, P2, P3, P5 and P7 (10 more edges, 48 in all; 10 sources with
+  none) and declined P4 and P6. **The DDaT Playbook now carries a SUPERSEDED warning
+  and Gate 4 a CONFLICT warning** on technology spend control. A conflict is now
+  worded as two sources that "disagree" on every surface (MCP, web, CLI), not as one
+  being "out of date", since for Gate 4 the conflicting page is the newer one.

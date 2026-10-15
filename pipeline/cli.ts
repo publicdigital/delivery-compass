@@ -125,8 +125,13 @@ async function cmdAsk(question: string): Promise<void> {
     const stale = byId.get(c.supersededSourceId)?.title ?? c.supersededSourceId;
     const winner = byId.get(c.bySourceId)?.title ?? c.bySourceId;
     const tag = c.severity === "high" ? `${RED}SUPERSEDED${RESET}` : `${YELLOW}CONFLICT${RESET}`;
-    console.log(`${tag} ${BOLD}${stale}${RESET} is out of date on ${BOLD}${c.scope ?? "this topic"}${RESET}${c.effective ? ` (since ${c.effective})` : ""}`);
-    console.log(`  Current position is in ${BOLD}${winner}${RESET}.`);
+    if (c.type === "supersedes") {
+      console.log(`${tag} ${BOLD}${stale}${RESET} is out of date on ${BOLD}${c.scope ?? "this topic"}${RESET}${c.effective ? ` (since ${c.effective})` : ""}`);
+      console.log(`  Current position is in ${BOLD}${winner}${RESET}.`);
+    } else {
+      // Two sources disagreeing: neither is known to be the current one.
+      console.log(`${tag} ${BOLD}${stale}${RESET} and ${BOLD}${winner}${RESET} disagree on ${BOLD}${c.scope ?? "this topic"}${RESET}`);
+    }
     if (c.guidance) console.log(`  ${c.guidance.replace(/\s+/g, " ").trim()}`);
     if (c.evidence) console.log(`  ${DIM}${c.evidence.replace(/\s+/g, " ").trim()}${RESET}`);
     console.log();

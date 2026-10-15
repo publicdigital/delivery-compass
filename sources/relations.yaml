@@ -309,3 +309,105 @@ relations:
       prior to submission of a Strategic Outline Business Case (SOBC) to HM Treasury for
       approval." "The process for submission of IAAPs is described in the Treasury
       Approvals Process for projects and programmes".
+
+  # --- Approved by Oli from the WP4 proposals (2026-10-15) ------------------
+  # P1. The DDaT Playbook predates the 2026 change and still routes TCoP assurance
+  # through Cabinet Office spend control. Same supersession as TCoP itself.
+  - from: spend-controls
+    to: ddat-playbook
+    type: supersedes
+    scope: who assures TCoP compliance and approves digital and technology spend
+    effective: 2026-04-01
+    severity: high
+    evidence: >-
+      DDaT Playbook (2023), DDaT assurance: "Compliance with this code is assured through
+      the Cabinet Office spend control process". Service Manual (updated 2026-04-01):
+      "Digital and technology spend controls were replaced on 1 April 2026."
+    guidance: >-
+      Treat the Service Manual as current on who approves digital and technology spend.
+      The rest of the playbook, including its separate commercial spend control, is not
+      affected by this.
+
+  # P2. Gate 4 was republished after the change and still asks for technology spend
+  # control sign-off. A conflict, not a supersession: Gate 4 is the newer page.
+  - from: spend-controls
+    to: gate-review-4
+    type: conflicts
+    scope: technology spend control sign-off before going live
+    effective: 2026-04-01
+    severity: medium
+    evidence: >-
+      Gate 4 workbook (republished 2026-08-20), 4.2: "Cabinet Office (CO) controls have
+      been sighted on the FBC and the project has satisfied the CO controls teams
+      commercial and technology spend control requirements." Service Manual (updated
+      2026-04-01): "Digital and technology spend controls were replaced on 1 April 2026."
+    guidance: >-
+      The two disagree on technology spend control; this library cannot say which is
+      right. Check with NISTA or the department's digital spend approvers. The
+      commercial spend control in the same sentence is a separate control.
+
+  # P3. The benefits assurance guide has a section per gate on the benefits evidence
+  # that gate needs.
+  - from: benefits-assurance
+    to: gate-review-0
+    type: elaborates
+    scope: benefits evidence at the strategic assessment
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 0: "Benefits slogan: 'Link benefits to
+      strategy'... Key question: 'Are the project benefits contributing to the wider
+      strategic objectives of the programme / department / HMG?'"
+  - from: benefits-assurance
+    to: gate-review-1
+    type: elaborates
+    scope: benefits evidence at business justification
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 1: "Benefits slogan: 'Identify benefits'", followed by
+      the key question and the benefits documents required at that gate.
+  - from: benefits-assurance
+    to: gate-review-2
+    type: elaborates
+    scope: benefits evidence at delivery strategy
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 2: "Benefits slogan: 'Value and appraise'...
+      For an Outline Business Case a selection of the most important benefits identified
+      will need to be valued".
+  - from: benefits-assurance
+    to: gate-review-3
+    type: elaborates
+    scope: benefits evidence at the investment decision
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 3: "Benefits slogan: 'Plan to realise'", followed by
+      the key question and the benefits documents required at that gate.
+  - from: benefits-assurance
+    to: gate-review-4
+    type: elaborates
+    scope: benefits evidence at readiness for service
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 4: "Benefits slogan: 'Work to realise'... Key
+      question: 'are the correct processes in place to ensure benefits continue to be
+      realised after the project transitions into business as usual?'"
+  - from: benefits-assurance
+    to: gate-review-5
+    type: elaborates
+    scope: benefits evidence at the operations review
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 5: "Benefits slogan: 'Review performance'", followed by
+      the key question and the benefits documents required at that gate.
+
+  # P5. "should" in a mandatory guide; recorded as requires (Oli approved).
+  - from: business-cases
+    to: integrated-assurance
+    type: requires
+    scope: planning assurance and approvals (the IAAP)
+    evidence: >-
+      Business case guidance (2026), 11.10: "Practitioners should develop an integrated
+      assurance and approval plan (IAAP)."
+
+  # P7. "should" in a mandatory standard; recorded as requires (Oli approved).
+  - from: govs-005
+    to: data-ethics
+    type: requires
+    scope: appropriate and responsible use of data and AI
+    evidence: >-
+      GovS 005 v2.2, 7.2: organisations "should use the Data and AI Ethics Framework to
+      ensure data and AI are used appropriately, responsibly and transparently".

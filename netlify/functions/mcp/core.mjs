@@ -90,8 +90,12 @@ function warningsFor(c, sourceId) {
     .map((r) => {
       const by = c.sourceById.get(r.from)?.title ?? r.from;
       const what = r.type === "supersedes" ? "SUPERSEDED" : "CONFLICT";
+      // A conflict is two sources disagreeing, not one replacing the other: Gate 4
+      // (August 2026) contradicts a change dated April 2026, and "overtaken" would
+      // claim the library knows which is right.
+      const relation = r.type === "supersedes" ? "this source is overtaken by" : "this source disagrees with";
       return `**WARNING (${what}, curated):** on ${r.scope ?? "this topic"}${r.effective ? `, since ${r.effective}` : ""}, ` +
-        `this source is overtaken by "${by}" (\`${r.from}\`). ${r.guidance ?? ""}`.trim();
+        `${relation} "${by}" (\`${r.from}\`). ${r.guidance ?? ""}`.trim();
     });
 }
 

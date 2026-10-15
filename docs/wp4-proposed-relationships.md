@@ -104,11 +104,19 @@ the top of `relations.yaml`: `green-book-health`, `green-book-environment` and
 `nista-annual-report` assured_by `govs-002`. Most can be evidenced from text now in the
 corpus; the three that involve GovS 002 cannot, since its text cannot be read.
 
+## Oli's decisions (2026-10-15)
+
+Approved and added: **P1, P2, P3, P5, P7** (10 edges). Declined: **P4, P6**.
+
+Adding P2, the first `conflicts` edge where the target is the *newer* page, showed
+that every surface worded a conflict as "out of date … current position is in". That
+claims to know which side is right. The MCP server, the web page and the CLI now say
+the two sources "disagree" for `conflicts`, and keep "out of date" for `supersedes`.
+This also changes how the existing `spend-controls` / `agile-business-case` conflict
+reads.
+
 ## Result
 
-38 relationships (27 before). Sources with no curated relationship: **11** (13 at the
-WP0 baseline, before new sources were added), so the plan's threshold is met, and Gates
-0, 2 and 4 are off the list. Still on it: `benefits-assurance` (P3 would fix it),
-`project-routemap`, `nista-par`, `nista-action-plan`, `ai-evaluation`,
-`green-book-collection`, `managing-public-money`, `better-regulation`, `gmpp`,
-`nao-reports`, `uc-lessons-learned`.
+48 relationships (27 before WP4). Sources with no curated relationship: **10** (13 at
+the WP0 baseline), so the plan's threshold is met, and Gates 0, 2 and 4 are off the
+list. Still on it: `project-routemap`, `nista-par`, `nista-action-plan`, `ai-evaluation`, `green-book-collection`, `managing-public-money`, `better-regulation`, `gmpp`, `nao-reports`, `uc-lessons-learned`.
