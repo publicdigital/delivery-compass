@@ -864,3 +864,22 @@ discovery in `docs/wp0-discovery.md`. WP1 outcome:
   5 it is back in the top 5 and nothing else moved.
 - Shipping engine 37/37 (new cases: "should cost model", "when should we use
   consultants").
+
+### Go-live plan, WP4: relationships (2026-10-15)
+
+- **11 relationships added**, each stated outright in a source and quoted as evidence
+  (decision D10): Gates 0, 2 and 4 to the business case guide (and Gate 4 to the
+  Magenta Book), GovS 005 to the Service Standard and TCoP, the DDaT Playbook to TCoP,
+  the Service Standard and the Sourcing Playbook, the Consultancy Playbook to the
+  Sourcing Playbook, and the integrated assurance guide to TAP. 38 relationships;
+  sources with none down to 11 (plan threshold: under 13).
+- **Seven proposals wait for Oli** in `docs/wp4-proposed-relationships.md`. The two
+  that matter most: the **DDaT Playbook (2023) still says TCoP compliance "is assured
+  through the Cabinet Office spend control process"**, the same supersession as TCoP
+  (P1); and **Gate 4, republished 2026-08-20, still asks that the project "satisfied
+  the CO controls teams commercial and technology spend control requirements"** (P2,
+  proposed as a conflict, since Gate 4 is the newer page).
+- 15 of the 27 older edges have no evidence line; listed in the same file for a later
+  pass.
+- One extraction slip seen: the integrated assurance PDF yields "submion" for
+  "submission" once. Isolated (checked); quotes use the PDF's printed word.

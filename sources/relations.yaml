@@ -199,3 +199,113 @@ relations:
     to: govs-002
     type: assured_by
     scope: delivery confidence assessment of the major projects portfolio
+
+  # --- Added in go-live WP4 (2026-10-15) ------------------------------------
+  # Under Oli's decision D10 (docs/go-live-plan.md): edges the source text states
+  # outright are added here with the quote; judgement calls are proposed in
+  # docs/wp4-proposed-relationships.md and wait for Oli.
+
+  # Gates 0, 2 and 4, following the pattern of Gates 1, 3 and 5.
+  - from: gate-review-0
+    to: business-cases
+    type: gates
+    scope: programme business case approval points
+    evidence: >-
+      Business case guidance (2026), 5.8: "There is only a single Gate for PBCs, which is
+      Gate Review 0." 5.10: "Practitioners should undertake a Gate 0 Review when the PBC
+      is first completed, ahead of the first approval point for the programme."
+
+  - from: gate-review-2
+    to: business-cases
+    type: gates
+    scope: Outline Business Case (OBC) approval
+    evidence: >-
+      Business case guidance (2026), Table 2: "Gate 2: Delivery Strategy. Prior to
+      Outline Business Case (OBC) approval." Gate 2 workbook: "Confirm the Outline
+      Business Case (OBC) now the project is fully defined".
+
+  - from: gate-review-4
+    to: business-cases
+    type: requires
+    scope: an approved Full Business Case before going live
+    evidence: >-
+      Gate 4 workbook, evidence expected: "The Project and HMT have been in dialogue
+      about the full business case and HMT and both the Department Finance Director and
+      HMT have signed off the FBC."
+
+  - from: gate-review-4
+    to: magenta-book
+    type: requires
+    scope: an approved evaluation plan
+    evidence: >-
+      Gate 4 workbook, project documentation: "A Magenta Book compliant Evaluation Plan
+      approved by the Department Investment Committee and HMT if appropriate."
+
+  # GovS 005: Digital.
+  - from: govs-005
+    to: service-standard
+    type: requires
+    scope: designing and running services
+    evidence: >-
+      GovS 005 v2.2, 5.3: "Services shall be delivered in accordance with the Service
+      Standard."
+
+  - from: tcop
+    to: govs-005
+    type: elaborates
+    scope: expectations for technology decisions
+    evidence: >-
+      GovS 005 v2.2, 1.3: "This standard is supported by The Service Standard, which sets
+      expectations for services, and the Technology Code of Practice, which sets
+      expectations for technology decisions."
+
+  # The commercial playbooks.
+  - from: ddat-playbook
+    to: tcop
+    type: requires
+    scope: technology design and data sharing in DDaT procurement
+    evidence: >-
+      DDaT Playbook (2023), Key policies: data should be shared using APIs which
+      "satisfy the requirements of the Technology Code of Practice (TCoP)". Governance and
+      approvals: "TCoP is a cross-government standard setting out the key considerations
+      for how the government should design, build and buy technology."
+
+  - from: ddat-playbook
+    to: service-standard
+    type: requires
+    scope: service assessments for DDaT services
+    evidence: >-
+      DDaT Playbook (2023), DDaT assurance: "services will also need to meet the
+      Government Service Standard".
+
+  - from: ddat-playbook
+    to: sourcing-playbook
+    type: elaborates
+    scope: sourcing and contracting for digital, data and technology
+    evidence: >-
+      DDaT Playbook: "The Digital, Data and Technology Playbook is part of a wider
+      portfolio of Sourcing Playbooks developed by the Cabinet Office." Sourcing Playbook:
+      "The DDaT Playbook provides guidance when sourcing and contracting for these
+      digital services."
+
+  - from: consultancy-playbook
+    to: sourcing-playbook
+    type: elaborates
+    scope: sourcing consultancy services
+    evidence: >-
+      Consultancy Playbook v1.1, Scope: "The Consultancy Playbook forms part of the
+      Sourcing Playbook. As such, the principles, guidelines and rules of the Sourcing
+      Playbook still apply and shall be considered alongside the Consultancy Playbook
+      where appropriate."
+
+  # NISTA's integrated assurance guide.
+  - from: integrated-assurance
+    to: tap
+    type: feeds
+    scope: Integrated Assurance and Approval Plans submitted for Treasury approval
+    evidence: >-
+      Integrated assurance guide v2.1: the initial IAAP should be "validated by NISTA and
+      HM Treasury, in sufficient time for appropriate planned assurance to take place
+      prior to submission of a Strategic Outline Business Case (SOBC) to HM Treasury for
+      approval." "The process for submission of IAAPs is described in the Treasury
+      Approvals Process for projects and programmes".
