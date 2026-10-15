@@ -147,6 +147,12 @@ const CASES: Case[] = [
     expect: ["benefits-assurance", "gate-review-5"],
     why: "Gate 5 and the Teal Book cover this more densely than NISTA's guide; either is a good answer (Oli, 2026-10-15).",
   },
+  {
+    q: "project delivery functional standard",
+    expect: ["govs-002"],
+    why: "GovS 002 is read from a committed snapshot (snapshot_pdf). Fails if the snapshot stops parsing. " +
+      "On topic-only questions the Teal Book, which elaborates it at 17 times the length, usually ranks first.",
+  },
   // --- added for go-live (docs/go-live-plan.md WP3) ---------------------------
   {
     q: "comply or explain digital procurement",

@@ -2,29 +2,52 @@
 # NOTE: the Infrastructure and Projects Authority was replaced by NISTA (National
 # Infrastructure and Service Transformation Authority) on 2025-04-01. The IPA
 # organisation page has not been updated since. Registry uses NISTA as the owning body.
-# The standard itself lives on projectdelivery.gov.uk (v2.1, Sept 2025). Its download
-# link and HTML edition both answer scripts with a Cloudflare challenge, and unlike
-# the Teal Book there is no openly served copy (checked 2026-10-15). We do not get
-# round the challenge, so it is linked, not reproduced. The GOV.UK landing page is
-# still polled, so a new version is noticed. Oli has asked Government Project
-# Delivery for an openly served copy (docs/wp0-discovery.md).
+# The standard (v2.1, 1 September 2025) is public on projectdelivery.gov.uk, but only
+# through its "Download" link, which answers scripts with a Cloudflare challenge; the
+# direct /wp-content/uploads/ file returns 404 even to a browser (checked 2026-10-15).
+# We do not get round the challenge. So it is read from a copy Oli downloaded on
+# 2026-10-15, committed to data/snapshots/ (fetcher snapshot_pdf). It does not update
+# itself: the GOV.UK landing page is still watched, and a new version there raises the
+# weekly curator issue. Oli has asked Government Project Delivery for a link a script
+# can fetch, as they already provide for the Teal Book. Two columns, no PDF outline:
+# headings come from type size, and the HTML edition carries the same headings, so
+# citations link to each one there.
 - id: govs-002
   title: "Government Functional Standard GovS 002: Project Delivery"
   body: Government Project Delivery
   spine: assurance
   authority: mandatory
-  fetcher: off_platform
+  fetcher: snapshot_pdf
   slug: /government/publications/project-delivery-functional-standard
+  endpoint: https://projectdelivery.gov.uk/library-products/government-functional-standard-govs-002-project-delivery/
+  snapshot:
+    file: data/snapshots/govs-002-v2.1.pdf
+    version: "2.1"
+    taken: "2026-10-15"
+    text_fragments: true
   licence: OGL-v3
-  not_indexed_reason: >-
-    Published on the Government Project Delivery website, which blocks automated
-    access, so it is linked, not reproduced. The Teal Book (`teal-book`), which builds
-    on this standard, is indexed.
-  # Same shall/should/may convention as the Orange Book. Currently metadata-only on
-  # GOV.UK, so this has no effect until the standard is ingestible.
+  # Same shall/should/may convention as the Orange Book.
   declares_convention: true
-  # Canonical file has moved off GOV.UK to projectdelivery.gov.uk.
+  # The library page with the publisher's Download link.
   external_attachment: https://projectdelivery.gov.uk/library-product/government-functional-standard-govs-002-project-delivery/
+
+# The standard's continuous improvement assessment framework (v2.1, August 2025).
+# Same route and reasons as govs-002. No HTML edition, so citations go to its library
+# page.
+- id: govs-002-ciaf
+  title: "GovS 002 continuous improvement assessment framework"
+  body: Government Project Delivery
+  spine: assurance
+  authority: advisory
+  fetcher: snapshot_pdf
+  slug: /government/publications/project-delivery-functional-standard
+  endpoint: https://projectdelivery.gov.uk/library-product/continuous-improvement-assessment-framework/
+  snapshot:
+    file: data/snapshots/govs-002-ciaf-v2.1.pdf
+    version: "2.1"
+    taken: "2026-10-15"
+    text_fragments: false
+  licence: OGL-v3
 
 # The Teal Book: Government Project Delivery's "core and definitive reference on how
 # project delivery should be done in government", building on GovS 002. Version 3.0,

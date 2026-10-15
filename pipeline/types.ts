@@ -24,7 +24,12 @@ export type FetcherName =
   | "projectdelivery_pdf"
   // A GOV.UK publication whose only edition is a PDF, read from whichever PDF the
   // landing page carries now. See pipeline/fetchers/govuk-pdf.ts.
-  | "govuk_pdf";
+  | "govuk_pdf"
+  // A PDF copy committed to data/snapshots/, for a document that is public but that
+  // no script can fetch (GovS 002: a bot challenge on the only download link). Does
+  // not update itself: the GOV.UK landing page (slug) is watched so a new version
+  // raises the weekly curator issue, and someone downloads it again.
+  | "snapshot_pdf";
 
 export interface Source {
   id: string;
@@ -49,6 +54,8 @@ export interface Source {
    * same document, which would index it twice.
    */
   excludeAttachments: string[];
+  /** For snapshot_pdf: the committed copy, its version, and the date it was taken. */
+  snapshot?: { file: string; version: string; taken: string; textFragments: boolean };
   /** For govuk_pdf, when the publication carries several PDFs: words in the wanted one's title. */
   pdfTitle?: string;
   /**

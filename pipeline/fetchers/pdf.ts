@@ -39,6 +39,12 @@ export interface Boundary {
   trail: string[];
   /** Caller's grouping (the Teal Book groups by chapter). */
   group: number;
+  /**
+   * Index of the heading's first line in the page-ordered line list, when known
+   * (headings found by type size). Then text is assigned in reading order, which
+   * is right for two-column layouts, where a page's height order is not.
+   */
+  line?: number;
 }
 
 export interface OutlineNode {
@@ -51,6 +57,21 @@ export interface OutlineNode {
 export const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 
 export const sha = (s: string) => createHash("sha256").update(s).digest("hex").slice(0, 16);
+
+/**
+ * Text fragment (#:~:text=) linking to a heading on a web page that carries the same
+ * text as the PDF. Web pages often repeat their headings in a contents list, and a
+ * bare fragment jumps to the first match, which is that list. So the fragment also
+ * names the first few words after the heading (`,-suffix`), which only the real
+ * heading has. If the suffix ever fails to match, the browser simply opens the page
+ * at the top. "-", "&" and "," are fragment syntax, so they are escaped on top of
+ * the usual URI encoding.
+ */
+const enc = (s: string) => encodeURIComponent(s).replace(/-/g, "%2D").replace(/,/g, "%2C");
+export const textFragment = (heading: string, text: string) => {
+  const lead = text.split(/\s+/).slice(0, 3).join(" ");
+  return `:~:text=${enc(heading)}${lead ? `,-${enc(lead)}` : ""}`;
+};
 
 export async function downloadPdf(url: string, purpose: string): Promise<Uint8Array> {
   // Says who we are, as the GOV.UK checker does. Not a browser's user agent: every
@@ -152,19 +173,24 @@ export function buildSections(
   skip: (line: Line) => boolean,
   anchor: (b: Boundary, text: string) => string | null,
 ): Map<Boundary, Section> {
-  // A heading starts where its destination is. Sort by position on the page rather
-  // than trusting outline order.
-  const sorted = placeOnPage(boundaries, lines).sort((a, b) => a.page - b.page || b.y - a.y);
+  // Headings found by type size know their own line, so text follows reading order
+  // (two-column pages read down one column, then the next). Outline headings know
+  // only a position, so they sort by position on the page rather than outline order.
+  const byLine = boundaries.length > 0 && boundaries.every((x) => x.line !== undefined);
+  const sorted = byLine
+    ? [...boundaries].sort((a, b) => a.line! - b.line!)
+    : placeOnPage(boundaries, lines).sort((a, b) => a.page - b.page || b.y - a.y);
 
   const textBy = new Map<Boundary, Line[]>();
   let b = -1;
-  for (const line of lines) {
+  for (const [i, line] of lines.entries()) {
     const text = squash(line.text);
     if (skip({ ...line, text })) continue;
     while (b + 1 < sorted.length) {
       const next = sorted[b + 1]!;
       // Destinations mark the top of the heading; its baseline sits below that.
-      if (line.page > next.page || (line.page === next.page && line.y <= next.y + 1)) b++;
+      const reached = byLine ? i >= next.line! : line.page > next.page || (line.page === next.page && line.y <= next.y + 1);
+      if (reached) b++;
       else break;
     }
     if (b < 0) continue;
@@ -266,33 +292,47 @@ export function typeSizeBoundaries(lines: Line[], skip: (line: Line) => boolean)
   const bodySize = [...body].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0;
 
   // The cover (first page) is set large throughout and is never a section.
-  const isHeading = (l: Line) =>
-    l.page > 0 && !skip(l) && Math.round(l.height) >= bodySize * 1.2 && squash(l.text).length <= 150 && /^[A-Z0-9]/.test(squash(l.text));
+  const large = (l: Line) =>
+    l.page > 0 && !skip(l) && Math.round(l.height) >= bodySize * 1.2 && squash(l.text).length <= 150;
 
-  const heads: { line: Line; title: string }[] = [];
-  for (let i = 0; i < lines.length; i++) {
-    const l = lines[i]!;
-    if (!isHeading(l)) continue;
+  const heads: { first: Line; last: Line; title: string; index: number }[] = [];
+  for (const [index, l] of lines.entries()) {
+    if (!large(l)) continue;
     const prev = heads[heads.length - 1];
-    const prevLine = lines[i - 1];
-    if (prev && prevLine === prev.line && prevLine.page === l.page && Math.round(prevLine.height) === Math.round(l.height)) {
+    // A heading that wraps continues on the next line at the same size, often in
+    // lower case ("Purpose of this assessment / framework"), so the continuation is
+    // judged by position, not by its first letter.
+    if (prev && prev.last.page === l.page && Math.round(prev.last.height) === Math.round(l.height) &&
+        prev.last.y - l.y > 0 && prev.last.y - l.y < l.height * 1.8) {
       prev.title = squash(`${prev.title} ${l.text}`);
-      prev.line = l;
+      prev.last = l;
       continue;
     }
-    heads.push({ line: l, title: squash(l.text) });
+    if (/^[A-Z0-9]/.test(squash(l.text))) heads.push({ first: l, last: l, title: squash(l.text), index });
   }
 
-  const sizes = [...new Set(heads.map((h) => Math.round(h.line.height)))].sort((a, b) => b - a);
+  // A contents page is set in heading sizes too, every entry ending in a page number.
+  // Keep its "Contents" heading (buildSections then drops the page) and nothing else
+  // on it, or on the pages it runs on to.
+  const contentsPages = new Set<number>();
+  const contents = heads.find((h) => /^(table of )?contents$/i.test(h.title));
+  if (contents) {
+    for (let p = contents.first.page; ; p++) {
+      const onPage = heads.filter((h) => h.first.page === p && h !== contents);
+      const numbered = onPage.filter((h) => /\s\d{1,3}$/.test(h.title)).length;
+      if (p !== contents.first.page && (onPage.length === 0 || numbered < onPage.length / 2)) break;
+      contentsPages.add(p);
+    }
+  }
+  const kept = heads.filter((h) => h === contents || !contentsPages.has(h.first.page));
+
+  const sizes = [...new Set(kept.map((h) => Math.round(h.first.height)))].sort((a, b) => b - a);
   const trail: string[] = [];
-  return heads.map(({ line, title }) => {
-    const depth = Math.min(sizes.indexOf(Math.round(line.height)), 2);
+  return kept.map(({ first, title, index }) => {
+    const depth = Math.min(sizes.indexOf(Math.round(first.height)), 2);
     trail.length = depth;
     trail[depth] = title;
-    // The first line's top, not the last line's: a wrapped heading starts above.
-    const first = lines.find((l) => l.page === line.page && Math.round(l.height) === Math.round(line.height) && squash(l.text) && title.startsWith(squash(l.text)));
-    const top = (first ?? line).y + line.height;
-    return { page: line.page, y: top, title, trail: trail.filter(Boolean), group: 0 };
+    return { page: first.page, y: first.y + first.height, title, trail: trail.filter(Boolean), group: 0, line: index };
   });
 }
 

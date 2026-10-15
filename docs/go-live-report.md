@@ -4,7 +4,25 @@ For Oli, at the go-live gate of [go-live-plan.md](go-live-plan.md). Written 2026
 on branch `go-live-sources` after a full local refresh. **Nothing has been deployed.**
 Merging the branch to `main` is the deploy.
 
-## Verdict
+## Update, after go-live (2026-10-15)
+
+**GovS 002 is now indexed**, with its continuous improvement assessment framework
+(`govs-002-ciaf`). Oli pointed out that both are public. They are, but only through
+the site's Download link, which answers scripts with the bot challenge; the direct
+file URL returns 404 even in a browser. So they are read from copies Oli downloaded,
+committed to `data/snapshots/` (new fetcher `snapshot_pdf`). They do not update
+themselves; the GOV.UK page is watched, and Oli has asked Government Project Delivery
+for a link a script can fetch. GovS 002 yields 50 sections and 62 MANDATORY
+obligations (its "shall" convention); its citations deep-link to each heading on the
+standard's web edition. WP1's GovS 002 acceptance search now passes: "senior
+responsible owner accountabilities" restricted to `govs-002` returns 4.4 Roles and
+accountabilities, with MANDATORY lines.
+
+WP3c (Aqua Book, Rose Book, ATRS) and WP7 (`docs/watch-list.md`) are also done. With
+GovS 002: **44 of 52 sources indexed**, 958 mandatory obligations, 55 relationships.
+Proposals P9 to P11 (from WP3c) wait for Oli in `docs/wp4-proposed-relationships.md`.
+
+## Verdict (at the go-live gate)
 
 Ready to go live, with one known gap. Oli accepted acceptance searches #6, #8 and
 #10 as they stand (2026-10-15; §3).

@@ -214,6 +214,11 @@ function getSource(c, { source_id }) {
   const out = [`# ${s.title}`, "", `- id: \`${s.id}\``, `- Owner: ${s.body}`, `- Spine: ${s.spine}`, `- Authority: ${authorityLabel(s)}`,
     `- Licence: ${s.licence}`, `- Canonical URL: ${s.url ?? "none"}`];
   if (s.externalAttachment) out.push(`- Substantive file: ${s.externalAttachment}`);
+  if (s.fetcher === "snapshot_pdf") {
+    out.push(`- How it is read: from a copy of version ${s.snapshot?.version ?? "?"} of the PDF, downloaded by hand on ${s.snapshot?.taken ?? "?"} and kept in the library, ` +
+      "because the publisher's site does not let scripts download it. It does not update itself: the GOV.UK page is watched weekly, " +
+      "and a new version is flagged for someone to download. Citations link to the publisher's own page.");
+  }
   if (s.fetcher === "govuk_pdf") {
     out.push("- How it is read: GOV.UK publishes this only as a PDF. The PDF attached to the publication page is re-read weekly, so a new version replaces the old one. " +
       "Citations link to the PDF at the page where the section starts.");

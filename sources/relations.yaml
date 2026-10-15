@@ -467,3 +467,14 @@ relations:
       Standard: "All central government departments and arm's length bodies that provide
       public or frontline services, or routinely interact with the general public, must
       use the ATRS."
+
+  # GovS 002's assessment framework (indexed 2026-10-15 from a snapshot).
+  - from: govs-002-ciaf
+    to: govs-002
+    type: elaborates
+    scope: assessing an organisation's adherence to the standard
+    evidence: >-
+      GovS 002 CIAF v2.1: "This assessment framework is designed to help drive continuous
+      improvement within and across government, by helping government organisations
+      assess their adherence to, and practical application of the project delivery
+      functional standard".
