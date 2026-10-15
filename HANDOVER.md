@@ -958,3 +958,15 @@ rendered GOV.UK page. 42 of 51 indexed; 5,413 sections; 895 mandatory obligation
   approves digital spending in my department" now misses there because spend-controls
   slips from 5th to 6th. None of the new sources is in its results; the shift comes
   from corpus-wide term statistics, and that engine has no per-document cap.
+
+### Go-live plan, WP7: watch list (2026-10-15, after go-live)
+
+**`docs/watch-list.md`**: the three items from the go-live report (a new NISTA assurance
+framework, a new Aqua Book edition, MOD Evidence-Led Assurance Parts 2 and 3), each with
+how it would be noticed. The weekly refresh sees changes to registered pages, new
+versions under a registered publication, new members of an expanded collection, and
+moves and withdrawals. It does **not** see a new publication at a new address: nothing
+sweeps NISTA's or HM Treasury's output. Until `compass discover` exists, sweep by hand
+with `pipeline/list-org.ts` (slugs in the file). NISTA swept 2026-10-15: newest item
+2026-09-10, no new framework yet. The Aqua Book on GOV.UK is already a 2025 "new
+edition"; the plan's May 2026 "new edition in progress" was not checked.
