@@ -19,3 +19,19 @@
   fetcher: govuk_attachment
   parent: magenta-book
   licence: OGL-v3
+
+# Go-live plan WP3c (decisions D2, D8). GOV.UK's title is "The AQuA Book"; this is the
+# 2025 edition (first published on GOV.UK 2025-07-30, HTML, OGL v3 checked on the
+# rendered page 2026-10-15). Owner per GOV.UK's lead organisation: the Government
+# Operational Research Service, listed with the Analysis Function, GAD and ONS. Not
+# HM Treasury, as the plan said. The watch list (docs/watch-list.md) carries the
+# note on the next edition.
+- id: aqua-book
+  title: "The AQuA Book: guidance on producing quality analysis for government"
+  body: Government Operational Research Service
+  spine: evaluation
+  authority: advisory
+  fetcher: govuk_content
+  slug: /guidance/the-aqua-book
+  prefer: html
+  licence: OGL-v3

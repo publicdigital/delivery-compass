@@ -161,6 +161,14 @@ const CASES: Case[] = [
     expect: ["consultancy-playbook"],
     why: "PDF only, with a second PDF on the same publication that pdf_title must not pick.",
   },
+  // --- added after go-live (WP3c) ---------------------------------------------
+  { q: "how do I quality assure a model", expect: ["aqua-book"] },
+  { q: "managing knowledge assets", expect: ["rose-book"] },
+  {
+    q: "do I need to publish a record of an algorithmic tool",
+    expect: ["atrs"],
+    why: "The Data and AI Ethics Framework's ATRS section ranks first; the standard's own guidance is 2nd.",
+  },
   // --- the Teal Book, the one source read from a PDF off GOV.UK ---------------
   {
     q: "what does the teal book say about tailoring",

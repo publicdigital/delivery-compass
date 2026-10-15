@@ -928,3 +928,33 @@ the WP7 watch list carried forward). Also fixed in WP8: `green-book-health` now 
 why it is not indexed (its 2013 PDF does not extract) and its owner is HM Treasury per
 GOV.UK; a doubled "NOT INDEXED: not indexed:" prefix is gone. WP3c and WP7 deferred to
 after go-live. Nothing deployed: merging `go-live-sources` to `main` is the deploy.
+
+### Go-live plan, WP3c: Aqua Book, Rose Book, ATRS (2026-10-15, after go-live)
+
+On branch `wp3c-wp7`. All three from their HTML editions, OGL v3 confirmed on each
+rendered GOV.UK page. 42 of 51 indexed; 5,413 sections; 895 mandatory obligations.
+
+- **`aqua-book`** (125 sections), `evaluation`, advisory, via `govuk_content`. GOV.UK's
+  title is "The AQuA Book"; this is the 2025 edition. **Owner is the Government
+  Operational Research Service**: it is GOV.UK's lead (primary publishing)
+  organisation, listed first, with the Analysis Function, GAD and ONS. Not HM Treasury
+  (the plan), and not the Analysis Function (the brief for this session).
+- **`rose-book`** (160 sections), `funding`, advisory: the 2024 book plus Annexes A
+  to E, all HTML. Owner the Government Office for Technology Transfer.
+- **`atrs`** (66 sections), `digital`, **mandatory**, with `authority_note` "for
+  government departments and some arm's-length bodies". Its own text: "It is mandatory
+  for all government departments, and for ALBs which deliver public or frontline
+  services, or directly interact with the general public." Others may publish
+  voluntarily.
+- **5 relationships added** (stated outright, D10): Aqua elaborates Magenta; Rose
+  elaborates Managing Public Money and the Teal Book; the AI Playbook and the Data and
+  AI Ethics Framework each require ATRS. 54 in all; 9 sources with none. **P9 to P11
+  proposed** for Oli in `docs/wp4-proposed-relationships.md`. No Aqua to Green Book
+  edge: the Aqua Book says the Green Book refers to it, but the current Green Book
+  does not.
+- Golden set 40/40 on the shipping engine (new: "how do I quality assure a model",
+  "managing knowledge assets", "do I need to publish a record of an algorithmic
+  tool"). The non-gating sqlite reference engine went from 35/37 to 37/40: "who
+  approves digital spending in my department" now misses there because spend-controls
+  slips from 5th to 6th. None of the new sources is in its results; the shift comes
+  from corpus-wide term statistics, and that engine has no per-document cap.

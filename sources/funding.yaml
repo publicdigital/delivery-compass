@@ -124,3 +124,18 @@
   slug: /government/publications/better-regulation-framework
   prefer: html
   licence: OGL-v3
+
+# Go-live plan WP3c (decision D3). The plan's URL was wrong; this is where GOV.UK
+# publishes it. 2024 edition: the book plus Annexes A to E, all HTML (the PDF copies
+# and the register template are not ingested). Owner per GOV.UK: the Government
+# Office for Technology Transfer, not HM Treasury. OGL v3 checked on the rendered
+# page 2026-10-15.
+- id: rose-book
+  title: "The Rose Book: guidance on knowledge asset management in government"
+  body: Government Office for Technology Transfer
+  spine: funding
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/knowledge-asset-management-in-government
+  prefer: html
+  licence: OGL-v3
