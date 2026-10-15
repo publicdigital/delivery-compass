@@ -66,15 +66,21 @@
   prefer: html
   licence: OGL-v3
 
+# PDF only (2013). Its main document, policy_appraisal_and_health.pdf, is one of the
+# seed PDFs that extracts as garbage (HANDOVER.md §4), so it is not read. Owner per
+# GOV.UK: HM Treasury (checked 2026-10-15; was recorded as DHSC).
 - id: green-book-health
   title: "Green Book supplementary guidance: health"
-  body: Department of Health and Social Care
+  body: HM Treasury
   spine: funding
   authority: advisory
   fetcher: govuk_publication
   slug: /government/publications/green-book-supplementary-guidance-health
   prefer: html
   licence: OGL-v3
+  not_indexed_reason: >-
+    GOV.UK publishes this only as PDFs from 2013, and the main one does not extract as
+    readable text. Linked, not reproduced.
 
 # Found via `compass expand` on the Green Book collection (27 members) while filling
 # ingestion gaps. Most of the collection's supplementary guides are PDF-only, same as

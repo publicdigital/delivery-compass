@@ -184,8 +184,8 @@ function searchGuidance(c, { question, source_id, limit = 6 }) {
 
 const STATUS = {
   full: "indexed: its text is searchable here",
-  metadata_only: "not indexed: GOV.UK publishes only a landing page, and the substance is a PDF or on another site",
-  not_indexed: "not indexed",
+  metadata_only: "GOV.UK publishes only a landing page, and the substance is a PDF or on another site",
+  not_indexed: "not ingested yet; the next refresh should index it",
 };
 
 /** "mandatory", or "mandatory (comply or explain)" where the registry qualifies it. */
@@ -223,7 +223,7 @@ function getSource(c, { source_id }) {
       "Citations link to the matching chapter on the website. The website itself cannot be read automatically.");
   }
   if (s.parent) out.push(`- Part of: \`${s.parent}\``);
-  out.push(`- Status: ${s.contentStatus === "full" ? `${STATUS.full} (${s.sections} sections)` : notIndexedReason(s)}`);
+  out.push(`- Status: ${s.contentStatus === "full" ? `${STATUS.full} (${s.sections} sections)` : `not indexed: ${notIndexedReason(s)}`}`);
   if (s.replacement) out.push(`- Replacement: ${s.replacement}`);
 
   const warnings = warningsFor(c, s.id);

@@ -918,3 +918,13 @@ discovery in `docs/wp0-discovery.md`. WP1 outcome:
   safety chapter and the ethics framework's safety section: keyword search always
   finds something. No NHS-specific source appears, and the scope statement now says
   why. The plan's wording ("no indexed result") will need Oli's call at WP8.
+
+### Go-live plan, WP8: verification (2026-10-15)
+
+Full local refresh clean (39 of 48 indexed; only the expected six skipped); all tests
+pass. Report for Oli at the go-live gate: **`docs/go-live-report.md`** (before/after
+counts, the ten acceptance searches, every source's status, decisions, open items, and
+the WP7 watch list carried forward). Also fixed in WP8: `green-book-health` now says
+why it is not indexed (its 2013 PDF does not extract) and its owner is HM Treasury per
+GOV.UK; a doubled "NOT INDEXED: not indexed:" prefix is gone. WP3c and WP7 deferred to
+after go-live. Nothing deployed: merging `go-live-sources` to `main` is the deploy.
