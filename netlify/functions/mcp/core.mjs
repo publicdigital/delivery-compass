@@ -184,6 +184,8 @@ const STATUS = {
 };
 
 function notIndexedReason(s) {
+  // A curated reason (sources/*.yaml `not_indexed_reason`) beats the generic one.
+  if (s.notIndexedReason && s.fetcher !== "withdrawn") return s.notIndexedReason;
   if (s.fetcher === "withdrawn") return `withdrawn${s.withdrawnOn ? ` on ${s.withdrawnOn}` : ""}${s.withdrawnReason ? `: ${s.withdrawnReason}` : ""}`;
   if (s.fetcher === "nao_wp") return "NAO content is not under the Open Government Licence, so it is linked, never reproduced";
   if (s.fetcher === "local_only") return "held only as a local copy, not published online";
@@ -204,6 +206,10 @@ function getSource(c, { source_id }) {
   const out = [`# ${s.title}`, "", `- id: \`${s.id}\``, `- Owner: ${s.body}`, `- Spine: ${s.spine}`, `- Authority: ${s.authority}`,
     `- Licence: ${s.licence}`, `- Canonical URL: ${s.url ?? "none"}`];
   if (s.externalAttachment) out.push(`- Substantive file: ${s.externalAttachment}`);
+  if (s.fetcher === "govuk_pdf") {
+    out.push("- How it is read: GOV.UK publishes this only as a PDF. The PDF attached to the publication page is re-read weekly, so a new version replaces the old one. " +
+      "Citations link to the PDF at the page where the section starts.");
+  }
   if (s.fetcher === "projectdelivery_pdf") {
     out.push(`- How it is read: the publisher's own PDF of the whole book, regenerated nightly from the website (${s.pdf}), re-read weekly. ` +
       "Citations link to the matching chapter on the website. The website itself cannot be read automatically.");

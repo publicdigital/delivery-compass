@@ -124,6 +124,13 @@ const CASES: Case[] = [
     expect: ["magenta-book", "service-manual"],
     why: "Bridged through adaptive-governance.",
   },
+  // --- GOV.UK sources read from their PDF (fetchers/govuk-pdf.ts) -------------
+  {
+    q: "five case model",
+    expect: ["business-cases"],
+    expectPath: "Guidance_on_Developing_Business_Cases.pdf",
+    why: "The 2026 combined guide is PDF only. Fails if it stops parsing or an old edition comes back.",
+  },
   // --- the Teal Book, the one source read from a PDF off GOV.UK ---------------
   {
     q: "what does the teal book say about tailoring",

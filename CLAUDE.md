@@ -78,7 +78,15 @@ in `assets/` on each `npm test`. Use a class.
 CID-encoded and extract as garbage; two are print-outs of web pages. A source with no
 HTML edition is skipped and reported, not guessed at.
 
-**One exception: the Teal Book** (`teal-book`, `pipeline/fetchers/projectdelivery.ts`).
+**PDFs, where they have been checked.** All PDF reading goes through one reader,
+`pipeline/fetchers/pdf.ts`, with two callers: the Teal Book (below) and `govuk_pdf`
+(`fetchers/govuk-pdf.ts`), for GOV.UK publications whose only edition is a PDF. A PDF
+is registered only after checking by hand that it extracts as clean text
+(`docs/wp0-discovery.md` §3 shows how). `govuk_pdf` takes whichever PDF the landing
+page carries on each run, so new versions arrive by themselves; citations link to the
+PDF at `#page=N`. Do not add a second PDF pipeline: extend this one.
+
+**The Teal Book** (`teal-book`, `pipeline/fetchers/projectdelivery.ts`).
 It is not on GOV.UK, and projectdelivery.gov.uk answers non-browser requests for its
 pages with a Cloudflare challenge. **Never try to get past that challenge** (a browser
 user agent, a headless browser, a solver): it is the publisher saying no. What it does

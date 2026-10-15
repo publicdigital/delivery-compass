@@ -2,7 +2,8 @@ import { createHash } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import { extractObligations } from "./classify.ts";
 import { getContent, type ContentItem } from "./fetchers/govuk.ts";
-import { downloadPdf, parseTealBook } from "./fetchers/projectdelivery.ts";
+import { downloadGovukPdf, parseGovukPdf } from "./fetchers/govuk-pdf.ts";
+import { downloadTealBook, parseTealBook } from "./fetchers/projectdelivery.ts";
 import { splitSections, type Section } from "./normalise.ts";
 import { recordOffsiteText } from "./offsite-state.ts";
 import type { Source } from "./types.ts";
@@ -33,6 +34,48 @@ interface Doc {
 }
 
 /**
+ * A GOV.UK publication with only a PDF edition (see fetchers/govuk-pdf.ts). Reads
+ * the landing page every run and takes the PDF attached now, so a new version
+ * replaces the old one by itself. One doc, cited at the PDF's own URL.
+ */
+async function resolveGovukPdf(source: Source): Promise<{ docs: Doc[]; skipped?: string; movedTo?: string }> {
+  if (!source.slug) return { docs: [], skipped: "no slug" };
+  let item = await getContent(source.slug);
+  if ("httpError" in item) return { docs: [], skipped: `HTTP ${item.httpError}` };
+  let movedTo: string | undefined;
+  if (item.document_type === "redirect" || item.schema_name === "redirect") {
+    const target = item.details?.redirects?.[0]?.destination ?? item.redirects?.[0]?.destination;
+    if (!target) return { docs: [], skipped: "redirect with no destination" };
+    const followed = await getContent(target);
+    if ("httpError" in followed) return { docs: [], skipped: `HTTP ${followed.httpError} after redirect to ${target}` };
+    movedTo = target;
+    item = followed;
+  }
+
+  const pdfs = (item.details?.attachments ?? []).filter((a) => a.content_type === "application/pdf" && a.url);
+  const want = source.pdfTitle?.toLowerCase();
+  const chosen = want ? pdfs.filter((a) => (a.title ?? "").toLowerCase().includes(want)) : pdfs;
+  // Guessing between several PDFs could index the wrong document under this id.
+  if (chosen.length !== 1) {
+    return { docs: [], movedTo, skipped: `expected one PDF${want ? ` titled like "${source.pdfTitle}"` : ""}, found ${chosen.length}; set pdf_title in the registry` };
+  }
+  const url = chosen[0]!.url!;
+
+  let parsed;
+  try {
+    parsed = await parseGovukPdf(await downloadGovukPdf(url));
+  } catch (e) {
+    return { docs: [], movedTo, skipped: `PDF unavailable: ${(e as Error).message}` };
+  }
+  // Every source on this route was checked by hand and parses to more than this. A
+  // new version that parses to almost nothing is an incident: stop the refresh
+  // rather than replace real guidance with a stub.
+  if (parsed.sections.length < 5) return { docs: [], movedTo, skipped: `PDF parsed to only ${parsed.sections.length} sections; check it extracts cleanly` };
+
+  return { docs: [{ path: url, html: "", updatedAt: item.public_updated_at ?? null, sections: parsed.sections }], movedTo };
+}
+
+/**
  * The Teal Book: one nightly PDF, split by its outline into one doc per chapter,
  * each cited at the chapter's web page. Also records the text's hash, which is how
  * a change is noticed at all (see offsite-state.ts).
@@ -43,7 +86,7 @@ async function resolveProjectDeliveryPdf(
   if (!source.pdf || !source.endpoint) return { docs: [], skipped: "registry entry needs both pdf and endpoint" };
   let book;
   try {
-    book = await parseTealBook(await downloadPdf(source.pdf));
+    book = await parseTealBook(await downloadTealBook(source.pdf));
   } catch (e) {
     return { docs: [], skipped: `PDF unavailable: ${(e as Error).message}` };
   }
@@ -247,6 +290,8 @@ export async function ingestSource(
 
   if (source.fetcher === "projectdelivery_pdf") {
     ({ docs, skipped, updatedAt: offsiteUpdatedAt, warnings: result.warnings } = await resolveProjectDeliveryPdf(source));
+  } else if (source.fetcher === "govuk_pdf") {
+    ({ docs, skipped, movedTo } = await resolveGovukPdf(source));
   } else if (source.fetcher === "govuk_attachment") {
     if (!source.parent) return { ...result, skipped: "no parent" };
     const parent = byId.get(source.parent);
@@ -296,7 +341,10 @@ export async function ingestSource(
     `INSERT INTO sources (id, title, body, spine, authority, slug, licence, live_url, public_updated_at, indexed_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
-       title=excluded.title, public_updated_at=excluded.public_updated_at, indexed_at=excluded.indexed_at`,
+       title=excluded.title, public_updated_at=excluded.public_updated_at, indexed_at=excluded.indexed_at,
+       -- Reset, then re-judged below. Without this a source that was once only a
+       -- landing page stayed "metadata_only" after it became indexable.
+       content_status='full', note=NULL`,
   ).run(
     source.id, source.title, source.body, source.spine, source.authority,
     source.slug ?? null, source.licence, liveUrl, publicUpdatedAt, new Date().toISOString(),

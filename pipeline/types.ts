@@ -21,7 +21,10 @@ export type FetcherName =
   | "off_platform"
   // The Teal Book: off GOV.UK, HTML behind a bot challenge, but published as a
   // nightly PDF generated from the same pages. See pipeline/fetchers/projectdelivery.ts.
-  | "projectdelivery_pdf";
+  | "projectdelivery_pdf"
+  // A GOV.UK publication whose only edition is a PDF, read from whichever PDF the
+  // landing page carries now. See pipeline/fetchers/govuk-pdf.ts.
+  | "govuk_pdf";
 
 export interface Source {
   id: string;
@@ -41,6 +44,14 @@ export interface Source {
   externalAttachment?: string;
   /** For projectdelivery_pdf: the PDF that is read. `endpoint` is the web page cited. */
   pdf?: string;
+  /** For govuk_pdf, when the publication carries several PDFs: words in the wanted one's title. */
+  pdfTitle?: string;
+  /**
+   * Why a source is not indexed, in a sentence a reader understands. Overrides the
+   * generic reason derived from the fetcher, which is right for most sources but
+   * says nothing specific about, say, a site that blocks automated access.
+   */
+  notIndexedReason?: string;
   supersedesUrl?: string;
   /** Document sets out the "shall denotes a requirement" convention in its front matter. */
   declaresConvention: boolean;

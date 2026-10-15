@@ -106,8 +106,9 @@ material moved to the OneFinance intranet. Guidance going behind the firewall is
 itself a finding.
 
 **Business case guidance was rewritten on 2026-06-30** following the 2025 Green Book
-Review, splitting into separate project and programme guides. The 2018 PDFs in the
-folder are superseded.
+Review, *combining* the separate project and programme guides into one document "to
+remove duplication" (GOV.UK change note). This said "splitting" until 2026-10-15,
+which was the wrong way round. The 2018 PDFs in the folder are superseded.
 
 **Page-update dates mislead; filename matching does not.** GOV.UK asset URLs embed
 the original filename, so an exact match against a live attachment is a *definitive*
@@ -763,3 +764,37 @@ management" in `watch` and the change-notes list; the real state was restored af
 The sqlite reference engine (non-gating) misses "how should governance change for
 agile delivery" and "light touch governance for a pilot"; the shipping engine passes
 29/29.
+
+### Go-live plan, WP1: mandatory sources (2026-10-15)
+
+Working through `docs/go-live-plan.md` on branch `go-live-sources`; decisions and
+discovery in `docs/wp0-discovery.md`. WP1 outcome:
+
+- **One PDF reader, two profiles.** `pipeline/fetchers/pdf.ts` now holds everything
+  the Teal Book reader did that is not Teal-Book-specific; `projectdelivery.ts` keeps
+  only the chapter URLs and footer rules, and its output is byte-for-byte unchanged
+  (same hash, sections and anchors on the same PDF). New `govuk_pdf` fetcher
+  (`govuk-pdf.ts`) for GOV.UK publications that are PDF only.
+- Two things GOV.UK's Word and InDesign PDFs needed that the Teal Book did not:
+  most of their bookmarks point at a page, not a position, so each heading is found
+  on its page by its text (`placeOnPage`); and they print headings with numbers
+  ("1 Introduction") but bookmark them without. Table, figure and box bookmarks are
+  ignored. A PDF with no outline at all falls back to headings by type size.
+- **`business-cases` indexed**: the combined 2026 guide, 82 sections, 568 obligations
+  (39 mandatory). Golden question "five case model" asserts the 2026 PDF.
+- **`govs-002` not indexed, and why is now said plainly.** The standard is only on
+  projectdelivery.gov.uk; its download link and HTML both answer scripts with the
+  Cloudflare challenge, and there is no openly served copy. Registered `off_platform`
+  with the GOV.UK slug kept, so the landing page is still watched for a new version.
+  Oli is asking Government Project Delivery for an openly served copy. The plan's
+  GovS 002 acceptance searches cannot pass until then; "senior responsible owner"
+  finds the Teal Book's SRO section instead. Owner changed to Government Project
+  Delivery, as GOV.UK lists it.
+- **Per-source "not indexed" reasons**: registry field `not_indexed_reason`, which
+  the MCP server shows instead of the generic one. Used for `govs-002` and
+  `secure-by-design`.
+- **Bug fixed**: re-ingesting never reset `content_status`, so a source once judged
+  "landing page only" stayed hidden locally after becoming indexable (a fresh runner
+  was unaffected).
+- Reference engine (non-gating) now also misses "what goes in the economic case";
+  the shipping engine passes 30/30.

@@ -23,14 +23,17 @@
   expand: true
   licence: OGL-v3
 
+# The 2026 guide (published 2026-06-30) combines the former separate project and
+# programme guides into one document, "to remove duplication" (GOV.UK change note).
+# PDF only on GOV.UK; checked 2026-10-15 to extract as clean text with a full
+# outline. The 2018 editions are on the National Archives and are not indexed.
 - id: business-cases
-  title: Guidance on developing business cases (Better Business Cases)
+  title: Guidance on developing business cases for projects and programmes
   body: HM Treasury
   spine: funding
   authority: mandatory
-  fetcher: govuk_publication
+  fetcher: govuk_pdf
   slug: /government/publications/guidance-on-developing-business-cases
-  prefer: html
   licence: OGL-v3
 
 - id: tap

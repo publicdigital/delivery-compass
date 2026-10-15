@@ -20,7 +20,7 @@ async function cmdIngest(only?: string): Promise<void> {
   const registry = loadRegistry().filter((s) => (only ? s.id === only || s.spine === only : true));
   if (registry.length === 0) { console.error(`nothing matches "${only}"`); process.exit(1); }
 
-  console.log(`${BOLD}Ingesting ${registry.length} sources${RESET} ${DIM}(HTML-first; PDF-only sources are skipped, not guessed at)${RESET}\n`);
+  console.log(`${BOLD}Ingesting ${registry.length} sources${RESET} ${DIM}(HTML-first; a PDF only where it was checked to extract cleanly)${RESET}\n`);
   let totalSections = 0, totalObligations = 0, ingested = 0;
   const moved: { id: string; from: string; to: string }[] = [];
   const emptied: { id: string; reason: string }[] = [];
@@ -36,7 +36,7 @@ async function cmdIngest(only?: string): Promise<void> {
   const expectsContent = (id: string) => {
     const src = byId.get(id);
     if (src?.fetcher === "projectdelivery_pdf") return true;
-    return Boolean(src && src.slug && src.fetcher !== "withdrawn" && src.fetcher !== "local_only" && src.fetcher !== "nao_wp");
+    return Boolean(src && src.slug && !["withdrawn", "local_only", "nao_wp", "off_platform"].includes(src.fetcher));
   };
 
   for (const source of registry) {

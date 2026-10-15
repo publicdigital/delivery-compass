@@ -2,15 +2,24 @@
 # NOTE: the Infrastructure and Projects Authority was replaced by NISTA (National
 # Infrastructure and Service Transformation Authority) on 2025-04-01. The IPA
 # organisation page has not been updated since. Registry uses NISTA as the owning body.
+# The standard itself lives on projectdelivery.gov.uk (v2.1, Sept 2025). Its download
+# link and HTML edition both answer scripts with a Cloudflare challenge, and unlike
+# the Teal Book there is no openly served copy (checked 2026-10-15). We do not get
+# round the challenge, so it is linked, not reproduced. The GOV.UK landing page is
+# still polled, so a new version is noticed. Oli has asked Government Project
+# Delivery for an openly served copy (docs/wp0-discovery.md).
 - id: govs-002
   title: "Government Functional Standard GovS 002: Project Delivery"
-  body: NISTA
+  body: Government Project Delivery
   spine: assurance
   authority: mandatory
-  fetcher: govuk_publication
+  fetcher: off_platform
   slug: /government/publications/project-delivery-functional-standard
-  prefer: html
   licence: OGL-v3
+  not_indexed_reason: >-
+    Published on the Government Project Delivery website, which blocks automated
+    access, so it is linked, not reproduced. The Teal Book (`teal-book`), which builds
+    on this standard, is indexed.
   # Same shall/should/may convention as the Orange Book. Currently metadata-only on
   # GOV.UK, so this has no effect until the standard is ingestible.
   declares_convention: true

@@ -57,6 +57,9 @@
   # fetched. Kept registered, off_platform, so the gap is visible rather than a
   # plausible-looking wrong answer sitting silently in the corpus.
   fetcher: off_platform
+  not_indexed_reason: >-
+    Published on the Secure by Design site (security.gov.uk), not GOV.UK, and that
+    site blocks automated access. Linked, not reproduced.
   external_attachment: https://www.security.gov.uk/guidance/secure-by-design/
   licence: OGL-v3
 

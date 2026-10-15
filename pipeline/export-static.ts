@@ -235,6 +235,7 @@ export function exportStatic(): void {
       url: s.slug ? `https://www.gov.uk${s.slug}` : (s.endpoint ?? null),
       externalAttachment: s.externalAttachment ?? null,
       pdf: s.pdf ?? null,
+      notIndexedReason: s.notIndexedReason ?? null,
       parent: s.parent ?? null,
       contentStatus: st?.status ?? "not_indexed",
       sections: st?.status === "full" ? st.sections : 0,
