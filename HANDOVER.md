@@ -904,3 +904,17 @@ discovery in `docs/wp0-discovery.md`. WP1 outcome:
   and `docs/what-we-built-and-why.md` naming CDDO in lists of bodies.
 - The Secure by Design page also says Service Standard point 9 requires its
   principles; proposed as P8 in `docs/wp4-proposed-relationships.md`.
+
+### Go-live plan, WP6: scope statement (2026-10-15)
+
+- `coverage` now has an **"Out of scope (by design)"** section between the spines and
+  the relationship gaps: NHS-specific guidance, devolved governments, procurement law,
+  and functional standards other than GovS 002 and GovS 005 (decision D9, wording as
+  drafted in the plan). The list is `OUT_OF_SCOPE` in `core.mjs`.
+- README.md carries the same text near the top. `test/mcp.test.ts` checks both the
+  section's position in `coverage` and that the README lists every item, so the two
+  cannot drift apart unnoticed (proved by breaking one, then restoring it).
+- WP8 search #10 ("NHS clinical safety DCB0129") returns the Teal Book's health and
+  safety chapter and the ethics framework's safety section: keyword search always
+  finds something. No NHS-specific source appears, and the scope statement now says
+  why. The plan's wording ("no indexed result") will need Oli's call at WP8.

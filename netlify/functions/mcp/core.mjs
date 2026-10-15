@@ -262,6 +262,19 @@ function getSource(c, { source_id }) {
   return out.join("\n") + footer(c);
 }
 
+/**
+ * What the library deliberately does not cover. Decided by Oli for go-live (decision
+ * D9 in docs/go-live-plan.md); README.md carries the same list, so change both
+ * together. Without it, a question on NHS clinical safety would get a near miss from
+ * some other source, and the silence on the real answer would read as "no rule".
+ */
+export const OUT_OF_SCOPE = [
+  "NHS-specific guidance (for example DTAC, DCB0129, DCB0160, the NHS service standard)",
+  "Guidance from the governments of Scotland, Wales or Northern Ireland",
+  "Procurement law, including Procurement Act 2023 guidance",
+  "Government functional standards other than GovS 002 (Project Delivery) and GovS 005 (Digital)",
+];
+
 function coverage(c) {
   const m = c.meta;
   const out = [
@@ -283,6 +296,12 @@ function coverage(c) {
     }
     out.push("");
   }
+
+  out.push("## Out of scope (by design)",
+    "This library covers UK central government delivery guidance. It does not include:",
+    ...OUT_OF_SCOPE.map((x) => `- ${x}`),
+    "If your question is about one of these subjects, no result from this library does not mean that no rule applies.",
+    "");
 
   const related = new Set(c.relations.flatMap((r) => [r.from, r.to]));
   const lonely = c.sources.filter((s) => !related.has(s.id));

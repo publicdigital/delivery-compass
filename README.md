@@ -8,6 +8,21 @@ coordination — HM Treasury, NISTA, GDS, CDDO, DSIT, DBT, the Evaluation Task F
 DHSC, the NAO and individual departments. Delivery teams are expected to comply with
 all of it, find it themselves, and notice when it moves.
 
+## Out of scope (by design)
+
+This library covers UK central government delivery guidance. It does not include:
+
+- NHS-specific guidance (for example DTAC, DCB0129, DCB0160, the NHS service standard)
+- Guidance from the governments of Scotland, Wales or Northern Ireland
+- Procurement law, including Procurement Act 2023 guidance
+- Government functional standards other than GovS 002 (Project Delivery) and GovS 005 (Digital)
+
+If your question is about one of these subjects, no result from this library does not
+mean that no rule applies.
+
+The MCP server's `coverage` tool shows the same list (`OUT_OF_SCOPE` in
+`netlify/functions/mcp/core.mjs`); `test/mcp.test.ts` fails if the two differ.
+
 ## Quick start
 
 Requires Node 24 (uses built-in `node:sqlite` and native TypeScript execution — no

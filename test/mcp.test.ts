@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 
 process.env.MCP_KEY = "test-key";
 // @ts-expect-error - plain ES module, deliberately untyped: the deploy has no build step
-const { handleMessage, TOOLS } = await import("../netlify/functions/mcp/core.mjs");
+const { handleMessage, TOOLS, OUT_OF_SCOPE } = await import("../netlify/functions/mcp/core.mjs");
 // @ts-expect-error - as above
 const { default: http } = await import("../netlify/functions/mcp/mcp.mjs");
 
@@ -76,6 +76,11 @@ check(/not under the Open Government Licence/.test(lonely.text), "NAO should be 
 
 const cov = call("coverage");
 check(/NOT INDEXED/.test(cov.text) && /No curated relationships/.test(cov.text), "coverage must state what is missing, not only what is there");
+check(/## Out of scope \(by design\)[\s\S]*NHS-specific[\s\S]*## No curated relationships/.test(cov.text),
+  "coverage must state what is out of scope, between the spines and the relationship gaps");
+// The README carries the same list for people who never call coverage.
+const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+check((OUT_OF_SCOPE as string[]).every((x) => readme.includes(x)), "README must carry the same out-of-scope list as coverage");
 
 const changes = call("recent_changes", { days: 730 });
 check(/publisher's own words/.test(changes.text) && /\*\*\d{4}-\d{2}-\d{2}\*\*/.test(changes.text), "recent_changes should list dated notes");
