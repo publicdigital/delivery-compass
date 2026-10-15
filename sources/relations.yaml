@@ -478,3 +478,34 @@ relations:
       improvement within and across government, by helping government organisations
       assess their adherence to, and practical application of the project delivery
       functional standard".
+
+  # --- Approved by Oli from the WP3c proposals (2026-10-15) -----------------
+  # P9. "should" in a mandatory standard, as P7.
+  - from: govs-005
+    to: atrs
+    type: requires
+    scope: algorithmic transparency
+    evidence: >-
+      GovS 005 v2.2, 7.1: "Organisations should follow cross-government strategies,
+      standards and governance for government digital and data, including ... the
+      Algorithmic Transparency Recording Standard, and relevant security, privacy and
+      technology standards".
+
+  # P10.
+  - from: rose-book
+    to: green-book
+    type: elaborates
+    scope: identifying, protecting and exploiting knowledge assets
+    evidence: >-
+      Green Book, Assets: "The Rose Book provides guidance on how to identify, protect
+      and exploit knowledge assets."
+
+  # P11.
+  - from: aqua-book
+    to: teal-book
+    type: elaborates
+    scope: standards for analysis and data use within project delivery
+    evidence: >-
+      Teal Book, 24.6.1.4: "the Government Functional Standard for Analysis and the Aqua
+      Book (requires sign in) set out standards for data use in analysis, and these
+      should be followed where such activities are part of the scope of the work."

@@ -148,7 +148,7 @@ The existing edge `tcop` requires `secure-by-design` has no evidence line either
 
 ### Proposed: Oli to decide
 
-#### P9. `govs-005` requires `atrs`. **Recommended: yes, as `requires`, matching P7.**
+#### P9. `govs-005` requires `atrs`. **Approved by Oli 2026-10-15; added.**
 
 GovS 005 v2.2, 7.1: "Organisations should follow cross-government strategies,
 standards and governance for government digital and data, including guidance from the
@@ -157,7 +157,7 @@ Framework, the Algorithmic Transparency Recording Standard, and relevant securit
 privacy and technology standards". "should" in a mandatory standard, the same judgement
 as P7 (approved).
 
-#### P10. `rose-book` elaborates `green-book`, on knowledge assets. **Recommended: yes.**
+#### P10. `rose-book` elaborates `green-book`, on knowledge assets. **Approved by Oli 2026-10-15; added.**
 
 Green Book, "Assets": "The Rose Book provides guidance on how to identify, protect and
 exploit knowledge assets." A pointer rather than "further guidance on this", so
@@ -165,7 +165,7 @@ proposed, not added. The Rose Book in turn applies Green Book appraisal ("In lin
 good practice set out in the HM Treasury's Green Book, such appraisal should be set
 alongside a 'do nothing' option").
 
-#### P11. `aqua-book` elaborates `teal-book`, on analysis and data use. **Recommended: yes.**
+#### P11. `aqua-book` elaborates `teal-book`, on analysis and data use. **Approved by Oli 2026-10-15; added.**
 
 The Teal Book points to the Aqua Book in about a dozen chapters. The strongest, 24.6.1.4:
 "the Government Functional Standard for Analysis and the Aqua Book (requires sign in)
