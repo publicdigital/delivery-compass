@@ -6,14 +6,15 @@ Merging the branch to `main` is the deploy.
 
 ## Verdict
 
-Ready to go live, with one known gap and one decision for Oli.
+Ready to go live, with one known gap. Oli accepted acceptance searches #6, #8 and
+#10 as they stand (2026-10-15; §3).
 
 - Every "must do" work package is done (WP0, WP1, WP3a, WP5, WP6, WP8), and so is every "should do" one (WP2, WP3b, WP4).
 - WP3c and WP7 are deferred to after go-live, as the plan allows.
 - All tests pass: golden retrieval 37/37 on the engine that ships, the MCP contract (47 mandatory quotes verified verbatim), CSP and typecheck.
 - **Every source is indexed, or registered as "not indexed" with a correct reason, or withdrawn.** The out-of-scope statement covers the rest.
 - **Known gap:** GovS 002 cannot be indexed. Its text is only on projectdelivery.gov.uk, behind a bot challenge, so WP1's two GovS 002 acceptance checks fail. The library says why, and points to the Teal Book instead.
-- **Decision for Oli:** the four acceptance searches that did not pass as written (#6, #8, #10, and #1 in part). See §3.
+- **Accepted by Oli:** the three acceptance searches that did not pass as written (#6, #8 and #10). See §3.
 
 ## 1. Before and after
 
@@ -83,10 +84,10 @@ Run through the MCP server against the refreshed corpus. Pass means the expected
 | 9 | Teal Book principles | `teal-book` | 1 | `teal-book`: Scope of The Teal Book | Pass. All top 5 are Teal Book; chapter 1 "Principles" is among them |
 | 10 | NHS clinical safety DCB0129 | no indexed result | n/a | `teal-book`: Ch. 7, health, safety and security | **Not as written.** Keyword search always finds something for "clinical safety". No NHS-specific source is returned, and `coverage` shows the out-of-scope note listing DCB0129 |
 
-**For Oli:** accept #6, #8 and #10 as they stand, or ask for a change. I recommend accepting all three:
-- #6 is a judgement you have already made.
-- #8 follows from your WP0 decision on Word documents.
-- For #10, the plan's real aim (that no NHS guidance appears to be covered) is met, and the scope note is visible.
+**Accepted by Oli on 2026-10-15: #6, #8 and #10 stand as they are.**
+- #6: the playbook in the top 5 is enough. This confirms the judgement made in WP3a.
+- #8: this follows from the WP0 decision to register Word-only sources as not indexed.
+- #10: the plan's real aim is met. No NHS-specific source is returned, and `coverage` shows the out-of-scope note.
 
 ## 4. Every source's status
 
@@ -170,7 +171,7 @@ Decisions taken during the work, all by Oli on 2026-10-15:
 
 ## 7. Deploying
 
-1. Read this report, and decide §3 and §6 item 2.
+1. Read this report, and decide §6 item 2 (§3 is settled).
 2. Merge `go-live-sources` into `main`. The push to `main` triggers the deploy workflow.
 3. Check the live connector: `coverage` should report 39 of 48 sources indexed, with an "Out of scope" section.
 
