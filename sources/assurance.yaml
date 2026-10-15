@@ -154,3 +154,31 @@
   slug: /government/publications/improving-infrastructure-delivery-project-initiation-routemap
   prefer: html
   licence: OGL-v3
+
+# NISTA's assurance review and action plan guidance. GOV.UK publishes both only as
+# Word documents (.docx), and the library reads HTML and checked PDFs only, so both
+# are registered as not indexed (Oli, 2026-10-15). The landing pages are still
+# watched, so a new edition or format is noticed.
+- id: nista-par
+  title: Project assurance review guidance and template
+  body: NISTA
+  spine: assurance
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/project-assessment-review-guidance-and-templates
+  licence: OGL-v3
+  not_indexed_reason: >-
+    GOV.UK publishes this only as a Word document, which the library does not read.
+    Linked, not reproduced.
+
+- id: nista-action-plan
+  title: Assurance of action plan guidance and templates
+  body: NISTA
+  spine: assurance
+  authority: advisory
+  fetcher: govuk_publication
+  slug: /government/publications/assurance-of-action-plan-guidance-and-templates
+  licence: OGL-v3
+  not_indexed_reason: >-
+    GOV.UK publishes this only as a Word document, which the library does not read.
+    Linked, not reproduced.

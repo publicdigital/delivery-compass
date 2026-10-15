@@ -155,6 +155,12 @@ const CASES: Case[] = [
       "explain' section rank first; the playbook is in the top 5 (Oli accepted this, 2026-10-15).",
   },
   { q: "digital functional standard", expect: ["govs-005"] },
+  { q: "should cost model", expect: ["sourcing-playbook"] },
+  {
+    q: "when should we use consultants",
+    expect: ["consultancy-playbook"],
+    why: "PDF only, with a second PDF on the same publication that pdf_title must not pick.",
+  },
   // --- the Teal Book, the one source read from a PDF off GOV.UK ---------------
   {
     q: "what does the teal book say about tailoring",

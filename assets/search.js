@@ -414,9 +414,11 @@ export function searchSections(index, byId, question, limit = 6, concepts = null
       if (!section) return null;
       const titleText = `${section.sourceTitle} ${docTitleWords(section.docPath)}`;
       // A nudge, not a override: enough to lift the canonical document into view when
-      // a concept names it, not enough to beat a strong direct match elsewhere.
+      // a concept names it, not enough to beat a strong direct match elsewhere. Was 4;
+      // 5 since the commercial playbooks' piloting sections pushed Test and Learn out
+      // of the top 5 for "light touch governance for a pilot" (Oli approved, 2026-10-15).
       const named =
-        (boostedDocs.some((d) => section.docPath.includes(d)) ? 4 : 0) +
+        (boostedDocs.some((d) => section.docPath.includes(d)) ? 5 : 0) +
         (boosted.has(section.sourceId) ? 1.5 : 0) +
         (namesSource(section.sourceTitle, question) ? NAMED_SOURCE : 0);
       return { section, rank: score + titleAffinity(titleText, terms) * TITLE_BOOST + named };

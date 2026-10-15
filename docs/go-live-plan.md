@@ -295,7 +295,7 @@ Priority:
 | 5 | benefits realisation assurance | `benefits-assurance` or `gate-review-5` (widened in WP2, Oli 2026-10-15) |
 | 6 | comply or explain digital procurement | `ddat-playbook` (top 5 accepted in WP3a: Teal Book and Orange Book passages rank first; Oli 2026-10-15) |
 | 7 | digital functional standard | `govs-005` |
-| 8 | project assessment review | `nista-par` |
+| 8 | project assessment review | `nista-par` (cannot pass: Word only, registered not indexed in WP3b; the benefits guide's PAR section ranks first) |
 | 9 | Teal Book principles | `teal-book` |
 | 10 | NHS clinical safety DCB0129 | No indexed result. The out-of-scope note is visible in `coverage`. |
 

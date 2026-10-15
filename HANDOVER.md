@@ -846,3 +846,21 @@ discovery in `docs/wp0-discovery.md`. WP1 outcome:
   and the "comply or explain digital procurement" case expects the playbook in the
   top 5 (the Teal Book's procurement chapter and the Orange Book rank first). Shipping
   engine 35/35.
+
+### Go-live plan, WP3b: Sourcing and Consultancy playbooks, PAR, action plan (2026-10-15)
+
+- **`sourcing-playbook`** (383 sections) and **`consultancy-playbook`** (21) on the
+  `commercial` spine, "mandatory (comply or explain)". Sourcing: the playbook plus
+  its four HTML guidance notes, owner the Government Commercial Agency per GOV.UK.
+  Consultancy: its own publication (not the Sourcing one, as the plan assumed), PDF
+  only, read via `govuk_pdf` with `pdf_title` to skip the Knowledge and Skills note
+  on the same page. All checked OGL v3.
+- **`nista-par`** and **`nista-action-plan`** registered, not indexed: Word only.
+  Their landing pages are watched. WP8 search #8 ("project assessment review" →
+  `nista-par`) therefore cannot pass; the benefits guide's PAR section ranks first.
+- **Third ranking change (Oli approved):** the concepts document nudge goes from 4 to
+  5. The playbooks' piloting sections had pushed Test and Learn to 6th for "light
+  touch governance for a pilot", the test that proves the concepts bridge works. At
+  5 it is back in the top 5 and nothing else moved.
+- Shipping engine 37/37 (new cases: "should cost model", "when should we use
+  consultants").

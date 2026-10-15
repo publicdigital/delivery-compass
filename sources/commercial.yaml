@@ -19,3 +19,32 @@
   licence: OGL-v3
   exclude_attachments:
     - /government/publications/the-digital-data-and-technology-playbook/the-digital-data-and-technology-playbook
+
+# Owner per GOV.UK: the Government Commercial Agency (lead), with the Government
+# Commercial Function. The playbook and its four HTML guidance notes are ingested;
+# the PDF-only notes from 2021 are not. Checked 2026-10-15: all OGL v3.
+- id: sourcing-playbook
+  title: The Sourcing Playbook
+  body: Government Commercial Agency
+  spine: commercial
+  authority: mandatory
+  authority_note: comply or explain
+  fetcher: govuk_publication
+  slug: /government/publications/the-sourcing-and-consultancy-playbooks
+  prefer: html
+  licence: OGL-v3
+
+# Its own publication, not part of the Sourcing Playbook's (the plan assumed it was).
+# v1.1, September 2022. PDF only; checked 2026-10-15 to extract cleanly, OGL on its
+# page 2. The publication also carries a Knowledge and Skills guidance note PDF, so
+# pdf_title picks the playbook.
+- id: consultancy-playbook
+  title: The Consultancy Playbook
+  body: Cabinet Office
+  spine: commercial
+  authority: mandatory
+  authority_note: comply or explain
+  fetcher: govuk_pdf
+  slug: /government/publications/the-consultancy-playbook
+  pdf_title: consultancy playbook
+  licence: OGL-v3
