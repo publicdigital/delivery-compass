@@ -173,6 +173,25 @@ export function docTitleWords(docPath) {
  * together, so both "the Service Manual" and "governance principles for agile
  * service delivery" are things a reader can successfully name.
  */
+/**
+ * Whether the question names this source outright, by its full title.
+ *
+ * titleAffinity counts single words, and on a large corpus that is not enough: once
+ * the DDaT Playbook and GovS 005 were added, both of which quote the Technology Code
+ * of Practice, "what does the technology code of practice require" ranked TCoP itself
+ * seventh, under passages that cite it. A question containing a source's whole title
+ * ("technology code of practice", "teal book", "orange book") is asking for that
+ * source. Titles under two words are ignored, so a bare word cannot trigger it.
+ */
+const plain = (s) => ` ${String(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim()} `;
+export function namesSource(sourceTitle, question) {
+  const short = String(sourceTitle).split(/:\s|\s[-–]\s/)[0];
+  const title = plain(short).replace(/^ the /, " ");
+  return title.trim().split(" ").length >= 2 && plain(question).includes(title);
+}
+/** Added to the rank of every section of a source the question names. */
+const NAMED_SOURCE = 6;
+
 export function titleAffinity(title, terms) {
   if (terms.length === 0) return 0;
   const t = String(title).toLowerCase();
@@ -398,7 +417,8 @@ export function searchSections(index, byId, question, limit = 6, concepts = null
       // a concept names it, not enough to beat a strong direct match elsewhere.
       const named =
         (boostedDocs.some((d) => section.docPath.includes(d)) ? 4 : 0) +
-        (boosted.has(section.sourceId) ? 1.5 : 0);
+        (boosted.has(section.sourceId) ? 1.5 : 0) +
+        (namesSource(section.sourceTitle, question) ? NAMED_SOURCE : 0);
       return { section, rank: score + titleAffinity(titleText, terms) * TITLE_BOOST + named };
     })
     .filter(Boolean)

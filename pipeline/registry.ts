@@ -27,6 +27,8 @@ function normalise(raw: Record<string, unknown>, definedIn: string): Source {
     externalAttachment: raw.external_attachment as string | undefined,
     pdf: raw.pdf as string | undefined,
     pdfTitle: raw.pdf_title as string | undefined,
+    authorityNote: raw.authority_note as string | undefined,
+    excludeAttachments: (raw.exclude_attachments as string[] | undefined) ?? [],
     notIndexedReason: raw.not_indexed_reason ? String(raw.not_indexed_reason).replace(/\s+/g, " ").trim() : undefined,
     supersedesUrl: raw.supersedes_url as string | undefined,
     declaresConvention: Boolean(raw.declares_convention),

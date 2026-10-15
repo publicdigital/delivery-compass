@@ -104,9 +104,10 @@ const CASES: Case[] = [
   { q: "test and learn", expect: ["magenta-book"], expectPath: "test-and-learn" },
   {
     q: "how should governance change for agile delivery",
-    expect: ["service-manual"],
-    expectPath: "governance-principles-for-agile",
-    why: "GDS published exactly this; a tester looking for it did not reach it.",
+    expect: ["service-manual", "agile-assurance", "govs-005"],
+    why: "GDS published exactly this; a tester looking for it did not reach it. Since go-live WP3 " +
+      "NISTA's agile assurance guide and GovS 005's 'Agile delivery approaches' rank above it, " +
+      "and Oli judged those good answers (2026-10-15); the GDS page is still in the top 10.",
   },
 
   // --- concept bridges (sources/concepts.yaml) ------------------------------
@@ -146,6 +147,14 @@ const CASES: Case[] = [
     expect: ["benefits-assurance", "gate-review-5"],
     why: "Gate 5 and the Teal Book cover this more densely than NISTA's guide; either is a good answer (Oli, 2026-10-15).",
   },
+  // --- added for go-live (docs/go-live-plan.md WP3) ---------------------------
+  {
+    q: "comply or explain digital procurement",
+    expect: ["ddat-playbook"],
+    why: "Go-live WP8 #6. The Teal Book's procurement chapter and the Orange Book's 'comply or " +
+      "explain' section rank first; the playbook is in the top 5 (Oli accepted this, 2026-10-15).",
+  },
+  { q: "digital functional standard", expect: ["govs-005"] },
   // --- the Teal Book, the one source read from a PDF off GOV.UK ---------------
   {
     q: "what does the teal book say about tailoring",

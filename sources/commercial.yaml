@@ -1,0 +1,21 @@
+# Commercial spine: the Government Commercial Function's playbooks, added for go-live
+# (docs/go-live-plan.md, decisions D5 to D7). The playbooks are "comply or explain":
+# departments must follow them or record why not. Labelled mandatory, with that
+# qualification shown alongside (authority_note).
+
+# Owner per GOV.UK: the DDaT Profession, not Cabinet Office. The publication carries
+# two HTML copies of the playbook: "...-html" is the 2023 edition (it has "What is
+# new?"), the other the 2022 original. Only the 2023 one is ingested. The Contracting
+# for Agile and IPR guidance notes (HTML) come with it.
+- id: ddat-playbook
+  title: The Digital, Data and Technology Playbook
+  body: Digital, Data and Technology Profession
+  spine: commercial
+  authority: mandatory
+  authority_note: comply or explain
+  fetcher: govuk_publication
+  slug: /government/publications/the-digital-data-and-technology-playbook
+  prefer: html
+  licence: OGL-v3
+  exclude_attachments:
+    - /government/publications/the-digital-data-and-technology-playbook/the-digital-data-and-technology-playbook

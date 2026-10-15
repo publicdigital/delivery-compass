@@ -23,6 +23,7 @@ const SPINE_COLOUR = {
   risk: "#a8271b",
   evaluation: "#8a5200",
   oversight: "#5c666d",
+  commercial: "#9c2f6b",
 };
 
 /** Edges that mean "this one is out of date" are the ones worth seeing first. */

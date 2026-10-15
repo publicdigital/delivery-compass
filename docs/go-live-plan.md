@@ -293,7 +293,7 @@ Priority:
 | 3 | reviewer with agile delivery experience | `agile-assurance` |
 | 4 | integrated assurance and approval plan | `integrated-assurance` |
 | 5 | benefits realisation assurance | `benefits-assurance` or `gate-review-5` (widened in WP2, Oli 2026-10-15) |
-| 6 | comply or explain digital procurement | `ddat-playbook` |
+| 6 | comply or explain digital procurement | `ddat-playbook` (top 5 accepted in WP3a: Teal Book and Orange Book passages rank first; Oli 2026-10-15) |
 | 7 | digital functional standard | `govs-005` |
 | 8 | project assessment review | `nista-par` |
 | 9 | Teal Book principles | `teal-book` |

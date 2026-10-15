@@ -236,6 +236,7 @@ export function exportStatic(): void {
       externalAttachment: s.externalAttachment ?? null,
       pdf: s.pdf ?? null,
       notIndexedReason: s.notIndexedReason ?? null,
+      authorityNote: s.authorityNote ?? null,
       parent: s.parent ?? null,
       contentStatus: st?.status ?? "not_indexed",
       sections: st?.status === "full" ? st.sections : 0,

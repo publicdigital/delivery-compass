@@ -168,6 +168,7 @@ async function resolveDocs(
   );
   for (const a of htmlAttachments) {
     if (excludeAttachmentTitles.some((t) => attachmentTitleMatches(a.title ?? "", t))) continue;
+    if (source.excludeAttachments.includes(a.url!)) continue;
     const sub = await getContent(a.url!);
     if ("httpError" in sub) continue;
     const body = sub.details?.body;

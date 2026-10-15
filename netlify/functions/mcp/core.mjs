@@ -155,7 +155,7 @@ function searchGuidance(c, { question, source_id, limit = 6 }) {
   hits.forEach((h, i) => {
     const src = c.sourceById.get(h.sourceId);
     out.push(`## ${i + 1}. ${h.headingPath || h.heading}`);
-    out.push(`Source: ${h.sourceTitle} (\`${h.sourceId}\`), ${h.body}. Authority: ${src?.authority ?? h.authority}. ${age(h.updatedAt, src)}.`);
+    out.push(`Source: ${h.sourceTitle} (\`${h.sourceId}\`), ${h.body}. Authority: ${src ? authorityLabel(src) : h.authority}. ${age(h.updatedAt, src)}.`);
     out.push(`Cite inline as: ${inlineCitation(h)}`);
     for (const w of warningsFor(c, h.sourceId)) out.push(w);
 
@@ -184,6 +184,9 @@ const STATUS = {
   not_indexed: "not indexed",
 };
 
+/** "mandatory", or "mandatory (comply or explain)" where the registry qualifies it. */
+const authorityLabel = (s) => (s?.authorityNote ? `${s.authority} (${s.authorityNote})` : s?.authority);
+
 function notIndexedReason(s) {
   // A curated reason (sources/*.yaml `not_indexed_reason`) beats the generic one.
   if (s.notIndexedReason && s.fetcher !== "withdrawn") return s.notIndexedReason;
@@ -204,7 +207,7 @@ function getSource(c, { source_id }) {
   }
   if (!s) throw new ToolError("source_id is required");
 
-  const out = [`# ${s.title}`, "", `- id: \`${s.id}\``, `- Owner: ${s.body}`, `- Spine: ${s.spine}`, `- Authority: ${s.authority}`,
+  const out = [`# ${s.title}`, "", `- id: \`${s.id}\``, `- Owner: ${s.body}`, `- Spine: ${s.spine}`, `- Authority: ${authorityLabel(s)}`,
     `- Licence: ${s.licence}`, `- Canonical URL: ${s.url ?? "none"}`];
   if (s.externalAttachment) out.push(`- Substantive file: ${s.externalAttachment}`);
   if (s.fetcher === "govuk_pdf") {
@@ -272,7 +275,7 @@ function coverage(c) {
     out.push(`## ${sp}`);
     for (const s of c.sources.filter((x) => x.spine === sp)) {
       const status = s.contentStatus === "full" ? `${s.sections} sections` : `NOT INDEXED: ${notIndexedReason(s)}`;
-      out.push(`- \`${s.id}\` ${s.title} (${s.body}, ${s.authority}). ${status}`);
+      out.push(`- \`${s.id}\` ${s.title} (${s.body}, ${authorityLabel(s)}). ${status}`);
     }
     out.push("");
   }

@@ -104,3 +104,18 @@
   slug: /government/publications/digital-and-data-benefits-framework
   prefer: html
   licence: OGL-v3
+
+# GovS 005 v2.2, published 2026-10-01. GOV.UK updated the HTML edition the same day,
+# and it carries the v2.2 changes ("government digital and data" wording, AI
+# references), so HTML is current and the PDF is not needed (checked 2026-10-15).
+# The publication's Continuous Improvement Assessment Framework (HTML) is ingested
+# with it.
+- id: govs-005
+  title: "Government Functional Standard GovS 005: Digital"
+  body: Government Digital Service
+  spine: digital
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/government-functional-standard-govs-005-digital
+  prefer: html
+  licence: OGL-v3

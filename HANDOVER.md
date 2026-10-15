@@ -820,3 +820,29 @@ discovery in `docs/wp0-discovery.md`. WP1 outcome:
   golden case and WP8 search #5 accept `gate-review-5` too.
 - Shipping engine 33/33. The non-gating sqlite reference engine has no cap and
   now misses three.
+
+### Go-live plan, WP3a: GovS 005 and the DDaT Playbook (2026-10-15)
+
+- **`govs-005`** indexed from HTML (88 sections): GOV.UK's HTML edition was updated
+  on 2026-10-01 with v2.2, so the PDF was not needed. Its Continuous Improvement
+  Assessment Framework (HTML) comes with it.
+- **`ddat-playbook`** indexed (261 sections) on a new **`commercial` spine** (type,
+  map colour and legend swatch added). The publication carries two HTML copies of
+  the playbook; the 2022 original is excluded via the new registry field
+  `exclude_attachments`, and the 2023 edition plus its Contracting for Agile and IPR
+  notes are ingested. Owner per GOV.UK: the DDaT Profession.
+- New registry field **`authority_note`**: the playbook reads "mandatory (comply or
+  explain)" everywhere the MCP server states authority.
+- All five new HTML documents were checked for the OGL v3 statement on the rendered
+  GOV.UK page (the Content API body does not carry it).
+- **Second ranking change (Oli approved): a named-source bonus** (`namesSource` in
+  `assets/search.js`). The new sources quote the Technology Code of Practice, which
+  pushed TCoP to 7th for "what does the technology code of practice require" and hid
+  its supersession warning, the tool's worked example. A question containing a
+  source's full title (two words or more) now lifts that source; TCoP is back at 4th
+  with its warning.
+- Golden expectations widened, both with Oli's agreement: the agile-governance
+  question accepts `agile-assurance` and `govs-005` as well as the GDS page (now 8th),
+  and the "comply or explain digital procurement" case expects the playbook in the
+  top 5 (the Teal Book's procurement chapter and the Orange Book rank first). Shipping
+  engine 35/35.
