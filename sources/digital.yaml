@@ -34,9 +34,11 @@
   # own digital and technology spending decisions.
   supersedes_url: /service-manual/agile-delivery/spend-controls-check-if-you-need-approval-to-spend-money-on-a-service
 
+# Owner: GOV.UK lists Government Digital Service first, with CDDO still listed second
+# (checked 2026-10-15). Following GOV.UK's lead organisation (Oli, WP0 answers).
 - id: tcop
   title: The Technology Code of Practice
-  body: Central Digital and Data Office
+  body: Government Digital Service
   spine: digital
   authority: mandatory
   fetcher: govuk_content
@@ -46,7 +48,10 @@
 
 - id: secure-by-design
   title: Secure by design
-  body: Central Digital and Data Office
+  # Not GDS, as the go-live plan expected: the framework's own About page says it "has
+  # been developed by the Government Cyber Unit (GCU)", with GSG, NCSC and industry
+  # (checked 2026-10-15). The page moved to /policy-and-guidance/secure-by-design/.
+  body: Government Cyber Unit
   spine: digital
   authority: mandatory
   # NOT /government/collections/secure-by-design - that GOV.UK collection is DSIT's
@@ -57,7 +62,10 @@
   # fetched. Kept registered, off_platform, so the gap is visible rather than a
   # plausible-looking wrong answer sitting silently in the corpus.
   fetcher: off_platform
-  external_attachment: https://www.security.gov.uk/guidance/secure-by-design/
+  not_indexed_reason: >-
+    Published on the Secure by Design site (security.gov.uk), not GOV.UK, and that
+    site blocks automated access. Linked, not reproduced.
+  external_attachment: https://www.security.gov.uk/policy-and-guidance/secure-by-design/
   licence: OGL-v3
 
 - id: ai-playbook
@@ -70,9 +78,10 @@
   prefer: html
   licence: OGL-v3
 
+# Owner: GOV.UK lists only Government Digital Service (checked 2026-10-15).
 - id: data-ethics
   title: Data and AI Ethics Framework
-  body: Central Digital and Data Office
+  body: Government Digital Service
   spine: digital
   authority: advisory
   fetcher: govuk_publication
@@ -99,5 +108,20 @@
   authority: advisory
   fetcher: govuk_publication
   slug: /government/publications/digital-and-data-benefits-framework
+  prefer: html
+  licence: OGL-v3
+
+# GovS 005 v2.2, published 2026-10-01. GOV.UK updated the HTML edition the same day,
+# and it carries the v2.2 changes ("government digital and data" wording, AI
+# references), so HTML is current and the PDF is not needed (checked 2026-10-15).
+# The publication's Continuous Improvement Assessment Framework (HTML) is ingested
+# with it.
+- id: govs-005
+  title: "Government Functional Standard GovS 005: Digital"
+  body: Government Digital Service
+  spine: digital
+  authority: mandatory
+  fetcher: govuk_publication
+  slug: /government/publications/government-functional-standard-govs-005-digital
   prefer: html
   licence: OGL-v3

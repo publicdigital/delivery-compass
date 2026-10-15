@@ -106,8 +106,9 @@ material moved to the OneFinance intranet. Guidance going behind the firewall is
 itself a finding.
 
 **Business case guidance was rewritten on 2026-06-30** following the 2025 Green Book
-Review, splitting into separate project and programme guides. The 2018 PDFs in the
-folder are superseded.
+Review, *combining* the separate project and programme guides into one document "to
+remove duplication" (GOV.UK change note). This said "splitting" until 2026-10-15,
+which was the wrong way round. The 2018 PDFs in the folder are superseded.
 
 **Page-update dates mislead; filename matching does not.** GOV.UK asset URLs embed
 the original filename, so an exact match against a live attachment is a *definitive*
@@ -763,3 +764,167 @@ management" in `watch` and the change-notes list; the real state was restored af
 The sqlite reference engine (non-gating) misses "how should governance change for
 agile delivery" and "light touch governance for a pilot"; the shipping engine passes
 29/29.
+
+### Go-live plan, WP1: mandatory sources (2026-10-15)
+
+Working through `docs/go-live-plan.md` on branch `go-live-sources`; decisions and
+discovery in `docs/wp0-discovery.md`. WP1 outcome:
+
+- **One PDF reader, two profiles.** `pipeline/fetchers/pdf.ts` now holds everything
+  the Teal Book reader did that is not Teal-Book-specific; `projectdelivery.ts` keeps
+  only the chapter URLs and footer rules, and its output is byte-for-byte unchanged
+  (same hash, sections and anchors on the same PDF). New `govuk_pdf` fetcher
+  (`govuk-pdf.ts`) for GOV.UK publications that are PDF only.
+- Two things GOV.UK's Word and InDesign PDFs needed that the Teal Book did not:
+  most of their bookmarks point at a page, not a position, so each heading is found
+  on its page by its text (`placeOnPage`); and they print headings with numbers
+  ("1 Introduction") but bookmark them without. Table, figure and box bookmarks are
+  ignored. A PDF with no outline at all falls back to headings by type size.
+- **`business-cases` indexed**: the combined 2026 guide, 82 sections, 568 obligations
+  (39 mandatory). Golden question "five case model" asserts the 2026 PDF.
+- **`govs-002` not indexed, and why is now said plainly.** The standard is only on
+  projectdelivery.gov.uk; its download link and HTML both answer scripts with the
+  Cloudflare challenge, and there is no openly served copy. Registered `off_platform`
+  with the GOV.UK slug kept, so the landing page is still watched for a new version.
+  Oli is asking Government Project Delivery for an openly served copy. The plan's
+  GovS 002 acceptance searches cannot pass until then; "senior responsible owner"
+  finds the Teal Book's SRO section instead. Owner changed to Government Project
+  Delivery, as GOV.UK lists it.
+- **Per-source "not indexed" reasons**: registry field `not_indexed_reason`, which
+  the MCP server shows instead of the generic one. Used for `govs-002` and
+  `secure-by-design`.
+- **Bug fixed**: re-ingesting never reset `content_status`, so a source once judged
+  "landing page only" stayed hidden locally after becoming indexable (a fresh runner
+  was unaffected).
+- Reference engine (non-gating) now also misses "what goes in the economic case";
+  the shipping engine passes 30/30.
+
+### Go-live plan, WP2: NISTA's August 2026 assurance guides (2026-10-15)
+
+- `agile-assurance` (21 sections), `integrated-assurance` (14) and
+  `benefits-assurance` (13) indexed through `govuk_pdf`. Each PDF states OGL on its
+  page 2; each landing page carries only the current version, so the agile guide's
+  2021 v1.2 cannot creep back in.
+- Two reader fixes they needed: **footnote markers** (a small raised number) split
+  sentences in two, and are now dropped; and for a PDF with **no outline**
+  (`integrated-assurance`), the large-type cover was read as the top heading of the
+  whole guide and the contents page as a section. Cover and contents are now never
+  sections. Teal Book and business-case output unchanged.
+- **Ranking change (Oli approved): at most two results per document** (`PER_DOC` in
+  `assets/search.js`). The agile guide had taken 3 of the top 5 for "how should
+  governance change for agile delivery" and pushed out the GDS page a tester went
+  looking for. With the cap, that and every other golden question pass, and no other
+  result changed. A search restricted to one source (`source_id`) is uncapped.
+- "benefits realisation assurance" finds Gate Review 5 and the Teal Book's benefits
+  chapter first; NISTA's guide ranks lower. Oli judged those good answers, so the
+  golden case and WP8 search #5 accept `gate-review-5` too.
+- Shipping engine 33/33. The non-gating sqlite reference engine has no cap and
+  now misses three.
+
+### Go-live plan, WP3a: GovS 005 and the DDaT Playbook (2026-10-15)
+
+- **`govs-005`** indexed from HTML (88 sections): GOV.UK's HTML edition was updated
+  on 2026-10-01 with v2.2, so the PDF was not needed. Its Continuous Improvement
+  Assessment Framework (HTML) comes with it.
+- **`ddat-playbook`** indexed (261 sections) on a new **`commercial` spine** (type,
+  map colour and legend swatch added). The publication carries two HTML copies of
+  the playbook; the 2022 original is excluded via the new registry field
+  `exclude_attachments`, and the 2023 edition plus its Contracting for Agile and IPR
+  notes are ingested. Owner per GOV.UK: the DDaT Profession.
+- New registry field **`authority_note`**: the playbook reads "mandatory (comply or
+  explain)" everywhere the MCP server states authority.
+- All five new HTML documents were checked for the OGL v3 statement on the rendered
+  GOV.UK page (the Content API body does not carry it).
+- **Second ranking change (Oli approved): a named-source bonus** (`namesSource` in
+  `assets/search.js`). The new sources quote the Technology Code of Practice, which
+  pushed TCoP to 7th for "what does the technology code of practice require" and hid
+  its supersession warning, the tool's worked example. A question containing a
+  source's full title (two words or more) now lifts that source; TCoP is back at 4th
+  with its warning.
+- Golden expectations widened, both with Oli's agreement: the agile-governance
+  question accepts `agile-assurance` and `govs-005` as well as the GDS page (now 8th),
+  and the "comply or explain digital procurement" case expects the playbook in the
+  top 5 (the Teal Book's procurement chapter and the Orange Book rank first). Shipping
+  engine 35/35.
+
+### Go-live plan, WP3b: Sourcing and Consultancy playbooks, PAR, action plan (2026-10-15)
+
+- **`sourcing-playbook`** (383 sections) and **`consultancy-playbook`** (21) on the
+  `commercial` spine, "mandatory (comply or explain)". Sourcing: the playbook plus
+  its four HTML guidance notes, owner the Government Commercial Agency per GOV.UK.
+  Consultancy: its own publication (not the Sourcing one, as the plan assumed), PDF
+  only, read via `govuk_pdf` with `pdf_title` to skip the Knowledge and Skills note
+  on the same page. All checked OGL v3.
+- **`nista-par`** and **`nista-action-plan`** registered, not indexed: Word only.
+  Their landing pages are watched. WP8 search #8 ("project assessment review" →
+  `nista-par`) therefore cannot pass; the benefits guide's PAR section ranks first.
+- **Third ranking change (Oli approved):** the concepts document nudge goes from 4 to
+  5. The playbooks' piloting sections had pushed Test and Learn to 6th for "light
+  touch governance for a pilot", the test that proves the concepts bridge works. At
+  5 it is back in the top 5 and nothing else moved.
+- Shipping engine 37/37 (new cases: "should cost model", "when should we use
+  consultants").
+
+### Go-live plan, WP4: relationships (2026-10-15)
+
+- **11 relationships added**, each stated outright in a source and quoted as evidence
+  (decision D10): Gates 0, 2 and 4 to the business case guide (and Gate 4 to the
+  Magenta Book), GovS 005 to the Service Standard and TCoP, the DDaT Playbook to TCoP,
+  the Service Standard and the Sourcing Playbook, the Consultancy Playbook to the
+  Sourcing Playbook, and the integrated assurance guide to TAP. 38 relationships;
+  sources with none down to 11 (plan threshold: under 13).
+- **Seven proposals wait for Oli** in `docs/wp4-proposed-relationships.md`. The two
+  that matter most: the **DDaT Playbook (2023) still says TCoP compliance "is assured
+  through the Cabinet Office spend control process"**, the same supersession as TCoP
+  (P1); and **Gate 4, republished 2026-08-20, still asks that the project "satisfied
+  the CO controls teams commercial and technology spend control requirements"** (P2,
+  proposed as a conflict, since Gate 4 is the newer page).
+- 15 of the 27 older edges have no evidence line; listed in the same file for a later
+  pass.
+- One extraction slip seen: the integrated assurance PDF yields "submion" for
+  "submission" once. Isolated (checked); quotes use the PDF's printed word.
+- Oli approved P1, P2, P3, P5 and P7 (10 more edges, 48 in all; 10 sources with
+  none) and declined P4 and P6. **The DDaT Playbook now carries a SUPERSEDED warning
+  and Gate 4 a CONFLICT warning** on technology spend control. A conflict is now
+  worded as two sources that "disagree" on every surface (MCP, web, CLI), not as one
+  being "out of date", since for Gate 4 the conflicting page is the newer one.
+
+### Go-live plan, WP5: metadata (2026-10-15)
+
+- Owners: `tcop` and `data-ethics` now **Government Digital Service** (GOV.UK lists
+  GDS first for TCoP, with CDDO still second; GDS only for the ethics framework).
+  `secure-by-design` is now **Government Cyber Unit**, not GDS as the plan expected:
+  the framework's own About page says it "has been developed by the Government Cyber
+  Unit (GCU)". Its page moved to `security.gov.uk/policy-and-guidance/secure-by-design/`;
+  registry link updated. No owner field says CDDO any more.
+- `gmpp` was already current: it indexes the April 2026 data (81 projects) and the
+  landing page's "from over 200 projects to 81 projects". No change.
+- Other "CDDO" mentions, left as they are for Oli: an evidence quote in
+  `relations.yaml` (historical, accurate), and prose in README.md, `docs/sources-engine.md`
+  and `docs/what-we-built-and-why.md` naming CDDO in lists of bodies.
+- The Secure by Design page also says Service Standard point 9 requires its
+  principles; proposed as P8 in `docs/wp4-proposed-relationships.md`.
+
+### Go-live plan, WP6: scope statement (2026-10-15)
+
+- `coverage` now has an **"Out of scope (by design)"** section between the spines and
+  the relationship gaps: NHS-specific guidance, devolved governments, procurement law,
+  and functional standards other than GovS 002 and GovS 005 (decision D9, wording as
+  drafted in the plan). The list is `OUT_OF_SCOPE` in `core.mjs`.
+- README.md carries the same text near the top. `test/mcp.test.ts` checks both the
+  section's position in `coverage` and that the README lists every item, so the two
+  cannot drift apart unnoticed (proved by breaking one, then restoring it).
+- WP8 search #10 ("NHS clinical safety DCB0129") returns the Teal Book's health and
+  safety chapter and the ethics framework's safety section: keyword search always
+  finds something. No NHS-specific source appears, and the scope statement now says
+  why. The plan's wording ("no indexed result") will need Oli's call at WP8.
+
+### Go-live plan, WP8: verification (2026-10-15)
+
+Full local refresh clean (39 of 48 indexed; only the expected six skipped); all tests
+pass. Report for Oli at the go-live gate: **`docs/go-live-report.md`** (before/after
+counts, the ten acceptance searches, every source's status, decisions, open items, and
+the WP7 watch list carried forward). Also fixed in WP8: `green-book-health` now says
+why it is not indexed (its 2013 PDF does not extract) and its owner is HM Treasury per
+GOV.UK; a doubled "NOT INDEXED: not indexed:" prefix is gone. WP3c and WP7 deferred to
+after go-live. Nothing deployed: merging `go-live-sources` to `main` is the deploy.

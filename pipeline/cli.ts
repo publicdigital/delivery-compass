@@ -20,7 +20,7 @@ async function cmdIngest(only?: string): Promise<void> {
   const registry = loadRegistry().filter((s) => (only ? s.id === only || s.spine === only : true));
   if (registry.length === 0) { console.error(`nothing matches "${only}"`); process.exit(1); }
 
-  console.log(`${BOLD}Ingesting ${registry.length} sources${RESET} ${DIM}(HTML-first; PDF-only sources are skipped, not guessed at)${RESET}\n`);
+  console.log(`${BOLD}Ingesting ${registry.length} sources${RESET} ${DIM}(HTML-first; a PDF only where it was checked to extract cleanly)${RESET}\n`);
   let totalSections = 0, totalObligations = 0, ingested = 0;
   const moved: { id: string; from: string; to: string }[] = [];
   const emptied: { id: string; reason: string }[] = [];
@@ -36,7 +36,7 @@ async function cmdIngest(only?: string): Promise<void> {
   const expectsContent = (id: string) => {
     const src = byId.get(id);
     if (src?.fetcher === "projectdelivery_pdf") return true;
-    return Boolean(src && src.slug && src.fetcher !== "withdrawn" && src.fetcher !== "local_only" && src.fetcher !== "nao_wp");
+    return Boolean(src && src.slug && !["withdrawn", "local_only", "nao_wp", "off_platform"].includes(src.fetcher));
   };
 
   for (const source of registry) {
@@ -125,8 +125,13 @@ async function cmdAsk(question: string): Promise<void> {
     const stale = byId.get(c.supersededSourceId)?.title ?? c.supersededSourceId;
     const winner = byId.get(c.bySourceId)?.title ?? c.bySourceId;
     const tag = c.severity === "high" ? `${RED}SUPERSEDED${RESET}` : `${YELLOW}CONFLICT${RESET}`;
-    console.log(`${tag} ${BOLD}${stale}${RESET} is out of date on ${BOLD}${c.scope ?? "this topic"}${RESET}${c.effective ? ` (since ${c.effective})` : ""}`);
-    console.log(`  Current position is in ${BOLD}${winner}${RESET}.`);
+    if (c.type === "supersedes") {
+      console.log(`${tag} ${BOLD}${stale}${RESET} is out of date on ${BOLD}${c.scope ?? "this topic"}${RESET}${c.effective ? ` (since ${c.effective})` : ""}`);
+      console.log(`  Current position is in ${BOLD}${winner}${RESET}.`);
+    } else {
+      // Two sources disagreeing: neither is known to be the current one.
+      console.log(`${tag} ${BOLD}${stale}${RESET} and ${BOLD}${winner}${RESET} disagree on ${BOLD}${c.scope ?? "this topic"}${RESET}`);
+    }
     if (c.guidance) console.log(`  ${c.guidance.replace(/\s+/g, " ").trim()}`);
     if (c.evidence) console.log(`  ${DIM}${c.evidence.replace(/\s+/g, " ").trim()}${RESET}`);
     console.log();

@@ -1,6 +1,6 @@
 /** Core domain types for the guidance corpus. */
 
-export type Spine = "funding" | "assurance" | "risk" | "evaluation" | "digital" | "oversight";
+export type Spine = "funding" | "assurance" | "risk" | "evaluation" | "digital" | "oversight" | "commercial";
 
 /** How binding a source or section is. `withdrawn` means the publisher has removed it. */
 export type Authority = "mandatory" | "advisory" | "informative" | "withdrawn";
@@ -21,7 +21,10 @@ export type FetcherName =
   | "off_platform"
   // The Teal Book: off GOV.UK, HTML behind a bot challenge, but published as a
   // nightly PDF generated from the same pages. See pipeline/fetchers/projectdelivery.ts.
-  | "projectdelivery_pdf";
+  | "projectdelivery_pdf"
+  // A GOV.UK publication whose only edition is a PDF, read from whichever PDF the
+  // landing page carries now. See pipeline/fetchers/govuk-pdf.ts.
+  | "govuk_pdf";
 
 export interface Source {
   id: string;
@@ -41,7 +44,26 @@ export interface Source {
   externalAttachment?: string;
   /** For projectdelivery_pdf: the PDF that is read. `endpoint` is the web page cited. */
   pdf?: string;
+  /**
+   * GOV.UK paths of HTML attachments not to ingest, e.g. a second HTML copy of the
+   * same document, which would index it twice.
+   */
+  excludeAttachments: string[];
+  /** For govuk_pdf, when the publication carries several PDFs: words in the wanted one's title. */
+  pdfTitle?: string;
+  /**
+   * Why a source is not indexed, in a sentence a reader understands. Overrides the
+   * generic reason derived from the fetcher, which is right for most sources but
+   * says nothing specific about, say, a site that blocks automated access.
+   */
+  notIndexedReason?: string;
   supersedesUrl?: string;
+  /**
+   * A qualification on `authority` that a reader needs alongside it, e.g. "comply or
+   * explain" for the commercial playbooks: mandatory, but a department may depart
+   * from them with a recorded reason.
+   */
+  authorityNote?: string;
   /** Document sets out the "shall denotes a requirement" convention in its front matter. */
   declaresConvention: boolean;
   withdrawnOn?: string;

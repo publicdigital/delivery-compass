@@ -23,14 +23,17 @@
   expand: true
   licence: OGL-v3
 
+# The 2026 guide (published 2026-06-30) combines the former separate project and
+# programme guides into one document, "to remove duplication" (GOV.UK change note).
+# PDF only on GOV.UK; checked 2026-10-15 to extract as clean text with a full
+# outline. The 2018 editions are on the National Archives and are not indexed.
 - id: business-cases
-  title: Guidance on developing business cases (Better Business Cases)
+  title: Guidance on developing business cases for projects and programmes
   body: HM Treasury
   spine: funding
   authority: mandatory
-  fetcher: govuk_publication
+  fetcher: govuk_pdf
   slug: /government/publications/guidance-on-developing-business-cases
-  prefer: html
   licence: OGL-v3
 
 - id: tap
@@ -63,15 +66,21 @@
   prefer: html
   licence: OGL-v3
 
+# PDF only (2013). Its main document, policy_appraisal_and_health.pdf, is one of the
+# seed PDFs that extracts as garbage (HANDOVER.md §4), so it is not read. Owner per
+# GOV.UK: HM Treasury (checked 2026-10-15; was recorded as DHSC).
 - id: green-book-health
   title: "Green Book supplementary guidance: health"
-  body: Department of Health and Social Care
+  body: HM Treasury
   spine: funding
   authority: advisory
   fetcher: govuk_publication
   slug: /government/publications/green-book-supplementary-guidance-health
   prefer: html
   licence: OGL-v3
+  not_indexed_reason: >-
+    GOV.UK publishes this only as PDFs from 2013, and the main one does not extract as
+    readable text. Linked, not reproduced.
 
 # Found via `compass expand` on the Green Book collection (27 members) while filling
 # ingestion gaps. Most of the collection's supplementary guides are PDF-only, same as

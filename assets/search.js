@@ -173,6 +173,25 @@ export function docTitleWords(docPath) {
  * together, so both "the Service Manual" and "governance principles for agile
  * service delivery" are things a reader can successfully name.
  */
+/**
+ * Whether the question names this source outright, by its full title.
+ *
+ * titleAffinity counts single words, and on a large corpus that is not enough: once
+ * the DDaT Playbook and GovS 005 were added, both of which quote the Technology Code
+ * of Practice, "what does the technology code of practice require" ranked TCoP itself
+ * seventh, under passages that cite it. A question containing a source's whole title
+ * ("technology code of practice", "teal book", "orange book") is asking for that
+ * source. Titles under two words are ignored, so a bare word cannot trigger it.
+ */
+const plain = (s) => ` ${String(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim()} `;
+export function namesSource(sourceTitle, question) {
+  const short = String(sourceTitle).split(/:\s|\s[-–]\s/)[0];
+  const title = plain(short).replace(/^ the /, " ");
+  return title.trim().split(" ").length >= 2 && plain(question).includes(title);
+}
+/** Added to the rank of every section of a source the question names. */
+const NAMED_SOURCE = 6;
+
 export function titleAffinity(title, terms) {
   if (terms.length === 0) return 0;
   const t = String(title).toLowerCase();
@@ -356,7 +375,17 @@ export function explainQuery(index, question) {
 }
 
 /**
- * Full retrieval: score, blend in title affinity, then de-duplicate.
+ * At most this many results from any one document. A long PDF (one document, dozens
+ * of sections) that matches a question's words can otherwise fill the whole answer:
+ * NISTA's agile assurance guide took 3 of the top 5 for "how should governance change
+ * for agile delivery" and pushed out the GDS page a tester had gone looking for.
+ * Breadth across documents is worth more to a reader than a third passage from one.
+ * A search restricted to one source passes Infinity, since there breadth is not the point.
+ */
+export const PER_DOC = 2;
+
+/**
+ * Full retrieval: score, blend in title affinity, then de-duplicate and cap per document.
  *
  * Registry entries legitimately overlap — the Service Manual crawl reaches the
  * spend-controls guide, which is also registered in its own right — so the same
@@ -366,8 +395,10 @@ export function explainQuery(index, question) {
  * @param {Map<number, object>} byId  section id -> section record
  * @param {string} question
  * @param {number} limit
+ * @param {object[]|null} concepts
+ * @param {number} perDocLimit  most sections any one document may contribute
  */
-export function searchSections(index, byId, question, limit = 6, concepts = null) {
+export function searchSections(index, byId, question, limit = 6, concepts = null, perDocLimit = PER_DOC) {
   const bridge = concepts ? matchConcepts(concepts, question) : { terms: [], concepts: [] };
   const scored = scoreDocs(index, question, bridge.terms);
   if (scored.length === 0) return [];
@@ -383,21 +414,27 @@ export function searchSections(index, byId, question, limit = 6, concepts = null
       if (!section) return null;
       const titleText = `${section.sourceTitle} ${docTitleWords(section.docPath)}`;
       // A nudge, not a override: enough to lift the canonical document into view when
-      // a concept names it, not enough to beat a strong direct match elsewhere.
+      // a concept names it, not enough to beat a strong direct match elsewhere. Was 4;
+      // 5 since the commercial playbooks' piloting sections pushed Test and Learn out
+      // of the top 5 for "light touch governance for a pilot" (Oli approved, 2026-10-15).
       const named =
-        (boostedDocs.some((d) => section.docPath.includes(d)) ? 4 : 0) +
-        (boosted.has(section.sourceId) ? 1.5 : 0);
+        (boostedDocs.some((d) => section.docPath.includes(d)) ? 5 : 0) +
+        (boosted.has(section.sourceId) ? 1.5 : 0) +
+        (namesSource(section.sourceTitle, question) ? NAMED_SOURCE : 0);
       return { section, rank: score + titleAffinity(titleText, terms) * TITLE_BOOST + named };
     })
     .filter(Boolean)
     .sort((a, b) => b.rank - a.rank);
 
   const seen = new Set();
+  const perDoc = new Map();
   const out = [];
   for (const { section } of ranked) {
     const key = `${section.docPath}#${section.anchor ?? section.heading}`;
     if (seen.has(key)) continue;
+    if ((perDoc.get(section.docPath) ?? 0) >= perDocLimit) continue;
     seen.add(key);
+    perDoc.set(section.docPath, (perDoc.get(section.docPath) ?? 0) + 1);
     out.push(section);
     if (out.length >= limit) break;
   }

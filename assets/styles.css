@@ -171,6 +171,7 @@ details.limits li{margin:6px 0}
 .g-key i.spine-risk{background:#a8271b}
 .g-key i.spine-evaluation{background:#8a5200}
 .g-key i.spine-oversight{background:#5c666d}
+.g-key i.spine-commercial{background:#9c2f6b}
 .g-key i.ring{background:#fff;border:2.5px solid var(--black)}
 .g-key i.faded{background:var(--grey1);opacity:.25}
 .g-key i.line{width:18px;height:0;border-radius:0;border-top:2.5px solid var(--red)}

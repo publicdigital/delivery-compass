@@ -90,8 +90,12 @@ function warningsFor(c, sourceId) {
     .map((r) => {
       const by = c.sourceById.get(r.from)?.title ?? r.from;
       const what = r.type === "supersedes" ? "SUPERSEDED" : "CONFLICT";
+      // A conflict is two sources disagreeing, not one replacing the other: Gate 4
+      // (August 2026) contradicts a change dated April 2026, and "overtaken" would
+      // claim the library knows which is right.
+      const relation = r.type === "supersedes" ? "this source is overtaken by" : "this source disagrees with";
       return `**WARNING (${what}, curated):** on ${r.scope ?? "this topic"}${r.effective ? `, since ${r.effective}` : ""}, ` +
-        `this source is overtaken by "${by}" (\`${r.from}\`). ${r.guidance ?? ""}`.trim();
+        `${relation} "${by}" (\`${r.from}\`). ${r.guidance ?? ""}`.trim();
     });
 }
 
@@ -123,7 +127,8 @@ function footer(c) {
 function searchGuidance(c, { question, source_id, limit = 6 }) {
   if (!question || !String(question).trim()) throw new ToolError("question is required");
   const n = Math.min(Math.max(Number(limit) || 6, 1), 10);
-  let hits = searchSections(c.index, c.sectionById, question, source_id ? 80 : n, c.concepts);
+  // Restricted to one source, every passage comes from it by design: no per-document cap.
+  let hits = searchSections(c.index, c.sectionById, question, source_id ? 80 : n, c.concepts, source_id ? Infinity : undefined);
   if (source_id) {
     if (!c.sourceById.has(source_id)) throw new ToolError(`unknown source_id "${source_id}". Call coverage for the list.`);
     hits = hits.filter((h) => h.sourceId === source_id);
@@ -154,7 +159,7 @@ function searchGuidance(c, { question, source_id, limit = 6 }) {
   hits.forEach((h, i) => {
     const src = c.sourceById.get(h.sourceId);
     out.push(`## ${i + 1}. ${h.headingPath || h.heading}`);
-    out.push(`Source: ${h.sourceTitle} (\`${h.sourceId}\`), ${h.body}. Authority: ${src?.authority ?? h.authority}. ${age(h.updatedAt, src)}.`);
+    out.push(`Source: ${h.sourceTitle} (\`${h.sourceId}\`), ${h.body}. Authority: ${src ? authorityLabel(src) : h.authority}. ${age(h.updatedAt, src)}.`);
     out.push(`Cite inline as: ${inlineCitation(h)}`);
     for (const w of warningsFor(c, h.sourceId)) out.push(w);
 
@@ -179,11 +184,16 @@ function searchGuidance(c, { question, source_id, limit = 6 }) {
 
 const STATUS = {
   full: "indexed: its text is searchable here",
-  metadata_only: "not indexed: GOV.UK publishes only a landing page, and the substance is a PDF or on another site",
-  not_indexed: "not indexed",
+  metadata_only: "GOV.UK publishes only a landing page, and the substance is a PDF or on another site",
+  not_indexed: "not ingested yet; the next refresh should index it",
 };
 
+/** "mandatory", or "mandatory (comply or explain)" where the registry qualifies it. */
+const authorityLabel = (s) => (s?.authorityNote ? `${s.authority} (${s.authorityNote})` : s?.authority);
+
 function notIndexedReason(s) {
+  // A curated reason (sources/*.yaml `not_indexed_reason`) beats the generic one.
+  if (s.notIndexedReason && s.fetcher !== "withdrawn") return s.notIndexedReason;
   if (s.fetcher === "withdrawn") return `withdrawn${s.withdrawnOn ? ` on ${s.withdrawnOn}` : ""}${s.withdrawnReason ? `: ${s.withdrawnReason}` : ""}`;
   if (s.fetcher === "nao_wp") return "NAO content is not under the Open Government Licence, so it is linked, never reproduced";
   if (s.fetcher === "local_only") return "held only as a local copy, not published online";
@@ -201,15 +211,19 @@ function getSource(c, { source_id }) {
   }
   if (!s) throw new ToolError("source_id is required");
 
-  const out = [`# ${s.title}`, "", `- id: \`${s.id}\``, `- Owner: ${s.body}`, `- Spine: ${s.spine}`, `- Authority: ${s.authority}`,
+  const out = [`# ${s.title}`, "", `- id: \`${s.id}\``, `- Owner: ${s.body}`, `- Spine: ${s.spine}`, `- Authority: ${authorityLabel(s)}`,
     `- Licence: ${s.licence}`, `- Canonical URL: ${s.url ?? "none"}`];
   if (s.externalAttachment) out.push(`- Substantive file: ${s.externalAttachment}`);
+  if (s.fetcher === "govuk_pdf") {
+    out.push("- How it is read: GOV.UK publishes this only as a PDF. The PDF attached to the publication page is re-read weekly, so a new version replaces the old one. " +
+      "Citations link to the PDF at the page where the section starts.");
+  }
   if (s.fetcher === "projectdelivery_pdf") {
     out.push(`- How it is read: the publisher's own PDF of the whole book, regenerated nightly from the website (${s.pdf}), re-read weekly. ` +
       "Citations link to the matching chapter on the website. The website itself cannot be read automatically.");
   }
   if (s.parent) out.push(`- Part of: \`${s.parent}\``);
-  out.push(`- Status: ${s.contentStatus === "full" ? `${STATUS.full} (${s.sections} sections)` : notIndexedReason(s)}`);
+  out.push(`- Status: ${s.contentStatus === "full" ? `${STATUS.full} (${s.sections} sections)` : `not indexed: ${notIndexedReason(s)}`}`);
   if (s.replacement) out.push(`- Replacement: ${s.replacement}`);
 
   const warnings = warningsFor(c, s.id);
@@ -248,6 +262,19 @@ function getSource(c, { source_id }) {
   return out.join("\n") + footer(c);
 }
 
+/**
+ * What the library deliberately does not cover. Decided by Oli for go-live (decision
+ * D9 in docs/go-live-plan.md); README.md carries the same list, so change both
+ * together. Without it, a question on NHS clinical safety would get a near miss from
+ * some other source, and the silence on the real answer would read as "no rule".
+ */
+export const OUT_OF_SCOPE = [
+  "NHS-specific guidance (for example DTAC, DCB0129, DCB0160, the NHS service standard)",
+  "Guidance from the governments of Scotland, Wales or Northern Ireland",
+  "Procurement law, including Procurement Act 2023 guidance",
+  "Government functional standards other than GovS 002 (Project Delivery) and GovS 005 (Digital)",
+];
+
 function coverage(c) {
   const m = c.meta;
   const out = [
@@ -265,10 +292,16 @@ function coverage(c) {
     out.push(`## ${sp}`);
     for (const s of c.sources.filter((x) => x.spine === sp)) {
       const status = s.contentStatus === "full" ? `${s.sections} sections` : `NOT INDEXED: ${notIndexedReason(s)}`;
-      out.push(`- \`${s.id}\` ${s.title} (${s.body}, ${s.authority}). ${status}`);
+      out.push(`- \`${s.id}\` ${s.title} (${s.body}, ${authorityLabel(s)}). ${status}`);
     }
     out.push("");
   }
+
+  out.push("## Out of scope (by design)",
+    "This library covers UK central government delivery guidance. It does not include:",
+    ...OUT_OF_SCOPE.map((x) => `- ${x}`),
+    "If your question is about one of these subjects, no result from this library does not mean that no rule applies.",
+    "");
 
   const related = new Set(c.relations.flatMap((r) => [r.from, r.to]));
   const lonely = c.sources.filter((s) => !related.has(s.id));

@@ -183,8 +183,11 @@ async function runAsk(q) {
   for (const c of caveats) {
     html += `<div class="card warn">
       <span class="tag ${c.type === "supersedes" ? "superseded" : "mandatory"}">${c.type === "supersedes" ? "Superseded" : "Conflict"}</span>
-      <strong>${esc(c.supersededTitle)}</strong> is out of date on <strong>${esc(c.scope ?? "this topic")}</strong>${c.effective ? ` (since ${esc(c.effective)})` : ""}.
-      <p class="para-tight">Current position is in <strong>${esc(c.byTitle)}</strong>. ${esc(c.guidance ?? "")}</p>
+      ${c.type === "supersedes"
+        ? `<strong>${esc(c.supersededTitle)}</strong> is out of date on <strong>${esc(c.scope ?? "this topic")}</strong>${c.effective ? ` (since ${esc(c.effective)})` : ""}.
+      <p class="para-tight">Current position is in <strong>${esc(c.byTitle)}</strong>. ${esc(c.guidance ?? "")}</p>`
+        : `<strong>${esc(c.supersededTitle)}</strong> and <strong>${esc(c.byTitle)}</strong> disagree on <strong>${esc(c.scope ?? "this topic")}</strong>.
+      <p class="para-tight">${esc(c.guidance ?? "")}</p>`}
       ${c.evidence ? `<p class="caveat-note">${esc(c.evidence)}</p>` : ""}
     </div>`;
   }

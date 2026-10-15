@@ -199,3 +199,226 @@ relations:
     to: govs-002
     type: assured_by
     scope: delivery confidence assessment of the major projects portfolio
+
+  # --- Added in go-live WP4 (2026-10-15) ------------------------------------
+  # Under Oli's decision D10 (docs/go-live-plan.md): edges the source text states
+  # outright are added here with the quote; judgement calls are proposed in
+  # docs/wp4-proposed-relationships.md and wait for Oli.
+
+  # Gates 0, 2 and 4, following the pattern of Gates 1, 3 and 5.
+  - from: gate-review-0
+    to: business-cases
+    type: gates
+    scope: programme business case approval points
+    evidence: >-
+      Business case guidance (2026), 5.8: "There is only a single Gate for PBCs, which is
+      Gate Review 0." 5.10: "Practitioners should undertake a Gate 0 Review when the PBC
+      is first completed, ahead of the first approval point for the programme."
+
+  - from: gate-review-2
+    to: business-cases
+    type: gates
+    scope: Outline Business Case (OBC) approval
+    evidence: >-
+      Business case guidance (2026), Table 2: "Gate 2: Delivery Strategy. Prior to
+      Outline Business Case (OBC) approval." Gate 2 workbook: "Confirm the Outline
+      Business Case (OBC) now the project is fully defined".
+
+  - from: gate-review-4
+    to: business-cases
+    type: requires
+    scope: an approved Full Business Case before going live
+    evidence: >-
+      Gate 4 workbook, evidence expected: "The Project and HMT have been in dialogue
+      about the full business case and HMT and both the Department Finance Director and
+      HMT have signed off the FBC."
+
+  - from: gate-review-4
+    to: magenta-book
+    type: requires
+    scope: an approved evaluation plan
+    evidence: >-
+      Gate 4 workbook, project documentation: "A Magenta Book compliant Evaluation Plan
+      approved by the Department Investment Committee and HMT if appropriate."
+
+  # GovS 005: Digital.
+  - from: govs-005
+    to: service-standard
+    type: requires
+    scope: designing and running services
+    evidence: >-
+      GovS 005 v2.2, 5.3: "Services shall be delivered in accordance with the Service
+      Standard."
+
+  - from: tcop
+    to: govs-005
+    type: elaborates
+    scope: expectations for technology decisions
+    evidence: >-
+      GovS 005 v2.2, 1.3: "This standard is supported by The Service Standard, which sets
+      expectations for services, and the Technology Code of Practice, which sets
+      expectations for technology decisions."
+
+  # The commercial playbooks.
+  - from: ddat-playbook
+    to: tcop
+    type: requires
+    scope: technology design and data sharing in DDaT procurement
+    evidence: >-
+      DDaT Playbook (2023), Key policies: data should be shared using APIs which
+      "satisfy the requirements of the Technology Code of Practice (TCoP)". Governance and
+      approvals: "TCoP is a cross-government standard setting out the key considerations
+      for how the government should design, build and buy technology."
+
+  - from: ddat-playbook
+    to: service-standard
+    type: requires
+    scope: service assessments for DDaT services
+    evidence: >-
+      DDaT Playbook (2023), DDaT assurance: "services will also need to meet the
+      Government Service Standard".
+
+  - from: ddat-playbook
+    to: sourcing-playbook
+    type: elaborates
+    scope: sourcing and contracting for digital, data and technology
+    evidence: >-
+      DDaT Playbook: "The Digital, Data and Technology Playbook is part of a wider
+      portfolio of Sourcing Playbooks developed by the Cabinet Office." Sourcing Playbook:
+      "The DDaT Playbook provides guidance when sourcing and contracting for these
+      digital services."
+
+  - from: consultancy-playbook
+    to: sourcing-playbook
+    type: elaborates
+    scope: sourcing consultancy services
+    evidence: >-
+      Consultancy Playbook v1.1, Scope: "The Consultancy Playbook forms part of the
+      Sourcing Playbook. As such, the principles, guidelines and rules of the Sourcing
+      Playbook still apply and shall be considered alongside the Consultancy Playbook
+      where appropriate."
+
+  # NISTA's integrated assurance guide.
+  - from: integrated-assurance
+    to: tap
+    type: feeds
+    scope: Integrated Assurance and Approval Plans submitted for Treasury approval
+    evidence: >-
+      Integrated assurance guide v2.1: the initial IAAP should be "validated by NISTA and
+      HM Treasury, in sufficient time for appropriate planned assurance to take place
+      prior to submission of a Strategic Outline Business Case (SOBC) to HM Treasury for
+      approval." "The process for submission of IAAPs is described in the Treasury
+      Approvals Process for projects and programmes".
+
+  # --- Approved by Oli from the WP4 proposals (2026-10-15) ------------------
+  # P1. The DDaT Playbook predates the 2026 change and still routes TCoP assurance
+  # through Cabinet Office spend control. Same supersession as TCoP itself.
+  - from: spend-controls
+    to: ddat-playbook
+    type: supersedes
+    scope: who assures TCoP compliance and approves digital and technology spend
+    effective: 2026-04-01
+    severity: high
+    evidence: >-
+      DDaT Playbook (2023), DDaT assurance: "Compliance with this code is assured through
+      the Cabinet Office spend control process". Service Manual (updated 2026-04-01):
+      "Digital and technology spend controls were replaced on 1 April 2026."
+    guidance: >-
+      Treat the Service Manual as current on who approves digital and technology spend.
+      The rest of the playbook, including its separate commercial spend control, is not
+      affected by this.
+
+  # P2. Gate 4 was republished after the change and still asks for technology spend
+  # control sign-off. A conflict, not a supersession: Gate 4 is the newer page.
+  - from: spend-controls
+    to: gate-review-4
+    type: conflicts
+    scope: technology spend control sign-off before going live
+    effective: 2026-04-01
+    severity: medium
+    evidence: >-
+      Gate 4 workbook (republished 2026-08-20), 4.2: "Cabinet Office (CO) controls have
+      been sighted on the FBC and the project has satisfied the CO controls teams
+      commercial and technology spend control requirements." Service Manual (updated
+      2026-04-01): "Digital and technology spend controls were replaced on 1 April 2026."
+    guidance: >-
+      The two disagree on technology spend control; this library cannot say which is
+      right. Check with NISTA or the department's digital spend approvers. The
+      commercial spend control in the same sentence is a separate control.
+
+  # P3. The benefits assurance guide has a section per gate on the benefits evidence
+  # that gate needs.
+  - from: benefits-assurance
+    to: gate-review-0
+    type: elaborates
+    scope: benefits evidence at the strategic assessment
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 0: "Benefits slogan: 'Link benefits to
+      strategy'... Key question: 'Are the project benefits contributing to the wider
+      strategic objectives of the programme / department / HMG?'"
+  - from: benefits-assurance
+    to: gate-review-1
+    type: elaborates
+    scope: benefits evidence at business justification
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 1: "Benefits slogan: 'Identify benefits'", followed by
+      the key question and the benefits documents required at that gate.
+  - from: benefits-assurance
+    to: gate-review-2
+    type: elaborates
+    scope: benefits evidence at delivery strategy
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 2: "Benefits slogan: 'Value and appraise'...
+      For an Outline Business Case a selection of the most important benefits identified
+      will need to be valued".
+  - from: benefits-assurance
+    to: gate-review-3
+    type: elaborates
+    scope: benefits evidence at the investment decision
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 3: "Benefits slogan: 'Plan to realise'", followed by
+      the key question and the benefits documents required at that gate.
+  - from: benefits-assurance
+    to: gate-review-4
+    type: elaborates
+    scope: benefits evidence at readiness for service
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 4: "Benefits slogan: 'Work to realise'... Key
+      question: 'are the correct processes in place to ensure benefits continue to be
+      realised after the project transitions into business as usual?'"
+  - from: benefits-assurance
+    to: gate-review-5
+    type: elaborates
+    scope: benefits evidence at the operations review
+    evidence: >-
+      Benefits assurance guide v2.1, Gate 5: "Benefits slogan: 'Review performance'", followed by
+      the key question and the benefits documents required at that gate.
+
+  # P5. "should" in a mandatory guide; recorded as requires (Oli approved).
+  - from: business-cases
+    to: integrated-assurance
+    type: requires
+    scope: planning assurance and approvals (the IAAP)
+    evidence: >-
+      Business case guidance (2026), 11.10: "Practitioners should develop an integrated
+      assurance and approval plan (IAAP)."
+
+  # P7. "should" in a mandatory standard; recorded as requires (Oli approved).
+  - from: govs-005
+    to: data-ethics
+    type: requires
+    scope: appropriate and responsible use of data and AI
+    evidence: >-
+      GovS 005 v2.2, 7.2: organisations "should use the Data and AI Ethics Framework to
+      ensure data and AI are used appropriately, responsibly and transparently".
+
+  # P8 (found in WP5, approved by Oli 2026-10-15). The quote is from the Secure by
+  # Design site, which is linked, not ingested.
+  - from: service-standard
+    to: secure-by-design
+    type: requires
+    scope: creating a secure service (Service Standard point 9)
+    evidence: >-
+      Secure by Design, About (security.gov.uk, read 2026-10-15): "The Service Standard
+      Point 9 (Create a secure service which protects users' privacy) advises service
+      teams that they must follow the Secure by Design principles."
