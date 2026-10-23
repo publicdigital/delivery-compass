@@ -142,6 +142,9 @@ When the trial ends: remove the `/trial` exception from `netlify/edge-functions/
 and the `Allow` line from `robots.txt`, or delete `trial/`. Keep the `/.well-known/`
 exception: Claude's connector dialog checks those addresses for OAuth before connecting,
 and a 401 there makes it fail with "Couldn't register with ... sign-in service".
+Confirmed on 2026-10-23: after the fix, Oli's personal account connected once the failed
+connector was deleted and added fresh with no sign-in chosen. Reconnecting the failed
+entry kept failing, so /trial tells people to delete and re-add.
 
 ## Form detection must be switched on, once, by hand
 
