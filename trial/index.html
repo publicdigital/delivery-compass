@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en-GB" class="govuk-template">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gov Delivery Library: free trial</title>
+  <meta name="description" content="843,253 words of UK government delivery guidance, searchable from your AI assistant. Free to try from 3 November to 3 December 2026.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://publicdigital-delivery-compass.netlify.app/trial/">
+  <meta property="og:title" content="Gov Delivery Library: try it free for a month">
+  <meta property="og:description" content="843,253 words of UK government delivery guidance, searchable from your AI assistant. Free trial, 3 November to 3 December 2026.">
+  <meta property="og:image" content="https://publicdigital-delivery-compass.netlify.app/trial/preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="627">
+  <meta property="og:image:alt" content="843,253 words of rules for delivering things in UK government, shown as blocks sized by document.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/trial/vendor/govuk-frontend.css">
+  <link rel="stylesheet" href="/trial/trial.css">
+</head>
+<body class="govuk-template__body">
+  <a href="#main-content" class="govuk-skip-link">Skip to main content</a>
+
+  <div class="govuk-generic-header">
+    <div class="govuk-generic-header__container govuk-width-container">
+      <div class="govuk-generic-header__logo">
+        <a href="/trial/" class="govuk-generic-header__homepage-link">Gov Delivery Library</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="govuk-width-container">
+    <div class="govuk-phase-banner">
+      <p class="govuk-phase-banner__content">
+        <strong class="govuk-tag govuk-phase-banner__content__tag">Trial</strong>
+        <span class="govuk-phase-banner__text">Free to use from 3 November to 3 December 2026. After that the connector stops answering. <a class="govuk-link" href="#feedback">Tell us what you think</a>.</span>
+      </p>
+    </div>
+
+    <main class="govuk-main-wrapper" id="main-content">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <span class="govuk-caption-l">The Gov Delivery Library · what it holds, as of 15 October 2026</span>
+          <h1 class="govuk-heading-xl"><span class="shelf-hero-number" id="hero-words">843,253</span> words of rules for delivering things in UK government</h1>
+          <p class="govuk-body-l">If you are running a project, programme or service in central government, this is the guidance someone may hold you to. It is published by <b>16 different bodies</b>, across <b>297 web pages and PDFs</b>, with no single owner and no single place it all lives. Read end to end at an average pace, it would take about <b id="hours">56 hours</b>: a week and a half of doing nothing else.</p>
+          <p class="govuk-body">The Gov Delivery Library lets your AI assistant search all of it for you. Ask a question in plain English and the answer quotes the guidance, links to the exact heading, gives the page date, and warns you where a newer document has overtaken an older one.</p>
+          <a href="#connect" class="govuk-button" data-module="govuk-button">Add it to your assistant</a>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+
+      <section class="shelf-section" id="connect">
+        <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+          <h2 class="govuk-heading-l">Add it to your assistant</h2>
+          <p class="govuk-body">The library works as a connector (an MCP server) that your assistant can call while it answers you. Every client needs the same address:</p>
+          <div class="copy-row">
+            <pre class="trial-code" id="connector-url">https://publicdigital-delivery-compass.netlify.app/mcp?key=gdl-trial-2026</pre>
+            <button type="button" class="govuk-button govuk-button--secondary copy-button" data-copy="connector-url">Copy address</button>
+          </div>
+          <p class="govuk-body-s copy-status" id="copy-status" role="status"></p>
+
+          <div class="govuk-warning-text">
+            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+            <strong class="govuk-warning-text__text"><span class="govuk-visually-hidden">Warning</span>Check your department's rules before you connect any tool to a work account.</strong>
+          </div>
+
+          <details class="govuk-details" open>
+            <summary class="govuk-details__summary"><span class="govuk-details__summary-text">Claude (web, desktop and mobile)</span></summary>
+            <div class="govuk-details__text">
+              <ol class="govuk-list govuk-list--number">
+                <li>In Claude on the web or desktop, open <b>Settings</b>, then <b>Connectors</b>.</li>
+                <li>Choose <b>Add custom connector</b>.</li>
+                <li>Name it <b>Gov Delivery Library</b>, paste the address and select <b>Add</b>.</li>
+              </ol>
+              <p class="govuk-body">Works on every plan. The free plan allows one custom connector. On Team and Enterprise plans an owner has to add it for the organisation first. Once added on the web, it is also available in the mobile app.</p>
+            </div>
+          </details>
+
+          <details class="govuk-details">
+            <summary class="govuk-details__summary"><span class="govuk-details__summary-text">ChatGPT</span></summary>
+            <div class="govuk-details__text">
+              <ol class="govuk-list govuk-list--number">
+                <li>Open <b>Settings</b>, then <b>Apps &amp; Connectors</b>, then <b>Advanced settings</b>, and turn on <b>Developer mode</b>.</li>
+                <li>Back in <b>Apps &amp; Connectors</b>, choose <b>Create</b>.</li>
+                <li>Name it <b>Gov Delivery Library</b>, paste the address, set authentication to <b>No authentication</b> and confirm that you trust it.</li>
+              </ol>
+              <p class="govuk-body">Needs a paid plan. On Business, Enterprise and Edu workspaces an admin may need to allow developer mode first. OpenAI moves these menus often, so the names may differ slightly.</p>
+            </div>
+          </details>
+
+          <details class="govuk-details">
+            <summary class="govuk-details__summary"><span class="govuk-details__summary-text">Microsoft 365 Copilot</span></summary>
+            <div class="govuk-details__text">
+              <p class="govuk-body">You cannot add a connector to Microsoft 365 Copilot yourself. Your IT team can add it as a custom MCP connector in Copilot Studio or the Microsoft 365 admin centre, using the address above. Many departments will not do this for a trial, and that is a reasonable answer.</p>
+            </div>
+          </details>
+
+          <details class="govuk-details">
+            <summary class="govuk-details__summary"><span class="govuk-details__summary-text">Claude Code</span></summary>
+            <div class="govuk-details__text">
+              <p class="govuk-body">Run this in a terminal:</p>
+              <pre class="trial-code">claude mcp add --transport http gov-delivery-library "https://publicdigital-delivery-compass.netlify.app/mcp?key=gdl-trial-2026"</pre>
+            </div>
+          </details>
+
+          <details class="govuk-details">
+            <summary class="govuk-details__summary"><span class="govuk-details__summary-text">VS Code with GitHub Copilot</span></summary>
+            <div class="govuk-details__text">
+              <p class="govuk-body">Add this to <code>.vscode/mcp.json</code> in your project, then use Copilot in agent mode:</p>
+              <pre class="trial-code">{
+  "servers": {
+    "gov-delivery-library": {
+      "type": "http",
+      "url": "https://publicdigital-delivery-compass.netlify.app/mcp?key=gdl-trial-2026"
+    }
+  }
+}</pre>
+            </div>
+          </details>
+
+          <details class="govuk-details">
+            <summary class="govuk-details__summary"><span class="govuk-details__summary-text">Gemini CLI</span></summary>
+            <div class="govuk-details__text">
+              <p class="govuk-body">Add this to <code>~/.gemini/settings.json</code>:</p>
+              <pre class="trial-code">{
+  "mcpServers": {
+    "gov-delivery-library": {
+      "httpUrl": "https://publicdigital-delivery-compass.netlify.app/mcp?key=gdl-trial-2026"
+    }
+  }
+}</pre>
+              <p class="govuk-body">The Gemini app and NotebookLM do not take connectors like this.</p>
+            </div>
+          </details>
+
+          <h3 class="govuk-heading-m">Then ask it something</h3>
+          <p class="govuk-body">Name the library in your question the first time, so your assistant knows to use it. For example:</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>"Using the Gov Delivery Library, when do I need a business case, and what goes in one?"</li>
+            <li>"Using the Gov Delivery Library, do I still need central approval for digital spend?"</li>
+            <li>"Using the Gov Delivery Library, what does the Green Book say about optimism bias?"</li>
+          </ul>
+        </div></div>
+      </section>
+
+      <section class="shelf-section">
+        <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+          <span class="govuk-caption-m">01 · The shelf</span>
+          <h2 class="govuk-heading-l">Three books hold almost half of it.</h2>
+          <p class="govuk-body">Each block below is one document or collection, sized by how many words it contains and coloured by the area of delivery it governs. Hover or tap a block for detail. The Teal Book, the Magenta Book and the Service Manual alone make up 45% of the words.</p>
+        </div></div>
+        <div class="legend" id="spine-legend"></div>
+        <div class="figure"><svg id="treemap" role="img" aria-label="Treemap of every indexed source, sized by word count and grouped by delivery area"></svg></div>
+        <p class="govuk-body-s">Not shown: 8 registered sources the library links to but cannot reproduce. See section 06.</p>
+      </section>
+
+      <section class="shelf-section">
+        <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+          <span class="govuk-caption-m">02 · Who writes it</span>
+          <h2 class="govuk-heading-l">Sixteen publishers, none of them in charge of the whole.</h2>
+          <p class="govuk-body">HM Treasury owns the money, NISTA owns assurance, GDS owns the digital spine, and Government Project Delivery owns the profession's standard. Then a long tail of departments, functions and task forces publish the pieces that sit in between.</p>
+        </div></div>
+        <div class="figure"><div class="bars" id="publishers"></div></div>
+      </section>
+
+      <section class="shelf-section">
+        <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+          <span class="govuk-caption-m">03 · How much of it is a rule</span>
+          <h2 class="govuk-heading-l"><span id="obl-total">10,067</span> statements telling you what to do. <span id="obl-must">958</span> of them say you must.</h2>
+          <p class="govuk-body">Every sentence that tells a reader what they must, should, may or could do has been pulled out and graded by its wording. That is how the library can show you the mandatory lines word for word rather than in summary. The grading is done by machine from the verb used, so treat these counts as a good estimate, not a legal audit.</p>
+        </div></div>
+        <div class="figure">
+          <div class="strength" id="strength" role="img" aria-label="Share of obligation statements by strength"></div>
+          <div class="s-key" id="s-key"></div>
+        </div>
+        <h3 class="govuk-heading-m">Where the "musts" are</h3>
+        <div class="figure"><div class="bars" id="musts"></div></div>
+      </section>
+
+      <section class="shelf-section">
+        <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+          <span class="govuk-caption-m">04 · How it fits together</span>
+          <h2 class="govuk-heading-l">One document leads to another. Sometimes they disagree.</h2>
+          <p class="govuk-body">Government publishes documents, not the links between them. These <b id="rel-n">58</b> links were mapped by hand: which document expands on which, which one you need before another applies, which assurance gates sit on which decisions, and where a newer document has quietly overtaken an older one.</p>
+        </div></div>
+        <div class="legend">
+          <span><i class="line"></i>expands on</span>
+          <span><i class="line strong"></i>requires or feeds into</span>
+          <span><i class="line dash"></i>is a gate on / assured by</span>
+          <span><i class="line alarm"></i>overtakes or conflicts with</span>
+        </div>
+        <div class="figure"><svg id="network" role="img" aria-label="Network of hand-mapped relationships between sources"></svg></div>
+        <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+          <div class="govuk-inset-text">
+            <strong class="govuk-tag govuk-tag--red govuk-!-margin-bottom-2">Live example</strong>
+            <p class="govuk-body"><b>Digital spend controls changed on 1 April 2026. Four older documents still describe the old process.</b> The Service Manual says the controls "were replaced on 1 April 2026", while the Technology Code of Practice, the DDaT Playbook, the agile business case guidance and Gate Review 4 still point readers at the old central approval route.</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="shelf-section">
+        <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+          <span class="govuk-caption-m">05 · How current it is</span>
+          <h2 class="govuk-heading-l">It keeps moving. <span id="fresh-n">26</span> of these documents changed this year.</h2>
+          <p class="govuk-body">Each dot is a document, placed at the date its publisher last updated it and sized by its length. The library checks every source weekly and records the publisher's own change notes, so a two-year-old copy on a shared drive is easy to spot.</p>
+        </div></div>
+        <div class="figure"><svg id="fresh" role="img" aria-label="Timeline of last-updated dates by delivery area"></svg></div>
+        <p class="govuk-body-s">The Teal Book publishes no page dates, so it is left off; the library compares its text week by week instead. For the Service Manual, the dot shows its most recently updated page of 143.</p>
+      </section>
+
+      <section class="shelf-section">
+        <span class="govuk-caption-m">06 · The edges</span>
+        <h2 class="govuk-heading-l">What it holds, and what it doesn't.</h2>
+        <div class="govuk-grid-row">
+          <div class="govuk-grid-column-one-half">
+            <h3 class="govuk-heading-m">Linked, not reproduced (8)</h3>
+            <p class="govuk-body-s">Registered and pointed to, but the text is not in the library. Answers say so rather than guess.</p>
+            <div id="gaps"></div>
+          </div>
+          <div class="govuk-grid-column-one-half">
+            <h3 class="govuk-heading-m">Out of scope by design</h3>
+            <p class="govuk-body-s">If a question is about one of these, an empty answer does not mean no rule applies.</p>
+            <ul class="govuk-list govuk-list--bullet">
+              <li>NHS-specific guidance (for example DTAC, DCB0129, DCB0160, the NHS service standard)</li>
+              <li>Guidance from the governments of Scotland, Wales or Northern Ireland</li>
+              <li>Procurement law, including Procurement Act 2023 guidance</li>
+              <li>Functional standards other than GovS 002 (Project Delivery) and GovS 005 (Digital)</li>
+            </ul>
+          </div>
+        </div>
+        <details class="govuk-details">
+          <summary class="govuk-details__summary"><span class="govuk-details__summary-text">Every source in the library (52)</span></summary>
+          <div class="govuk-details__text tablewrap">
+            <table class="govuk-table" id="table">
+              <thead class="govuk-table__head"><tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Source</th><th scope="col" class="govuk-table__header">Publisher</th><th scope="col" class="govuk-table__header">Area</th>
+                <th scope="col" class="govuk-table__header govuk-table__header--numeric">Words</th><th scope="col" class="govuk-table__header govuk-table__header--numeric">Sections</th>
+                <th scope="col" class="govuk-table__header govuk-table__header--numeric">"Must"s</th><th scope="col" class="govuk-table__header">Last updated</th>
+              </tr></thead>
+              <tbody class="govuk-table__body"></tbody>
+            </table>
+          </div>
+        </details>
+        <p class="govuk-body-s">Figures from the Gov Delivery Library index built on 15 October 2026. Word counts are from the indexed text. Obligation strengths are machine-graded from wording. Relationships are hand-curated and incomplete: no link between two documents does not mean they are independent.</p>
+      </section>
+
+      <section class="shelf-section">
+        <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+          <h2 class="govuk-heading-l">Before you rely on it</h2>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>It is unofficial. It is not a government service, and it is not affiliated with or endorsed by HM Treasury, NISTA, GDS or any other publisher listed.</li>
+            <li>It quotes the guidance and links to the original. The original is the authority, so follow the link before you act on anything important.</li>
+            <li>Your assistant writes the final answer, and assistants can still get things wrong. The library gives it the exact text and dates to work from.</li>
+            <li>The library only receives the search your assistant sends it, never the rest of your conversation. Those searches are logged so we can see what people need, kept for no longer than the trial, and never shared. Leave personal details out of your questions.</li>
+            <li>The text comes from GOV.UK and projectdelivery.gov.uk under the Open Government Licence v3.0.</li>
+          </ul>
+          <p class="govuk-body">It is an experiment by Oli Lovell at Public Digital, built to find out whether delivery people find this useful. The trial ends on 3 December 2026.</p>
+        </div></div>
+      </section>
+
+      <section class="shelf-section" id="feedback">
+        <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+          <h2 class="govuk-heading-l">Tell us what you think</h2>
+          <p class="govuk-body">This is the only way we will know whether it is worth keeping.</p>
+          <form name="trial-feedback" method="POST" action="/trial/thanks/" data-netlify="true" netlify-honeypot="website" novalidate>
+            <input type="hidden" name="form-name" value="trial-feedback">
+            <p class="govuk-visually-hidden"><label>Leave this empty <input name="website" tabindex="-1" autocomplete="off"></label></p>
+
+            <div class="govuk-form-group">
+              <label class="govuk-label govuk-label--s" for="asked">What did you ask it?</label>
+              <textarea class="govuk-textarea" id="asked" name="asked" rows="3"></textarea>
+            </div>
+
+            <div class="govuk-form-group">
+              <fieldset class="govuk-fieldset">
+                <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Was the answer useful?</legend>
+                <div class="govuk-radios govuk-radios--small" data-module="govuk-radios">
+                  <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="useful" name="useful" type="radio" value="Yes">
+                    <label class="govuk-label govuk-radios__label" for="useful">Yes</label>
+                  </div>
+                  <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="useful-partly" name="useful" type="radio" value="Partly">
+                    <label class="govuk-label govuk-radios__label" for="useful-partly">Partly</label>
+                  </div>
+                  <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="useful-no" name="useful" type="radio" value="No">
+                    <label class="govuk-label govuk-radios__label" for="useful-no">No</label>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+
+            <div class="govuk-form-group">
+              <label class="govuk-label govuk-label--s" for="more">Anything else we should know?</label>
+              <div class="govuk-hint" id="more-hint">For example, guidance that is missing, or an answer that was wrong.</div>
+              <textarea class="govuk-textarea" id="more" name="more" rows="4" aria-describedby="more-hint"></textarea>
+            </div>
+
+            <div class="govuk-form-group">
+              <label class="govuk-label govuk-label--s" for="email">Email address (optional)</label>
+              <div class="govuk-hint" id="email-hint">Only if you would like a reply. We will not use it for anything else.</div>
+              <input class="govuk-input govuk-!-width-two-thirds" id="email" name="email" type="email" autocomplete="email" spellcheck="false" aria-describedby="email-hint">
+            </div>
+
+            <button type="submit" class="govuk-button" data-module="govuk-button">Send feedback</button>
+          </form>
+        </div></div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="govuk-footer">
+    <div class="govuk-width-container">
+      <div class="govuk-footer__meta">
+        <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
+          <p class="govuk-footer__meta-custom">Unofficial. Not affiliated with or endorsed by HM Treasury, NISTA, GDS or any other publisher listed. Styled with the open-source GOV.UK Frontend (MIT licence).</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <div class="tip" id="tip" hidden></div>
+
+  <script src="/trial/vendor/d3.min.js"></script>
+  <script src="/trial/shelf-data.js"></script>
+  <script src="/trial/trial.js"></script>
+</body>
+</html>

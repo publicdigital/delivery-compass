@@ -1,0 +1,91 @@
+/* The public /trial page. Layered on GOV.UK Frontend (vendor/govuk-frontend.css), which
+   supplies type, spacing and components. This file only adds what the Design System has
+   no component for: the stat row, the charts and the code blocks. Colours come from the
+   GOV.UK colour palette; no rounded corners or shadows, to match it. */
+:root {
+  --ink: #0b0c0c;
+  --ink-2: #484949;
+  --rule: #cecece;
+  --axis: #b1b4b6;
+  --surface: #ffffff;
+  --accent: #1d70b8;
+  --alarm: #ca3535;
+  --sp-assurance: #1d70b8;
+  --sp-digital: #f47738;
+  --sp-funding: #28a197;
+  --sp-evaluation: #4c2c92;
+  --sp-commercial: #d53880;
+  --sp-risk: #00703c;
+  --sp-oversight: #b58840;
+  --st-1: #003078;
+  --st-2: #1d70b8;
+  --st-3: #5694ca;
+  --st-4: #bbd4ea;
+  color-scheme: light;
+}
+
+/* GOV.UK Frontend has no dark mode, so the page stays light whatever the viewer's setting. */
+html { background-color: var(--govuk-template-background-colour, #f4f8fb); }
+/* GOV.UK Frontend sets its font on its own classes only; the charts and stat row need it too. */
+body { position: relative; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--ink); }
+
+.shelf-section { padding-top: 30px; margin-top: 30px; border-top: 1px solid var(--rule); }
+.shelf-hero-number { display: block; font-size: 80px; line-height: 1; font-weight: 700; margin-bottom: 10px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0 20px; border-top: 5px solid var(--accent); margin-bottom: 20px; }
+.stat { padding: 15px 0 5px; display: grid; gap: 5px; align-content: start; }
+.stat b { font-size: 48px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat small { font-size: 16px; color: var(--ink-2); line-height: 1.3; }
+
+/* connector address and config snippets */
+.trial-code {
+  margin: 0 0 15px; padding: 15px; background: #f3f2f1; border-left: 5px solid var(--axis);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 15px; line-height: 1.5;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.copy-row { display: flex; flex-wrap: wrap; gap: 0 15px; align-items: flex-start; }
+.copy-row .trial-code { flex: 1 1 320px; min-width: 0; }
+.copy-status:empty { display: none; }
+
+/* charts */
+.figure { border-top: 1px solid var(--axis); border-bottom: 1px solid var(--axis); padding: 15px 0; margin-bottom: 20px; min-width: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 5px 20px; font-size: 16px; margin-bottom: 15px; }
+.legend i { display: inline-block; width: 15px; height: 15px; margin-right: 6px; vertical-align: -2px; }
+.legend .line { width: 25px; height: 0; border-top: 2px solid var(--axis); vertical-align: 4px; }
+.legend .line.strong { border-top-color: var(--ink-2); }
+.legend .line.dash { border-top-style: dashed; border-top-color: var(--ink-2); }
+.legend .line.alarm { border-top: 3px solid var(--alarm); }
+.legend .num { color: var(--ink-2); }
+#treemap, #network, #fresh { width: 100%; display: block; }
+svg text { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+.tip { position: absolute; pointer-events: none; z-index: 5; max-width: 300px; background: var(--ink); color: #fff; font-size: 14px; line-height: 1.4; padding: 10px; }
+.tip b { display: block; font-size: 16px; margin-bottom: 5px; }
+
+.strength { display: flex; height: 50px; gap: 2px; }
+.strength div { min-width: 0; }
+.s-key { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px 20px; margin-top: 20px; }
+.s-key div { display: grid; gap: 4px; border-top: 5px solid; padding-top: 10px; }
+.s-key b { font-size: 36px; font-weight: 700; line-height: 1; }
+.s-key em { font-style: normal; font-weight: 700; font-size: 16px; }
+.s-key small { font-size: 16px; color: var(--ink-2); }
+
+.bars { display: grid; grid-template-columns: minmax(0, 16em) minmax(0, 1fr); gap: 8px 15px; align-items: center; font-size: 16px; }
+.bars .lab { line-height: 1.25; }
+.bars .lab small { color: var(--ink-2); display: block; font-size: 14px; }
+.bars .track { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.bars .bar { height: 20px; background: var(--accent); min-width: 2px; }
+.bars .val { font-size: 14px; color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.gap-item { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.gap-item:first-child { border-top: 1px solid var(--rule); }
+.sw { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; }
+.tablewrap { overflow-x: auto; }
+.tablewrap .govuk-table { min-width: 760px; }
+
+@media (max-width: 40.0525em) {
+  .shelf-hero-number { font-size: 53px; }
+  .stat b { font-size: 36px; }
+  .bars { grid-template-columns: minmax(0, 1fr); gap: 2px 0; }
+  .bars .track { margin-bottom: 10px; }
+}

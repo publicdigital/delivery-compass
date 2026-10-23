@@ -100,6 +100,30 @@ check((await http(new Request("https://x/mcp?key=test-key"))).status === 405, "G
 delete process.env.MCP_KEY;
 check((await post({ jsonrpc: "2.0", id: 1, method: "ping" })).status === 401, "with no MCP_KEY set, the test key must not work");
 
+// --- the public trial -----------------------------------------------------------------
+// The trial key and end date are read when the module loads, so each case loads its own
+// copy (a query string makes it a separate module instance).
+const toolCall = { jsonrpc: "2.0", id: 9, method: "tools/call", params: { name: "coverage", arguments: {} } };
+const quiet = console.log;
+console.log = () => {}; // logCall writes a line per tool call; keep the test output readable
+
+process.env.TRIAL_KEY = "trial-test";
+process.env.TRIAL_ENDS = "2999-01-01T00:00:00Z";
+// @ts-expect-error - as above
+const { default: during } = await import("../netlify/functions/mcp/mcp.mjs?during");
+const live = await (await during(new Request("https://x/mcp?key=trial-test", { method: "POST", body: JSON.stringify(toolCall) }))).json();
+check(/What the Gov Delivery Library covers/.test(live.result?.content?.[0]?.text ?? ""), "the trial key should answer tool calls during the trial");
+
+process.env.TRIAL_ENDS = "2000-01-01T00:00:00Z";
+// @ts-expect-error - as above
+const { default: after } = await import("../netlify/functions/mcp/mcp.mjs?after");
+const callAfter = (body: unknown) => after(new Request("https://x/mcp?key=trial-test", { method: "POST", body: JSON.stringify(body) }));
+const over = await (await callAfter(toolCall)).json();
+check(/trial .* ended/.test(over.result?.content?.[0]?.text ?? "") && over.result?.isError === true, "after the trial, tool calls should say the trial has ended");
+check((await callAfter({ jsonrpc: "2.0", id: 1, method: "ping" })).status === 200, "after the trial, the client should stay connected to read that message");
+check((await after(new Request("https://x/mcp?key=wrong", { method: "POST", body: JSON.stringify(toolCall) }))).status === 401, "a wrong key is still refused after the trial");
+console.log = quiet;
+
 if (failures.length) {
   console.error(`MCP: ${failures.length} failure(s)\n`);
   for (const f of failures) console.error(`  - ${f}`);

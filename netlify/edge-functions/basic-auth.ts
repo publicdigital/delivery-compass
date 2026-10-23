@@ -25,8 +25,14 @@
 // (netlify/functions/mcp/mcp.mjs). Matched exactly, so nothing else slips through.
 const OWN_AUTH = new Set(["/mcp", "/.netlify/functions/mcp"]);
 
+// /trial/ is the public page for the trial of 3 November to 3 December 2026: how to
+// connect, plus the corpus visual. Everything it loads lives under /trial/ too, so
+// opening this one prefix exposes nothing else. Remove it when the trial ends.
+const isPublic = (path: string) => path === "/trial" || path.startsWith("/trial/");
+
 export default async (request: Request, context: Netlify.Context) => {
-  if (OWN_AUTH.has(new URL(request.url).pathname)) return context.next();
+  const path = new URL(request.url).pathname;
+  if (OWN_AUTH.has(path) || isPublic(path)) return context.next();
 
   const expected = "Basic " + btoa("compass:q6IrR1zm1R9mA2cpei0uCH");
 

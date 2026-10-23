@@ -107,6 +107,40 @@ curl -s -X POST https://publicdigital-delivery-compass.netlify.app/mcp -H 'conte
 A `404` there means the function did not deploy. Check the deploy log for a
 "Bundling functions" or "Packaging functions" line.
 
+## The public trial (3 November to 3 December 2026)
+
+`/trial/` is the one public page on the site: what the library holds, how to connect
+each assistant, and a feedback form. The Basic Auth edge function lets `/trial` and
+everything under it through; everything else still needs the password. The page loads
+only files under `/trial/` (its own copy of GOV.UK Frontend's CSS, d3, and a dated data
+snapshot from `scripts/export-shelf.ts`), because `/assets/data` stays private.
+
+The connector address published on that page is
+`https://publicdigital-delivery-compass.netlify.app/mcp?key=gdl-trial-2026`. The trial
+key is not a secret: it stops answering at the end of 3 December 2026, after which
+tool calls return a message saying the trial has ended. The tester key is unaffected.
+Two optional Netlify environment variables change this without a push:
+
+- `TRIAL_ENDS`: an ISO date-time, for example `2027-01-04T00:00:00Z` to extend it.
+- `TRIAL_KEY`: a different trial key. Setting it to a random string ends the trial at
+  once for everyone holding the published address.
+
+Each tool call writes one log line with the search text and arguments (Netlify →
+Logs → Functions → `mcp`). Netlify keeps these briefly, so look while the trial runs.
+
+Check after a deploy:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' https://publicdigital-delivery-compass.netlify.app/trial/
+curl -s -X POST 'https://publicdigital-delivery-compass.netlify.app/mcp?key=gdl-trial-2026' -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"ping"}'
+```
+
+Expect `200`, then `{"jsonrpc":"2.0","id":1,"result":{}}`. The page's feedback form
+(`trial-feedback`) needs form detection switched on, below.
+
+When the trial ends: remove the `/trial` exception from `netlify/edge-functions/basic-auth.ts`
+and the `Allow` line from `robots.txt`, or delete `trial/`.
+
 ## Form detection must be switched on, once, by hand
 
 **Netlify disables form detection by default on new sites.** Until it is enabled,

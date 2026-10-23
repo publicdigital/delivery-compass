@@ -1,4 +1,6 @@
-# Unofficial prototype, shared with a handful of named testers. Not for indexing.
-# The site also sits behind HTTP Basic Auth, so this is belt and braces.
+# Unofficial prototype. Only /trial/ is public, for the trial of 3 November to
+# 3 December 2026; it is allowed so link previews (LinkedIn) can read its title and
+# image. Everything else sits behind HTTP Basic Auth as well, so this is belt and braces.
 User-agent: *
+Allow: /trial/
 Disallow: /

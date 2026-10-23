@@ -22,6 +22,10 @@ const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const SHIPPED = [
   "index.html",
   ...readdirSync(join(ROOT, "assets")).filter((f) => f.endsWith(".js")).map((f) => `assets/${f}`),
+  // The public trial page, under the same CSP. vendor/ is third-party and minified.
+  "trial/index.html",
+  "trial/thanks/index.html",
+  ...readdirSync(join(ROOT, "trial")).filter((f) => f.endsWith(".js")).map((f) => `trial/${f}`),
 ];
 
 const failures: string[] = [];

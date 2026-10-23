@@ -995,3 +995,30 @@ for a new version, and ask Government Project Delivery for a fetchable link.
   topic-only questions the Teal Book usually outranks it; that is fair.
 - Built on the WP3c/WP7 branch (`wp3c-wp7`), which another session left committed and
   idle in this same checkout, and merged to `main` together.
+
+### Public trial, 3 November to 3 December 2026 (built 2026-10-23)
+
+Oli got permission to share the library publicly for a month, announced on LinkedIn, and
+now has Netlify access himself. Built on the site rather than as a claude.ai artifact so
+the page, the visual and the connector share one address and the link gets a real
+preview card. DEPLOY.md, "The public trial", has the operating detail.
+
+- `/trial/` is the first public page: the corpus visual (first made as a claude.ai
+  artifact, restyled with GOV.UK Frontend under the no-branding rule: generic header,
+  Arial, no crown), setup steps for Claude, ChatGPT, Microsoft 365 Copilot (admin only,
+  said plainly), Claude Code, VS Code and Gemini CLI, and a `trial-feedback` Netlify
+  form. Everything it loads is under `/trial/`; `/assets/data` stays private.
+- `basic-auth.ts` lets `/trial` through; `robots.txt` allows `/trial/` so LinkedIn can
+  read the preview. Both need undoing when the trial ends.
+- `mcp.mjs`: a published trial key (`gdl-trial-2026`) that answers until the end of
+  3 December 2026 and then returns a readable "trial has ended" tool result. Overridable
+  with `TRIAL_KEY` / `TRIAL_ENDS` in Netlify. One log line per tool call (search text
+  and arguments only); `/trial` tells users. Tested in `mcp.test.ts`.
+- `scripts/export-shelf.ts` writes the page's dated data snapshot. Not part of
+  `refresh`, because the page prose quotes some of its figures.
+- The page's example questions were checked against the live search. "What must an SRO
+  do before Gate 3?" retrieved Gate 0 and Gate 5 workbooks, so it was replaced with a
+  business case question. Gate-specific questions are a retrieval weakness worth a
+  golden case.
+- LinkedIn carousel, preview image source and post draft live outside the repo, in
+  `../trial-launch/`.

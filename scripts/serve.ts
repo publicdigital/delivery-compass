@@ -33,6 +33,7 @@ const TYPES: Record<string, string> = {
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon",
+  ".png": "image/png",
 };
 
 /** Hand an incoming request to the MCP function as a fetch Request, as Netlify does. */
