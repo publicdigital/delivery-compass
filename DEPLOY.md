@@ -139,7 +139,9 @@ Expect `200`, then `{"jsonrpc":"2.0","id":1,"result":{}}`. The page's feedback f
 (`trial-feedback`) needs form detection switched on, below.
 
 When the trial ends: remove the `/trial` exception from `netlify/edge-functions/basic-auth.ts`
-and the `Allow` line from `robots.txt`, or delete `trial/`.
+and the `Allow` line from `robots.txt`, or delete `trial/`. Keep the `/.well-known/`
+exception: Claude's connector dialog checks those addresses for OAuth before connecting,
+and a 401 there makes it fail with "Couldn't register with ... sign-in service".
 
 ## Form detection must be switched on, once, by hand
 
