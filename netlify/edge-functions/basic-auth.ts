@@ -27,8 +27,10 @@ const OWN_AUTH = new Set(["/mcp", "/.netlify/functions/mcp"]);
 
 // /trial/ is the public page for the trial of 3 November to 3 December 2026: how to
 // connect, plus the corpus visual. Everything it loads lives under /trial/ too, so
-// opening this one prefix exposes nothing else. Remove it when the trial ends.
-const isPublic = (path: string) => path === "/trial" || path.startsWith("/trial/");
+// opening this one prefix exposes nothing else. robots.txt is public too, so crawlers
+// fetching a link preview read its "Allow: /trial/" rather than a 401. Remove the
+// /trial part when the trial ends.
+const isPublic = (path: string) => path === "/robots.txt" || path === "/trial" || path.startsWith("/trial/");
 
 export default async (request: Request, context: Netlify.Context) => {
   const path = new URL(request.url).pathname;
