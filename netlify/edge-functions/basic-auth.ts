@@ -30,7 +30,14 @@ const OWN_AUTH = new Set(["/mcp", "/.netlify/functions/mcp"]);
 // opening this one prefix exposes nothing else. robots.txt is public too, so crawlers
 // fetching a link preview read its "Allow: /trial/" rather than a 401. Remove the
 // /trial part when the trial ends.
-const isPublic = (path: string) => path === "/robots.txt" || path === "/trial" || path.startsWith("/trial/");
+//
+// /.well-known/ is public so it can say "nothing here". Before connecting, Claude's
+// custom-connector dialog asks /.well-known/oauth-protected-resource and friends whether
+// the server needs OAuth. A 401 from this password reads as "yes", and Claude then fails
+// with "Couldn't register with ... sign-in service". A plain 404 (there are no such
+// files) tells it there is no OAuth, so it connects with the ?key= in the URL.
+const isPublic = (path: string) =>
+  path === "/robots.txt" || path.startsWith("/.well-known/") || path === "/trial" || path.startsWith("/trial/");
 
 export default async (request: Request, context: Netlify.Context) => {
   const path = new URL(request.url).pathname;
