@@ -188,6 +188,20 @@ async function resolveDocs(
     docs.push({ path: movedTo ?? source.slug, html: inline, updatedAt: item.public_updated_at ?? null });
   }
 
+  // Manuals (e.g. the Test, Learn and Grow Playbook) hold their prose in section
+  // pages, listed under child_section_groups, one page each.
+  for (const group of item.details?.child_section_groups ?? []) {
+    for (const section of group.child_sections ?? []) {
+      if (!section.base_path) continue;
+      const sub = await getContent(section.base_path);
+      if ("httpError" in sub) continue;
+      const body = sub.details?.body;
+      if (body && body.trim().length > 0) {
+        docs.push({ path: section.base_path, html: body, updatedAt: sub.public_updated_at ?? item.public_updated_at ?? null });
+      }
+    }
+  }
+
   // Publications hold their prose in HTML attachments, one page each.
   const htmlAttachments = (item.details?.attachments ?? []).filter(
     (a) => a.attachment_type === "html" && a.url?.startsWith("/"),

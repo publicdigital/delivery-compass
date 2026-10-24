@@ -24,6 +24,10 @@ export interface ContentItem {
     attachments?: { title?: string; url?: string; content_type?: string; attachment_type?: string }[];
     body?: string;
     redirects?: { destination?: string }[];
+    /** Manuals list their section pages here. */
+    child_section_groups?: { title?: string; child_sections?: { base_path?: string; title?: string }[] }[];
+    /** Manuals publish change notes here, per section, rather than in change_history. */
+    change_notes?: { published_at?: string; change_note?: string; title?: string }[];
   };
   links?: Record<string, { base_path?: string; title?: string }[]> & {
     children?: { base_path?: string; title?: string }[];
@@ -43,7 +47,11 @@ export async function getContent(slug: string): Promise<ContentItem | { httpErro
 }
 
 function toChangeNotes(item: ContentItem): ChangeNote[] {
-  return (item.details?.change_history ?? []).map((c) => ({ timestamp: c.public_timestamp, note: c.note }));
+  const history = (item.details?.change_history ?? []).map((c) => ({ timestamp: c.public_timestamp, note: c.note }));
+  const manual = (item.details?.change_notes ?? [])
+    .filter((c) => c.published_at && c.change_note)
+    .map((c) => ({ timestamp: c.published_at!, note: c.title ? `${c.title}: ${c.change_note}` : c.change_note! }));
+  return [...history, ...manual];
 }
 
 function toAttachments(item: ContentItem): Attachment[] {

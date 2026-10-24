@@ -35,3 +35,20 @@
   slug: /guidance/the-aqua-book
   prefer: html
   licence: OGL-v3
+
+# Added 2026-10-24 at Oli's request. Cabinet Office's Test, Learn and Grow Playbook,
+# first published 2026-10-19: what the £100m Test, Learn and Grow programme learned,
+# phase by phase. A GOV.UK manual, so its prose sits in 11 section pages, which
+# resolveDocs reads from child_section_groups. Advisory: it describes a way of
+# working and sets no requirements (a handful of "must"s, mostly on research safety).
+# Public Digital is in the programme's delivery consortium, so say so wherever this
+# library's handling of it is published.
+- id: test-learn-grow-playbook
+  title: Test, Learn and Grow Playbook
+  body: Cabinet Office
+  spine: evaluation
+  authority: advisory
+  fetcher: govuk_content
+  slug: /guidance/test-learn-and-grow-playbook
+  prefer: html
+  licence: OGL-v3

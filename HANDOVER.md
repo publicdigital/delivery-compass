@@ -1022,3 +1022,27 @@ preview card. DEPLOY.md, "The public trial", has the operating detail.
   golden case.
 - LinkedIn carousel, preview image source and post draft live outside the repo, in
   `../trial-launch/`.
+
+### Test, Learn and Grow Playbook added (2026-10-24)
+
+Oli asked for Cabinet Office's Test, Learn and Grow Playbook (first published
+2026-10-19, `/guidance/test-learn-and-grow-playbook`) as a source. It is the first
+GOV.UK *manual* in the corpus: no body of its own, prose in 11 section pages listed
+under `details.child_section_groups`. `resolveDocs` now reads those (any manual will
+work the same way), and `toChangeNotes` reads manuals' `details.change_notes` too.
+
+- `test-learn-grow-playbook`, `evaluation` spine, advisory, 169 sections (168 anchored),
+  81 obligations, 9 MANDATORY, nearly all in "Conducting research safely".
+- Ingested by a full `npm run refresh`, not on its own: the export dates the corpus by
+  the newest `indexed_at`, so a single-source ingest would have claimed every source was
+  checked today. The refresh found no other upstream changes beyond three sections
+  (integrated assurance, Service Manual). The scheduled refresh of 2026-10-19 left no
+  commit on main; nobody has checked why yet.
+- Golden: shipping engine 41/41. Ranking change for Oli to approve: on "test and learn"
+  the playbook takes 4 of the top 5 and HMT's Test and Learn annex (Magenta Book) drops
+  from 1st to 4th. On the governance questions the Magenta Book stays 1st.
+- Proposed relations, not added (the playbook states both): playbook elaborates the
+  Magenta Book (cites its Test and Learn annex, chapters 5 and 6); playbook elaborates
+  the Service Manual (cites its agile governance, research and analysis guides).
+- Public Digital is in the Test, Learn and Grow delivery consortium. Declare it wherever
+  this library's handling of the playbook is published, including /trial.
