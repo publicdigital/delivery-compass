@@ -10,13 +10,17 @@
   --surface: #ffffff;
   --accent: #1d70b8;
   --alarm: #ca3535;
-  --sp-assurance: #1d70b8;
-  --sp-digital: #f47738;
-  --sp-funding: #28a197;
-  --sp-evaluation: #4c2c92;
-  --sp-commercial: #d53880;
-  --sp-risk: #00703c;
-  --sp-oversight: #b58840;
+  /* Each area takes the colour of its namesake book where it has one: assurance the
+     Teal Book, funding the Green Book, evaluation the Magenta Book, risk the Orange
+     Book. Steps and order (see SPINES in trial.js) pass the dataviz palette checks
+     for colour-blind and normal-vision separation on white. */
+  --sp-assurance: #00968f;
+  --sp-digital: #2b6cc4;
+  --sp-funding: #3a8a1f;
+  --sp-commercial: #7b5ccf;
+  --sp-risk: #e8661c;
+  --sp-evaluation: #c2187a;
+  --sp-oversight: #a07800;
   --st-1: #003078;
   --st-2: #1d70b8;
   --st-3: #5694ca;

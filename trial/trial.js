@@ -28,18 +28,19 @@
   if (!window.d3 || !window.SHELF) return;
   const DATA = window.SHELF;
 
+  // This order keeps neighbouring colours distinguishable (see trial.css); change both together.
   const SPINES = [
     ["assurance", "Assurance & project delivery"],
     ["digital", "Digital & technology"],
     ["funding", "Funding & business cases"],
-    ["evaluation", "Evaluation & analysis"],
     ["commercial", "Commercial"],
     ["risk", "Risk"],
+    ["evaluation", "Evaluation & analysis"],
     ["oversight", "Oversight & scrutiny"],
   ];
   const SPINE_NAME = Object.fromEntries(SPINES);
-  // Light fills that need dark text to meet contrast; the rest take white.
-  const DARK_INK = new Set(["digital", "funding", "oversight"]);
+  // Fills where dark text contrasts better than white; the rest take white.
+  const DARK_INK = new Set(["assurance", "funding", "risk", "oversight"]);
   const SHORT = {
     "teal-book": "Teal Book", "magenta-book": "Magenta Book", "service-manual": "Service Manual",
     "sourcing-playbook": "Sourcing Playbook", "ddat-playbook": "DDaT Playbook", "rose-book": "Rose Book",
