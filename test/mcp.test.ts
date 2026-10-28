@@ -86,26 +86,79 @@ const changes = call("recent_changes", { days: 730 });
 check(/publisher's own words/.test(changes.text) && /\*\*\d{4}-\d{2}-\d{2}\*\*/.test(changes.text), "recent_changes should list dated notes");
 
 // --- HTTP ---------------------------------------------------------------------------
-const post = (body: unknown, url = "https://x/mcp?key=test-key", headers: Record<string, string> = {}) =>
-  http(new Request(url, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) }));
+// Capture every line the handler writes, so the logs can be checked as well as quieted.
+const logged: string[] = [];
+const quiet = console.log;
+console.log = (...a: unknown[]) => { logged.push(a.join(" ")); };
+const lastLog = () => JSON.parse(logged.at(-1) ?? "{}");
 
-check((await post({ jsonrpc: "2.0", id: 1, method: "ping" }, "https://x/mcp")).status === 401, "no key should be 401");
-check((await post({ jsonrpc: "2.0", id: 1, method: "ping" }, "https://x/mcp?key=wrong")).status === 401, "wrong key should be 401");
-check((await post({ jsonrpc: "2.0", id: 1, method: "ping" })).status === 200, "query key should work");
-check((await post({ jsonrpc: "2.0", id: 1, method: "ping" }, "https://x/mcp", { authorization: "Bearer test-key" })).status === 200, "bearer key should work");
+const post = (body: unknown, url = "https://x/mcp?key=test-key", headers: Record<string, string> = {}) =>
+  http(new Request(url, { method: "POST", headers: { "content-type": "application/json", "user-agent": "Claude-User", ...headers }, body: JSON.stringify(body) }));
+const initialize = { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "claude-ai", version: "0.1.0" } } };
+
+const viaQuery = await post(initialize);
+check(viaQuery.status === 200, "query key should work");
+const initLog = lastLog();
+check(initLog.event === "mcp" && initLog.key === "tester" && initLog.auth === "query" && initLog.status === 200, "the log line should record the key's label and how it arrived");
+check(initLog.client?.name === "claude-ai" && initLog.client?.version === "0.1.0", "an initialize should log the client's name and version");
+check(initLog.ua === "Claude-User" && typeof initLog.ms === "number", "the log line should carry the user agent and the time taken");
+
+check((await post(initialize, "https://x/mcp", { authorization: "Bearer test-key" })).status === 200, "bearer key should work");
+check(lastLog().auth === "header", "a bearer key should log as arriving by header");
+check((await post(initialize, "https://x/mcp?key=wrong", { authorization: "Bearer test-key" })).status === 200, "the header should win over the query");
+
+const noKey = await post(initialize, "https://x/mcp");
+const wrongKey = await post(initialize, "https://x/mcp?key=wrong");
+check(noKey.status === 401 && wrongKey.status === 401, "a missing or wrong key should be 401");
+const noKeyBody = await noKey.text();
+check(noKeyBody === await wrongKey.text(), "a missing key and a wrong key must get the same response");
+check(JSON.parse(noKeyBody).error?.code === -32001 && /Authorization: Bearer <key>/.test(noKeyBody), "the 401 should say how to send a key");
+check(!noKey.headers.has("www-authenticate"), "no WWW-Authenticate header, which can start an OAuth flow");
+check(lastLog().key === null && lastLog().status === 401 && lastLog().auth === "query", "a failed key should still be logged, with no label");
+
+await post({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "coverage", arguments: { secret: "user-text" } } });
+const toolLog = logged.at(-1) ?? "";
+check(JSON.parse(toolLog).calls?.[0]?.tool === "coverage", "a tools/call should log the tool's name");
+check(!toolLog.includes("user-text"), "the request log line must not carry tool arguments");
+
+await post([{ jsonrpc: "2.0", id: 3, method: "ping" }, { jsonrpc: "2.0", id: 4, method: "tools/list" }]);
+check(JSON.stringify(lastLog().calls) === JSON.stringify([{ method: "ping", tool: null }, { method: "tools/list", tool: null }]), "a batch should log one call per message");
+
+const garbled = await http(new Request("https://x/mcp?key=test-key", { method: "POST", body: "{not json" }));
+check(garbled.status === 400 && (await garbled.json()).error?.code === -32700, "a body that is not JSON should get the usual parse error");
+check(JSON.stringify(lastLog().calls) === "[]", "a body that is not JSON should log no calls");
+
 check((await post({ jsonrpc: "2.0", method: "notifications/initialized" })).status === 202, "a notification should be 202");
 check((await http(new Request("https://x/mcp?key=test-key"))).status === 405, "GET should be 405 (no event stream)");
+check((await http(new Request("https://x/mcp?key=test-key", { headers: { accept: "text/event-stream" } }))).status === 405, "an MCP client probing GET should still get 405");
+const page = await http(new Request("https://x/mcp", { headers: { accept: "text/html,application/xhtml+xml" } }));
+const pageText = await page.text();
+check(page.status === 200 && /text\/html/.test(page.headers.get("content-type") ?? "") && /MCP server/.test(pageText), "a browser should get the help page, without a key");
+check(!/<script|<style|style=/.test(pageText), "the help page must not need inline script or style (the CSP forbids both)");
 
 // Without the override, only the key whose hash is committed opens it. Nothing falls open.
 delete process.env.MCP_KEY;
-check((await post({ jsonrpc: "2.0", id: 1, method: "ping" })).status === 401, "with no MCP_KEY set, the test key must not work");
+// @ts-expect-error - as above
+const { default: bare } = await import("../netlify/functions/mcp/mcp.mjs?bare");
+check((await bare(new Request("https://x/mcp?key=test-key", { method: "POST", body: JSON.stringify(initialize) }))).status === 401, "with no MCP_KEY set, the test key must not work");
+
+// MCP_KEYS replaces the built-in keys, and its labels reach the log.
+process.env.MCP_KEYS = JSON.stringify({ "key-one": "group-a", "key-two": "group-b" });
+// @ts-expect-error - as above
+const { default: keyed } = await import("../netlify/functions/mcp/mcp.mjs?keyed");
+const keyedPost = (key: string) => keyed(new Request("https://x/mcp", { method: "POST", headers: { authorization: `Bearer ${key}` }, body: JSON.stringify(initialize) }));
+check((await keyedPost("key-two")).status === 200 && lastLog().key === "group-b", "an MCP_KEYS key should work and log its own label");
+check((await keyedPost("test-key")).status === 401, "with MCP_KEYS set, keys outside it must not work");
+delete process.env.MCP_KEYS;
+
+// Nothing secret in any line written so far: no key, no query string.
+const allLogs = logged.join("\n");
+check(!/test-key|key-one|key-two|key=|\?key|Bearer/.test(allLogs), "log output must never contain a key, a query string or the Authorization header");
 
 // --- the public trial -----------------------------------------------------------------
 // The trial key and end date are read when the module loads, so each case loads its own
 // copy (a query string makes it a separate module instance).
 const toolCall = { jsonrpc: "2.0", id: 9, method: "tools/call", params: { name: "coverage", arguments: {} } };
-const quiet = console.log;
-console.log = () => {}; // logCall writes a line per tool call; keep the test output readable
 
 process.env.TRIAL_KEY = "trial-test";
 process.env.TRIAL_ENDS = "2999-01-01T00:00:00Z";
@@ -113,6 +166,7 @@ process.env.TRIAL_ENDS = "2999-01-01T00:00:00Z";
 const { default: during } = await import("../netlify/functions/mcp/mcp.mjs?during");
 const live = await (await during(new Request("https://x/mcp?key=trial-test", { method: "POST", body: JSON.stringify(toolCall) }))).json();
 check(/What the Gov Delivery Library covers/.test(live.result?.content?.[0]?.text ?? ""), "the trial key should answer tool calls during the trial");
+check(lastLog().key === "trial", "the trial key should log as trial");
 
 process.env.TRIAL_ENDS = "2000-01-01T00:00:00Z";
 // @ts-expect-error - as above

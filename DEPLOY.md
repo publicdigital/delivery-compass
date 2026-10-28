@@ -83,10 +83,18 @@ corpus directly. It is a Netlify Function (`netlify/functions/mcp/`), registered
 `netlify.toml` with a rewrite from `/mcp` and `included_files` for the corpus.
 
 It does not sit behind the Basic Auth password, because assistants cannot answer one.
-It checks its own key instead. The repo holds only the key's SHA-256, in
-`netlify/functions/mcp/mcp.mjs`; the key itself is in the gitignored `.env` of whoever
-set it up. To rotate it, generate a new key, replace the hash and push. An `MCP_KEY`
-environment variable in Netlify, if set, replaces the hashed key. Clients pass it either way:
+It checks its own key instead. The keys live in one Netlify environment variable,
+`MCP_KEYS`: a JSON object mapping each key to a label for the group that holds it, for
+example `{"<key>":"tester","<key>":"trial"}`. The label is what the request log records,
+so give each group its own key. The label `trial` is special: those keys stop answering
+at `TRIAL_ENDS` (below). Adding or rotating a key is an edit to that variable and a
+redeploy, with no push.
+
+Until `MCP_KEYS` is set, two built-in keys work: the testers' key, held in
+`netlify/functions/mcp/mcp.mjs` only as its SHA-256 (the key itself is in the gitignored
+`.env` of whoever set it up; an `MCP_KEY` variable replaces it), and the trial key below.
+Once `MCP_KEYS` is set, it replaces both, so include them in it. Clients pass a key
+either way (the header wins if both are sent):
 
 - as a query string, `.../mcp?key=KEY`, which works in every client, including
   Claude's custom connector dialog; or
@@ -127,6 +135,12 @@ Two optional Netlify environment variables change this without a push:
 
 Each tool call writes one log line with the search text and arguments (Netlify →
 Logs → Functions → `mcp`). Netlify keeps these briefly, so look while the trial runs.
+
+Every request also writes one `"event":"mcp"` line: the methods and tool names called,
+the key's label, whether the key came by header or query, the status, the time taken,
+the user agent and, on `initialize`, the client's name and version. It never holds the
+key, the URL or tool arguments. A browser opening `/mcp` gets a short help page; MCP
+clients probing GET still get `405`.
 
 Check after a deploy:
 

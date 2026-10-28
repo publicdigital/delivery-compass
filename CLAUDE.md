@@ -142,8 +142,10 @@ Copilot, ChatGPT and anything else that speaks MCP) at `/mcp`. Design and reason
   checks each of these. Do not add a tool that returns text without its warnings.
 - **Own auth.** The Basic Auth edge function lets `/mcp` through (assistants cannot
   answer a password prompt) and the function checks its own key, as `?key=` or a
-  Bearer token. Only the key's SHA-256 is in `mcp.mjs`; the key itself is in the
-  gitignored `.env`. Never commit the key: a push of it was blocked once already.
+  Bearer token. Keys and their group labels live in the `MCP_KEYS` environment
+  variable; without it, `mcp.mjs` falls back to the testers' key (as a SHA-256 only)
+  and the published trial key. Never commit a key: a push of one was blocked once
+  already. The per-request log line must never carry a key, the URL or tool arguments.
 - Locally, `npm run serve` routes `/mcp` to the real handler.
 
 ## The thing to be careful about
