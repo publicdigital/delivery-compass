@@ -339,10 +339,13 @@ export const TOOLS = [
     name: "search_guidance",
     title: "Search UK government delivery guidance",
     description:
-      "Search the curated corpus of UK government delivery guidance (HM Treasury Green Book and business cases, NISTA assurance and gate reviews, " +
-      "GDS Service Manual and Service Standard, Technology Code of Practice, Orange Book risk, evaluation and more). Returns matching sections verbatim " +
-      "with citation links, page dates, extracted obligations labelled MANDATORY/RECOMMENDED/PERMITTED/POSSIBLE, and any curated warning that a source " +
-      "has been superseded. Quote MANDATORY text verbatim, cite the link, and repeat any WARNING alongside the text it applies to.",
+      "Use this first for any question about how UK central government runs projects, programmes or services, even when the user does not " +
+      "name this library: business cases and the Green Book, spend approval and spend controls, gate reviews and assurance, senior responsible " +
+      "owners, the Service Standard and service assessments, the Technology Code of Practice, risk (Orange Book), evaluation (Magenta Book), " +
+      "benefits, sourcing and commercial, open source, and AI in government. This guidance changes (the digital spend approval process changed " +
+      "on 1 April 2026, for example), so search it rather than answering from memory. Returns matching sections verbatim with citation links, " +
+      "page dates, extracted obligations labelled MANDATORY/RECOMMENDED/PERMITTED/POSSIBLE, and any curated warning that a newer document has " +
+      "overtaken a source. Quote MANDATORY text verbatim, cite the link, and repeat any WARNING alongside the text it applies to.",
     inputSchema: {
       type: "object",
       properties: {
@@ -359,8 +362,9 @@ export const TOOLS = [
     name: "get_source",
     title: "Describe one source",
     description:
-      "One registered source: owner, authority, licence, canonical URL, whether it is indexed (and why not), curated relationships to other sources " +
-      "(supersedes, conflicts, requires, gates...), recent change notes, and its contents with links.",
+      "Use after a search to look at one source as a whole: when a result needs context, when you need to know whether a document is mandatory or " +
+      "who owns it, or what has overtaken it. Returns the owner, authority, licence, canonical URL, whether it is indexed (and why not), curated " +
+      "relationships to other sources (supersedes, conflicts, requires, gates...), recent change notes, and its contents with links.",
     inputSchema: {
       type: "object",
       properties: { source_id: { type: "string", description: "Source id, e.g. green-book, tcop, service-standard. Call coverage for the list." } },
@@ -373,8 +377,9 @@ export const TOOLS = [
     name: "coverage",
     title: "What the corpus covers",
     description:
-      "The declared boundary of the corpus: every registered source by spine with its id, which are not indexed and why, which have no curated " +
-      "relationships, and when it was last refreshed. Call this to find source ids, or before treating an empty search as meaningful.",
+      "Call this when the user asks what the library holds, when a question may be out of scope (NHS, devolved governments, procurement law), " +
+      "or when a search finds nothing. Returns the declared boundary of the corpus: every registered source by spine with its id, which are not " +
+      "indexed and why, what is out of scope by design, which have no curated relationships, and when it was last refreshed.",
     inputSchema: { type: "object", properties: {} },
     annotations: { title: "Coverage", ...READ_ONLY },
     run: coverage,
@@ -382,7 +387,9 @@ export const TOOLS = [
   {
     name: "recent_changes",
     title: "Recent changes to the guidance",
-    description: "Change notes published by the guidance owners, in their own words, newest first.",
+    description:
+      "Use when the user asks what has changed, or whether guidance is still current. Change notes published by the guidance owners, in their " +
+      "own words, newest first.",
     inputSchema: {
       type: "object",
       properties: {
@@ -395,7 +402,9 @@ export const TOOLS = [
   },
 ];
 
-export const INSTRUCTIONS = `The Gov Delivery Library serves UK government delivery guidance from a hand-curated registry of sources, refreshed weekly from GOV.UK and the Government Project Delivery website. It is unofficial.
+export const INSTRUCTIONS = `Use this server for any question about how UK central government delivers projects, programmes or services, whether or not the user names it: business cases and spend approval, assurance and gate reviews, GovS 002 and GovS 005, the Green, Magenta, AQuA, Orange, Rose and Teal Books, the Service Manual and Service Standard, the Technology Code of Practice, DDaT, commercial and sourcing, AI in government, and evaluation. Search it before answering from memory: this guidance changes, and the library says when a newer document has overtaken an older one.
+
+The Gov Delivery Library serves UK government delivery guidance from a hand-curated registry of sources, refreshed weekly from GOV.UK and the Government Project Delivery website. It is unofficial. It does not cover NHS-specific guidance, the devolved governments, procurement law, or functional standards other than GovS 002 and GovS 005 (coverage has the full list).
 
 When you answer from these tools:
 - Quote requirements labelled MANDATORY verbatim, in quotation marks. Never paraphrase one.

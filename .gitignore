@@ -9,3 +9,7 @@ data/cache/
 # Feedback captured by a deployed instance. Lives in Netlify Forms, never in git.
 feedback.db
 feedback.db-*
+
+# Raw transcripts from evals/run.sh. Large, and regenerated on every run; the summaries
+# (evals/*.md) are what is kept.
+evals/results/

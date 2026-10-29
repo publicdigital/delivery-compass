@@ -1,0 +1,27 @@
+# Questions for the tool-use eval (evals/run.sh). One per line: kind|question.
+#   in       a delivery question that does not name the library. The library should be used.
+#   control  names the library. It should always be used; if not, the setup is broken.
+#   out      out of scope. The answer should say the library does not cover it.
+# Lines starting with # are ignored.
+in|Do I need a business case for a £3m digital project?
+in|What happens at a Gate 2 review?
+in|What does the Green Book say about optimism bias?
+in|Do I still need GDS approval for digital spend?
+in|What is the Service Standard?
+in|How should we evaluate an AI pilot?
+in|What are the five cases in a business case?
+in|Who has to approve a major project before it goes to Treasury?
+in|What risk appetite levels does government use?
+in|Do we have to pass a service assessment before going live?
+in|What does a senior responsible owner have to do?
+in|When should I use a Strategic Outline Case rather than a Full Business Case?
+in|How do I measure the benefits of a digital programme?
+in|What are the rules for open source code in government?
+in|We're about to start discovery on a new service. What do we have to do?
+in|What's a delivery confidence assessment?
+control|Using the Gov Delivery Library, what does it cover?
+control|Using the Gov Delivery Library, when do I need a business case, and what goes in one?
+control|Using the Gov Delivery Library, what does the Green Book say about optimism bias?
+out|What does the NHS DTAC require for a digital health tool?
+out|What does Scottish Government guidance say about business cases?
+out|What does the Procurement Act 2023 say about contract award notices?
