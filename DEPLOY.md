@@ -133,14 +133,29 @@ Two optional Netlify environment variables change this without a push:
 - `TRIAL_KEY`: a different trial key. Setting it to a random string ends the trial at
   once for everyone holding the published address.
 
-Each tool call writes one log line with the search text and arguments (Netlify →
-Logs → Functions → `mcp`). Netlify keeps these briefly, so look while the trial runs.
+Every request writes one `"event":"mcp"` line (Netlify → Logs → Functions → `mcp`):
+the methods and tool names called, the key's label, whether the key came by header or
+query, the status, the time taken, the user agent, the session, whether it is
+`internal` (the testers' key, or `node`/`curl`), and on `initialize` the client's name
+and version. For a tool call it adds the search **after redaction** (email addresses,
+phone numbers, NI numbers, postcodes, long numbers and links with query strings become
+`[redacted]`, cut to 300 characters), the non-free-text arguments (`source_id`, `limit`,
+`days`), and for a search the number of results, the top three source ids and `empty`.
+It never holds the key, the URL, an IP address or an unredacted search. A browser
+opening `/mcp` gets a short help page; MCP clients probing GET still get `405`.
 
-Every request also writes one `"event":"mcp"` line: the methods and tool names called,
-the key's label, whether the key came by header or query, the status, the time taken,
-the user agent and, on `initialize`, the client's name and version. It never holds the
-key, the URL or tool arguments. A browser opening `/mcp` gets a short help page; MCP
-clients probing GET still get `405`.
+The session is an id the server issues on `initialize` (`Mcp-Session-Id`) and clients
+send back. It is random, never stored and never checked. Clients that do not send it
+back get a hash of key label, user agent and hour instead.
+
+Netlify keeps function logs for 7 days, so connections and tool calls are also written
+to Netlify Blobs, store `search-log`, one small blob per event
+(`netlify/functions/mcp/searchlog.mjs`). The write happens after the answer has gone and
+a failure is dropped. **`/report`** (behind the site password) reads it back for any
+date range: how many real connections went on to call a tool, searches per day, the
+most common searches, every search that found nothing, and the sources most often in
+the top three. **When the trial ends, delete the log with the button at the bottom of
+`/report`**: the trial page promises searches are kept no longer than the trial.
 
 Check after a deploy:
 

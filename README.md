@@ -176,3 +176,7 @@ There is no build step, so the exported corpus under `assets/data/` is committed
 
 Full detail, including how to refresh the corpus and read the feedback:
 **[DEPLOY.md](DEPLOY.md)**. Switch-off date: **2027-01-15**.
+
+**When the trial ends (3 December 2026):** open `/report` on the hosted site and use
+"Delete the search log" at the bottom. The trial page promises that searches are kept
+for no longer than the trial. DEPLOY.md has the rest of the end-of-trial list.

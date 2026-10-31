@@ -6,12 +6,17 @@
  * The edge function lets /mcp through, because assistants cannot answer a browser
  * password prompt, so this function checks a key of its own instead.
  *
- * Stateless by design: no session id is issued and nothing is kept between
- * requests, which is what the hosting allows. GET (a server-to-client event stream)
- * is not offered; the spec allows a 405 for that.
+ * Stateless by design: nothing is kept between requests, which is what the hosting
+ * allows. A session id is issued on initialize all the same, and clients send it back on
+ * every later request; it is random, never stored, never checked, and exists only so
+ * the log can group one connection's requests (the trial's adoption number is how
+ * many connections go on to call a tool). GET (a server-to-client event stream) is not
+ * offered; the spec allows a 405 for that, and for DELETE.
  */
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { handleMessage } from "./core.mjs";
+import { redact } from "./redact.mjs";
+import { blobsContext, eventKey, put } from "./searchlog.mjs";
 
 // Keys, each mapped to a label naming the group of people who hold it. MCP_KEYS in the
 // Netlify environment is the source of truth: a JSON object of key to label, such as
@@ -54,6 +59,7 @@ const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "POST, GET, OPTIONS",
   "access-control-allow-headers": "authorization, content-type, mcp-session-id, mcp-protocol-version, last-event-id",
+  "access-control-expose-headers": "mcp-session-id",
 };
 
 const json = (body, status = 200, extra = {}) =>
@@ -123,17 +129,37 @@ function trialOver(msg) {
   return { jsonrpc: "2.0", id: msg.id, result: { content: [{ type: "text", text: TRIAL_OVER }], isError: true } };
 }
 
+// Tool arguments that are never free text, so they can be logged as they are. Anything
+// else an assistant sends (a future argument, an extra field) is left out.
+const SAFE_ARGS = ["source_id", "limit", "days"];
+
 /**
- * One log line per tool call: the search text and arguments only, never anything else
- * from the conversation. Netlify keeps function logs briefly, so this is a short window
- * onto what people ask, not a dataset. /trial tells people it happens.
+ * What the log keeps about one message: method and tool for all of them, and for a tool
+ * call the redacted search, the safe arguments, and what came back (how many results,
+ * the top three sources, whether it was a gap). Search results are read back from the
+ * result text, whose "Source: ... (`id`)" lines test/searchlog.test.ts pins down.
  */
-function logCall(msg, who) {
-  if (msg?.method !== "tools/call") return;
-  console.log(JSON.stringify({ at: new Date().toISOString(), access: who, tool: msg.params?.name, args: msg.params?.arguments ?? {} }));
+function describe(msg, response) {
+  const d = { method: msg?.method ?? null, tool: msg?.method === "tools/call" ? msg.params?.name ?? null : null };
+  if (d.method !== "tools/call") return d;
+  const args = msg.params?.arguments ?? {};
+  if (d.tool === "search_guidance") d.query = redact(args.question);
+  d.args = {};
+  for (const k of SAFE_ARGS) {
+    if (args[k] !== undefined) d.args[k] = typeof args[k] === "number" ? args[k] : redact(args[k]).slice(0, 60);
+  }
+  const result = response?.result;
+  if (result?.isError || response?.error) d.error = true;
+  else if (d.tool === "search_guidance") {
+    const sources = [...(result?.content?.[0]?.text ?? "").matchAll(/^Source: .*?\(`([^`]+)`\)/gm)].map((m) => m[1]);
+    d.results = sources.length;
+    d.top = [...new Set(sources)].slice(0, 3);
+    d.empty = sources.length === 0;
+  }
+  return d;
 }
 
-async function handle(req, who) {
+async function handle(req, who, meta) {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (wantsHelpPage(req)) return new Response(HELP, { status: 200, headers: { "content-type": "text/html; charset=utf-8", ...CORS } });
   if (!who.label) return json(UNAUTHORIZED, 401);
@@ -143,57 +169,93 @@ async function handle(req, who) {
   try {
     body = await req.json();
   } catch {
+    meta.calls = [];
     return json({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, 400);
   }
 
   // Batches were dropped from the spec in 2025-06-18 but older clients may send them.
+  const messages = Array.isArray(body) ? body : [body];
   const ended = who.label === "trial" && Date.now() >= TRIAL_ENDS;
-  const answer = (m) => {
-    logCall(m, who.label);
-    return (ended && trialOver(m)) || handleMessage(m);
-  };
+  meta.calls = [];
+  const out = messages.map((m) => {
+    const res = (ended && trialOver(m)) || handleMessage(m);
+    meta.calls.push(describe(m, res));
+    return res;
+  });
+  meta.client = messages.find((m) => m?.method === "initialize")?.params?.clientInfo ?? null;
+  const headers = {};
+  if (meta.client && !req.headers.get("mcp-session-id")) headers["mcp-session-id"] = meta.issued = randomUUID().replace(/-/g, "");
 
-  if (Array.isArray(body)) {
-    const out = body.map(answer).filter(Boolean);
-    return out.length ? json(out) : new Response(null, { status: 202, headers: CORS });
-  }
-  const res = answer(body);
-  return res ? json(res) : new Response(null, { status: 202, headers: CORS });
+  const answers = out.filter(Boolean);
+  if (!answers.length) return new Response(null, { status: 202, headers: { ...CORS, ...headers } });
+  return json(Array.isArray(body) ? answers : answers[0], 200, headers);
 }
+
+/** Testers' own key, and scripts rather than assistants, are left out of the trial's numbers. */
+const isInternal = (who, ua) => who.label === "tester" || /^(node|curl|undici)\b/i.test(ua);
 
 /**
  * One line per request, because Netlify's own request log cannot see past the URL to
  * which tool was called, and the URL is the one thing it must not record here (it can
- * hold the key). So: methods and tool names, the key's label, how it arrived, and the
- * client's name. Never the key, the URL, the Authorization header or tool arguments.
+ * hold the key). So: methods and tool names, the redacted search and what it found, the
+ * key's label, how it arrived, the session, and the client's name. Never the key, the
+ * URL, the Authorization header, an IP address, or any search before redaction.
  */
-async function logRequest(copy, req, who, res, started) {
+async function logRequest(copy, req, who, meta, res, started) {
   const ms = Date.now() - started;
-  let messages = [];
-  try {
-    const body = await copy.json();
-    messages = Array.isArray(body) ? body : [body];
-  } catch {}
-  const init = messages.find((m) => m?.method === "initialize")?.params?.clientInfo;
-  console.log(JSON.stringify({
+  let calls = meta.calls;
+  if (!calls) {
+    // Not handled as JSON-RPC (a refused key, a GET): name the methods, nothing more.
+    let messages = [];
+    try {
+      const body = await copy.json();
+      messages = Array.isArray(body) ? body : [body];
+    } catch {}
+    calls = messages.map((m) => ({ method: m?.method ?? null, tool: m?.method === "tools/call" ? m.params?.name ?? null : null }));
+  }
+  const ua = (req.headers.get("user-agent") ?? "").slice(0, 80);
+  const at = new Date(started).toISOString();
+  const session = String(req.headers.get("mcp-session-id") ?? meta.issued ??
+    // A client that never sends the id back: the nearest thing to a session that
+    // identifies nobody, the key's group and client within the hour.
+    `h-${sha256(`${who.label}|${ua}|${at.slice(0, 13)}`).slice(0, 12)}`).replace(/[^a-zA-Z0-9-]/g, "").slice(0, 40);
+  const internal = isInternal(who, ua);
+  const line = {
     event: "mcp",
-    calls: messages.map((m) => ({ method: m?.method ?? null, tool: m?.method === "tools/call" ? m.params?.name ?? null : null })),
+    calls,
     key: who.label,
     auth: who.via,
     status: res.status,
     ms,
-    ua: (req.headers.get("user-agent") ?? "").slice(0, 80),
-    client: init ? { name: init.name ?? null, version: init.version ?? null } : null,
-  }));
+    ua,
+    client: meta.client ? { name: meta.client.name ?? null, version: meta.client.version ?? null } : null,
+    session,
+    internal,
+  };
+  console.log(JSON.stringify(line));
+
+  // Kept past Netlify's 7 days: connections, and tool calls with what they found.
+  const ctx = who.label && blobsContext();
+  if (!ctx) return null;
+  const writes = [];
+  if (meta.client) writes.push(put(ctx, eventKey({ at, internal, session, kind: "init" }), { at, key: who.label, client: line.client }));
+  for (const call of calls.filter((c) => c.method === "tools/call")) {
+    writes.push(put(ctx, eventKey({ at, internal, session, kind: "call" }), { at, key: who.label, ...call }));
+  }
+  return Promise.all(writes);
 }
 
-export default async (req) => {
+export default async (req, context) => {
   const started = Date.now();
   const copy = req.clone();
   const who = access(req);
-  const res = await handle(req, who);
+  const meta = {};
+  const res = await handle(req, who, meta);
   try {
-    await logRequest(copy, req, who, res, started);
+    // The answer does not wait for the store: waitUntil lets the write finish after the
+    // response has gone, and a failed write is dropped, never the request.
+    const stored = (await logRequest(copy, req, who, meta, res, started))?.catch(() => {});
+    if (stored) context?.waitUntil ? context.waitUntil(stored) : await stored;
   } catch {}
   return res;
 };

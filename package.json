@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "verify": "node --experimental-strip-types pipeline/cli.ts verify",
     "feedback": "node --experimental-strip-types pipeline/cli.ts feedback",
-    "test": "node --experimental-strip-types test/csp.test.ts && node --experimental-strip-types test/golden.test.ts && node --experimental-strip-types test/mcp.test.ts"
+    "test": "node --experimental-strip-types test/csp.test.ts && node --experimental-strip-types test/golden.test.ts && node --experimental-strip-types test/mcp.test.ts && node --experimental-strip-types test/searchlog.test.ts"
   },
   "dependencies": {
     "pdfjs-dist": "4.10.38",

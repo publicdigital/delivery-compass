@@ -145,7 +145,9 @@ Copilot, ChatGPT and anything else that speaks MCP) at `/mcp`. Design and reason
   Bearer token. Keys and their group labels live in the `MCP_KEYS` environment
   variable; without it, `mcp.mjs` falls back to the testers' key (as a SHA-256 only)
   and the published trial key. Never commit a key: a push of one was blocked once
-  already. The per-request log line must never carry a key, the URL or tool arguments.
+  already. The per-request log line and the search log (`searchlog.mjs`, read by
+  `/report`) must never carry a key, the URL, an IP address or a search that has not
+  been through `redact.mjs`; only the arguments listed in `SAFE_ARGS` are kept.
 - Locally, `npm run serve` routes `/mcp` to the real handler.
 
 ## The thing to be careful about

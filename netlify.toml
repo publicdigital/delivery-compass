@@ -28,6 +28,14 @@
   status = 200
   force = true
 
+# The trial report (netlify/functions/report/). Not public: the Basic Auth edge
+# function covers it like every other page.
+[[redirects]]
+  from = "/report"
+  to = "/.netlify/functions/report"
+  status = 200
+  force = true
+
 # The app has no inline scripts or styles, so the CSP can forbid both outright
 # rather than relying on nonces (which needed a server to generate them).
 # connect-src and form-action stay 'self': the only thing leaving the browser is
