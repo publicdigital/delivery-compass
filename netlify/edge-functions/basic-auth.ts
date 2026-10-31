@@ -36,8 +36,11 @@ const OWN_AUTH = new Set(["/mcp", "/.netlify/functions/mcp"]);
 // the server needs OAuth. A 401 from this password reads as "yes", and Claude then fails
 // with "Couldn't register with ... sign-in service". A plain 404 (there are no such
 // files) tells it there is no OAuth, so it connects with the ?key= in the URL.
+//
+// /favicon.ico is public because browsers and link-preview bots ask for it unprompted;
+// behind the password each request was a 401, hundreds a day, drowning real errors.
 const isPublic = (path: string) =>
-  path === "/robots.txt" || path.startsWith("/.well-known/") || path === "/trial" || path.startsWith("/trial/");
+  path === "/robots.txt" || path === "/favicon.ico" || path.startsWith("/.well-known/") || path === "/trial" || path.startsWith("/trial/");
 
 export default async (request: Request, context: Netlify.Context) => {
   const path = new URL(request.url).pathname;

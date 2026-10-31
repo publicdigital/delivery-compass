@@ -13,3 +13,7 @@ feedback.db-*
 # Raw transcripts from evals/run.sh. Large, and regenerated on every run; the summaries
 # (evals/*.md) are what is kept.
 evals/results/
+
+# Raw screen recordings for the demo video. Only the processed files in trial/media/ ship.
+media/*.mov
+media/*.mp4

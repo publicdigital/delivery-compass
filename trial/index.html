@@ -16,6 +16,7 @@
   <meta property="og:image:height" content="627">
   <meta property="og:image:alt" content="843,253 words of rules for delivering things in UK government, shown as blocks sized by document.">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/trial/favicon.ico">
   <link rel="stylesheet" href="/trial/vendor/govuk-frontend.css">
   <link rel="stylesheet" href="/trial/trial.css">
 </head>
@@ -53,7 +54,10 @@
       <section class="shelf-section" id="connect">
         <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
           <h2 class="govuk-heading-l">Add it to your assistant</h2>
-          <p class="govuk-body">The library works as a connector (an MCP server) that your assistant can call while it answers you. Every client needs the same address:</p>
+          <p class="govuk-body">Three steps: add it, check it works, then ask it a real question. The library works as a connector (an MCP server) that your assistant can call while it answers you.</p>
+
+          <h3 class="govuk-heading-m">1. Add it</h3>
+          <p class="govuk-body">Every client needs the same address:</p>
           <div class="copy-row">
             <pre class="trial-code" id="connector-url">https://publicdigital-delivery-compass.netlify.app/mcp?key=gdl-trial-2026</pre>
             <button type="button" class="govuk-button govuk-button--secondary copy-button" data-copy="connector-url">Copy address</button>
@@ -137,13 +141,54 @@
             </div>
           </details>
 
-          <h3 class="govuk-heading-m">Then ask it something</h3>
-          <p class="govuk-body">Name the library in your question the first time, so your assistant knows to use it. For example:</p>
-          <ul class="govuk-list govuk-list--bullet">
-            <li>"Using the Gov Delivery Library, when do I need a business case, and what goes in one?"</li>
-            <li>"Using the Gov Delivery Library, do I still need central approval for digital spend?"</li>
-            <li>"Using the Gov Delivery Library, what does the Green Book say about optimism bias?"</li>
+          <h3 class="govuk-heading-m">2. Check it works</h3>
+          <p class="govuk-body">Start a new chat and ask:</p>
+          <div class="copy-row">
+            <p class="trial-code" id="q-check">Using the Gov Delivery Library, what does it cover?</p>
+            <button type="button" class="govuk-button govuk-button--secondary copy-button" data-copy="q-check" data-status="check-status" data-done="Question copied. Paste it into a new chat." aria-describedby="q-check">Copy</button>
+          </div>
+          <p class="govuk-body-s copy-status" id="check-status" role="status"></p>
+          <p class="govuk-body">A good answer shows that your assistant used the Gov Delivery Library, lists its sources by area (assurance, digital, funding and so on), and says what it does not cover, such as NHS guidance. If your assistant says it has no such tool, check the connector is switched on for that chat.</p>
+
+          <h3 class="govuk-heading-m">3. Ask it a real question</h3>
+          <p class="govuk-body"><b>Start every question with “Using the Gov Delivery Library”.</b> Without those words, assistants usually search the web or answer from memory, even with the library connected. In our own tests, Claude used the library on 1 of 5 plain questions, and on every question that named it.</p>
+          <p class="govuk-body">Try one of these:</p>
+          <ul class="govuk-list example-list">
+            <li>
+              <div class="copy-row">
+                <p class="trial-code" id="q-spend">Using the Gov Delivery Library, do I still need GDS approval for digital spend?</p>
+                <button type="button" class="govuk-button govuk-button--secondary copy-button" data-copy="q-spend" data-status="question-status" data-done="Question copied. Paste it into a new chat." aria-describedby="q-spend">Copy</button>
+              </div>
+              <p class="govuk-body-s example-note">This one shows where a newer document has overtaken an older one.</p>
+            </li>
+            <li>
+              <div class="copy-row">
+                <p class="trial-code" id="q-optimism">Using the Gov Delivery Library, what does the Green Book say about optimism bias?</p>
+                <button type="button" class="govuk-button govuk-button--secondary copy-button" data-copy="q-optimism" data-status="question-status" data-done="Question copied. Paste it into a new chat." aria-describedby="q-optimism">Copy</button>
+              </div>
+              <p class="govuk-body-s example-note">This one quotes a “must” word for word.</p>
+            </li>
+            <li>
+              <div class="copy-row">
+                <p class="trial-code" id="q-gate2">Using the Gov Delivery Library, what happens at a Gate 2 review?</p>
+                <button type="button" class="govuk-button govuk-button--secondary copy-button" data-copy="q-gate2" data-status="question-status" data-done="Question copied. Paste it into a new chat." aria-describedby="q-gate2">Copy</button>
+              </div>
+            </li>
+            <li>
+              <div class="copy-row">
+                <p class="trial-code" id="q-business-case">Using the Gov Delivery Library, do I need a business case for a £3m digital project?</p>
+                <button type="button" class="govuk-button govuk-button--secondary copy-button" data-copy="q-business-case" data-status="question-status" data-done="Question copied. Paste it into a new chat." aria-describedby="q-business-case">Copy</button>
+              </div>
+            </li>
+            <li>
+              <div class="copy-row">
+                <p class="trial-code" id="q-ai-pilot">Using the Gov Delivery Library, how should we evaluate an AI pilot?</p>
+                <button type="button" class="govuk-button govuk-button--secondary copy-button" data-copy="q-ai-pilot" data-status="question-status" data-done="Question copied. Paste it into a new chat." aria-describedby="q-ai-pilot">Copy</button>
+              </div>
+            </li>
           </ul>
+          <p class="govuk-body-s copy-status" id="question-status" role="status"></p>
+          <p class="govuk-body">Tried it? <a class="govuk-link" href="#feedback">Tell us if it helped</a>.</p>
         </div></div>
       </section>
 

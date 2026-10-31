@@ -7,20 +7,22 @@
  * element.style, which the CSP allows. test/csp.test.ts checks this file for that.
  */
 (() => {
-  // --- copy the connector address ---------------------------------------------------
+  // --- copy the connector address and the example questions -------------------------
+  // Each button names what it copies (data-copy), where to report (data-status) and
+  // what to say (data-done); the connector address uses the defaults.
   for (const button of document.querySelectorAll("[data-copy]")) {
     button.addEventListener("click", async () => {
       const source = document.getElementById(button.dataset.copy);
-      const status = document.getElementById("copy-status");
+      const status = document.getElementById(button.dataset.status ?? "copy-status");
       try {
         await navigator.clipboard.writeText(source.textContent.trim());
-        status.textContent = "Address copied.";
+        status.textContent = button.dataset.done ?? "Address copied.";
       } catch {
         const range = document.createRange();
         range.selectNodeContents(source);
         getSelection().removeAllRanges();
         getSelection().addRange(range);
-        status.textContent = "Your browser blocked copying. The address is selected: press Ctrl+C or Cmd+C.";
+        status.textContent = "Your browser blocked copying. The text is selected: press Ctrl+C or Cmd+C.";
       }
     });
   }
