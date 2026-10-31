@@ -120,8 +120,8 @@ A `404` there means the function did not deploy. Check the deploy log for a
 `/trial/` is the one public page on the site: what the library holds, how to connect
 each assistant, and a feedback form. The Basic Auth edge function lets `/trial` and
 everything under it through; everything else still needs the password. The page loads
-only files under `/trial/` (its own copy of GOV.UK Frontend's CSS, d3, and a dated data
-snapshot from `scripts/export-shelf.ts`), because `/assets/data` stays private.
+only files under `/trial/` (Public Digital's fonts, logo and stylesheet in `pd.css`, d3, the
+demo video in `media/`, and a dated data snapshot from `scripts/export-shelf.ts`), because `/assets/data` stays private.
 
 The connector address published on that page is
 `https://publicdigital-delivery-compass.netlify.app/mcp?key=gdl-trial-2026`. The trial

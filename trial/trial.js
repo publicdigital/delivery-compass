@@ -152,7 +152,7 @@
       const w = d.x1 - d.x0, h = d.y1 - d.y0, g = d3.select(this);
       if (w < 54 || h < 30) return;
       const big = w > 170 && h > 90;
-      const ink = DARK_INK.has(d.data.sp) ? "#0b0c0c" : "#ffffff";
+      const ink = DARK_INK.has(d.data.sp) ? "#323131" : "#ffffff";
       const fs = big ? Math.min(30, Math.max(16, w / 10)) : 12.5;
       const name = short(d.data);
       const t = g.append("text").attr("x", 8).attr("y", fs + 6).style("fill", ink)
@@ -249,7 +249,7 @@
     const years = [2022, 2023, 2024, 2025, 2026];
     svg.append("rect").attr("x", x(new Date("2026-01-01"))).attr("y", top)
       .attr("width", x(new Date("2026-12-31")) - x(new Date("2026-01-01"))).attr("height", H - 26 - top)
-      .style("fill", "#e8f1f8");
+      .style("fill", "#ece6e4");
     svg.append("g").selectAll("line").data(years).join("line")
       .attr("x1", (d) => x(new Date(`${d}-01-01`))).attr("x2", (d) => x(new Date(`${d}-01-01`)))
       .attr("y1", top).attr("y2", H - 26).style("stroke", "var(--rule)");
@@ -280,21 +280,21 @@
   fill("gaps", S.filter((s) => !s.w).map((s) => {
     const why = s.wd ? `Deleted from GOV.UK on ${prettyDate(s.wd)}. Kept so the library can warn anyone still holding a copy.`
       : s.why || (s.id === "nao-reports" ? "Not under the Open Government Licence, so linked rather than copied." : "Linked for reference; not indexed.");
-    return `<div class="gap-item">${s.wd ? '<strong class="govuk-tag govuk-tag--red govuk-!-margin-bottom-1">Withdrawn</strong><br>' : ""}` +
-      `<p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1">${esc(s.t)}</p>` +
-      `<p class="govuk-body-s govuk-!-margin-bottom-0">${esc(s.b)}. ${esc(why)}</p></div>`;
+    return `<div class="gap-item">${s.wd ? '<strong class="pd-tag pd-tag--red pd-u-margin-bottom-1">Withdrawn</strong><br>' : ""}` +
+      `<p class="pd-body pd-u-font-weight-bold pd-u-margin-bottom-1">${esc(s.t)}</p>` +
+      `<p class="pd-body-s pd-u-margin-bottom-0">${esc(s.b)}. ${esc(why)}</p></div>`;
   }).join(""));
 
   const ordered = [...S].sort((a, b) => spineIdx[a.sp] - spineIdx[b.sp] || b.w - a.w);
   const tbody = document.querySelector("#table tbody");
-  tbody.innerHTML = ordered.map((s) => `<tr class="govuk-table__row">
-    <td class="govuk-table__cell">${s.url ? `<a class="govuk-link" href="${esc(s.url)}" rel="noopener">${esc(s.t)}</a>` : esc(s.t)}</td>
-    <td class="govuk-table__cell">${esc(s.b)}</td>
-    <td class="govuk-table__cell"><span class="sw" data-bg="sp-${s.sp}"></span>${SPINE_NAME[s.sp]}</td>
-    <td class="govuk-table__cell govuk-table__cell--numeric">${s.w ? fmt(s.w) : "–"}</td>
-    <td class="govuk-table__cell govuk-table__cell--numeric">${s.s || "–"}</td>
-    <td class="govuk-table__cell govuk-table__cell--numeric">${s.m || "–"}</td>
-    <td class="govuk-table__cell">${s.wd ? "Withdrawn " + prettyDate(s.wd) : s.w ? (s.id === "teal-book" ? "Not published" : prettyDate(s.d1)) : "Linked only"}</td></tr>`).join("");
+  tbody.innerHTML = ordered.map((s) => `<tr class="pd-table__row">
+    <td class="pd-table__cell">${s.url ? `<a class="pd-link" href="${esc(s.url)}" rel="noopener">${esc(s.t)}</a>` : esc(s.t)}</td>
+    <td class="pd-table__cell">${esc(s.b)}</td>
+    <td class="pd-table__cell"><span class="sw" data-bg="sp-${s.sp}"></span>${SPINE_NAME[s.sp]}</td>
+    <td class="pd-table__cell pd-table__cell--numeric">${s.w ? fmt(s.w) : "–"}</td>
+    <td class="pd-table__cell pd-table__cell--numeric">${s.s || "–"}</td>
+    <td class="pd-table__cell pd-table__cell--numeric">${s.m || "–"}</td>
+    <td class="pd-table__cell">${s.wd ? "Withdrawn " + prettyDate(s.wd) : s.w ? (s.id === "teal-book" ? "Not published" : prettyDate(s.d1)) : "Linked only"}</td></tr>`).join("");
   applyStyles(tbody);
 
   function drawAll() { hideTip(); drawTreemap(); drawNetwork(); drawFresh(); }

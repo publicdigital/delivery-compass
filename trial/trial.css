@@ -1,15 +1,14 @@
-/* The public /trial page. Layered on GOV.UK Frontend (vendor/govuk-frontend.css), which
-   supplies type, spacing and components. This file only adds what the Design System has
-   no component for: the stat row, the charts and the code blocks. Colours come from the
-   GOV.UK colour palette; no rounded corners or shadows, to match it. */
+/* The public /trial page: the stat row, the charts and the code blocks. Type, colour and
+   components are in pd.css (Public Digital's style); this file uses the same tokens. No
+   rounded corners or shadows, to match it. */
 :root {
-  --ink: #0b0c0c;
-  --ink-2: #484949;
-  --rule: #cecece;
-  --axis: #b1b4b6;
-  --surface: #ffffff;
-  --accent: #1d70b8;
-  --alarm: #ca3535;
+  --ink: #323131;
+  --ink-2: #5e5b5b;
+  --rule: #d9d2d0;
+  --axis: #b9b0ad;
+  --surface: #f7f3f3;
+  --accent: #0f7d75;
+  --alarm: #c8412f;
   /* Each area takes the colour of its namesake book where it has one: assurance the
      Teal Book, funding the Green Book, evaluation the Magenta Book, risk the Orange
      Book. Steps and order (see SPINES in trial.js) pass the dataviz palette checks
@@ -21,29 +20,30 @@
   --sp-risk: #e8661c;
   --sp-evaluation: #c2187a;
   --sp-oversight: #a07800;
-  --st-1: #003078;
-  --st-2: #1d70b8;
-  --st-3: #5694ca;
-  --st-4: #bbd4ea;
+  /* obligation strength, strongest first: ink, then PD's teals */
+  --st-1: #323131;
+  --st-2: #0f7d75;
+  --st-3: #7cc7d5;
+  --st-4: #bdd1d4;
   color-scheme: light;
 }
 
-/* GOV.UK Frontend has no dark mode, so the page stays light whatever the viewer's setting. */
-html { background-color: var(--govuk-template-background-colour, #f4f8fb); }
-/* GOV.UK Frontend sets its font on its own classes only; the charts and stat row need it too. */
-body { position: relative; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--ink); }
+/* PD's palette has no dark variant, so the page stays light whatever the viewer's setting. */
+body { position: relative; }
 
 .shelf-section { padding-top: 30px; margin-top: 30px; border-top: 1px solid var(--rule); }
 .shelf-hero-number { display: block; font-size: 80px; line-height: 1; font-weight: 700; margin-bottom: 10px; }
 
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0 20px; border-top: 5px solid var(--accent); margin-bottom: 20px; }
-.stat { padding: 15px 0 5px; display: grid; gap: 5px; align-content: start; }
-.stat b { font-size: 48px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.stat small { font-size: 16px; color: var(--ink-2); line-height: 1.3; }
+/* the stat row: PD's dark panel, numbers in teal */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0 24px; background: var(--ink); color: #f7f3f3; padding: 8px 24px 20px; margin: 12px 0 24px; }
+.stats:empty { display: none; }
+.stat { padding: 16px 0 0; display: grid; gap: 6px; align-content: start; }
+.stat b { font-size: 48px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: #7cc7d5; }
+.stat small { font-size: 15px; color: #f7f3f3; line-height: 1.35; }
 
 /* connector address and config snippets */
 .trial-code {
-  margin: 0 0 15px; padding: 15px; background: #f3f2f1; border-left: 5px solid var(--axis);
+  margin: 0 0 15px; padding: 14px 16px; background: #ffffff;
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 15px; line-height: 1.5;
   white-space: pre-wrap; overflow-wrap: anywhere;
 }
@@ -64,7 +64,7 @@ body { position: relative; font-family: "Helvetica Neue", Helvetica, Arial, sans
 .legend .line.alarm { border-top: 3px solid var(--alarm); }
 .legend .num { color: var(--ink-2); }
 #treemap, #network, #fresh { width: 100%; display: block; }
-svg text { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+svg text { font-family: "Lexend Deca", Arial, sans-serif; }
 
 .tip { position: absolute; pointer-events: none; z-index: 5; max-width: 300px; background: var(--ink); color: #fff; font-size: 14px; line-height: 1.4; padding: 10px; }
 .tip b { display: block; font-size: 16px; margin-bottom: 5px; }
@@ -88,7 +88,7 @@ svg text { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
 .gap-item:first-child { border-top: 1px solid var(--rule); }
 .sw { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; }
 .tablewrap { overflow-x: auto; }
-.tablewrap .govuk-table { min-width: 760px; }
+.tablewrap .pd-table { min-width: 760px; }
 
 @media (max-width: 40.0525em) {
   .shelf-hero-number { font-size: 53px; }
