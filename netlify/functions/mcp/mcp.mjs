@@ -14,7 +14,7 @@
  * offered; the spec allows a 405 for that, and for DELETE.
  */
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
-import { handleMessage } from "./core.mjs";
+import { handleMessage, warm } from "./core.mjs";
 import { redact } from "./redact.mjs";
 import { blobsContext, eventKey, put } from "./searchlog.mjs";
 
@@ -257,5 +257,9 @@ export default async (req, context) => {
     const stored = (await logRequest(copy, req, who, meta, res, started))?.catch(() => {});
     if (stored) context?.waitUntil ? context.waitUntil(stored) : await stored;
   } catch {}
+  // A new instance takes seconds to build the search index. Assistants connect and list
+  // the tools well before they search, so start building once the answer has gone,
+  // and the first search usually finds the index ready.
+  if (who.label && context?.waitUntil) context.waitUntil(new Promise((r) => setTimeout(r, 0)).then(warm).catch(() => {}));
   return res;
 };

@@ -62,6 +62,9 @@ export function loadCorpus(dir = dataDir()) {
 let cached = null;
 const corpus = () => (cached ??= loadCorpus());
 
+/** Build the index ahead of the first search. Does nothing once it is built. */
+export const warm = () => void corpus();
+
 // --- formatting ----------------------------------------------------------------
 
 const day = (iso) => (iso ? String(iso).slice(0, 10) : "unknown");

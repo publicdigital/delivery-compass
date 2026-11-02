@@ -73,6 +73,16 @@ const STEP4 = [
  * dropping it would quietly change which sections come back.
  */
 export function stem(word) {
+  let w = STEMS.get(word);
+  if (w === undefined) STEMS.set(word, (w = porter(word)));
+  return w;
+}
+
+// Building the index stems about two million words, but only some tens of thousands
+// of distinct ones. Remembering each answer cuts the cold start of the MCP function.
+const STEMS = new Map();
+
+function porter(word) {
   let w = word;
   if (w.length < 3) return w;
 
@@ -125,7 +135,9 @@ export function stem(word) {
 /** Split text into stemmed terms, dropping stop words and single characters. */
 export function tokenize(text, stopSet = STOP) {
   const out = [];
-  const raw = String(text).toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, " ").split(/\s+/);
+  // Same split as replacing everything else with a space and splitting on whitespace,
+  // in one pass instead of two.
+  const raw = String(text).toLowerCase().match(/[\p{L}\p{N}-]+/gu) ?? [];
   for (const t of raw) {
     if (t.length < 2 || stopSet.has(t)) continue;
     out.push(stem(t));
